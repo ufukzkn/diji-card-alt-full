@@ -1,0 +1,20 @@
+﻿# Node ve Angular
+node_modules/
+dist/
+.angular/
+
+# VS Code
+.vscode/
+
+# Dotnet build klasörleri
+bin/
+obj/
+
+# User secrets, SQLite gibi yerel veriler
+*.db
+*.suo
+*.user
+
+# Sistem dosyaları
+.DS_Store
+Thumbs.db
