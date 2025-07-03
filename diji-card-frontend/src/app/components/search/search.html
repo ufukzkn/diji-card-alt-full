@@ -1,0 +1,41 @@
+<div class="header-centered">
+  <div class="logo-wrapper">
+  <img src="https://i.hizliresim.com/tnhf1uk.png"
+       alt="Logo" />
+</div>
+
+      
+  <h2 style="margin-bottom: 2rem;">Diji-Card</h2>
+</div>
+
+<div class="search-container">
+  <input type="text"
+         [(ngModel)]="searchQuery"
+         (keydown.enter)="triggerSearch()"
+         placeholder="İsim ara..."
+         class="search-input" />
+
+
+  <button (click)="triggerSearch()" class="search-button">
+    Ara
+  </button>
+
+  <p *ngIf="searchQuery.length > 0 && searchQuery.length < 3" class="info-message">
+    Lütfen en az 3 harf girin...
+  </p>
+
+  <div *ngFor="let user of filteredUsers" class="user-card">
+    <h3>{{ user.fullName }}</h3>
+    <p>{{ user.jobTitle }} &#64; {{ user.company }}</p>
+    <a [routerLink]="['/profil', user.userId]">Profili Gör</a>
+  </div>
+
+  <p *ngIf="filteredUsers.length === 3" class="info-message">
+    Daha fazla sonuç için enter’a basın veya aramayı detaylandırın.
+  </p>
+
+  <p *ngIf="showAllResults && filteredUsers.length > 3" class="info-message">
+    Tüm sonuçlar gösteriliyor.
+  </p>
+
+</div>
