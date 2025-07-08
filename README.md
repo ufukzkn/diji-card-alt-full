@@ -1,7 +1,5 @@
 # Digital Business Card
 
-## Açıklama
-
 **Digital Business Card**, kullanıcıların kendi dijital kartvizitlerini kolayca oluşturup paylaşmalarını sağlayan şık ve kullanıcı dostu bir web uygulamasıdır. Temel özellikleri şunlardır:
 
 - **Profil Fotoğrafı Yükleme:** Kullanıcılar, kendilerine ait bir profil fotoğrafını yükleyerek kartvizitlerine kişisel bir dokunuş katabilir.  
@@ -24,6 +22,7 @@ Bu özellikler sayesinde, fiziksel kartvizitlere gerek kalmadan, profesyonel ve 
 - .NET 7+
 - Angular 19
 - Postgresql
+- Flutter Mobile
 
 ## Gereksinimler
 
