@@ -15,6 +15,8 @@ namespace diji_card_alt.Models
         [Required]
         public string Value { get; set; }
 
+        public int SortId { get; set; } // Sıralama için eklendi
+
         [JsonIgnore]
         [ForeignKey(nameof(UserId))]
         public User? User { get; set; }

@@ -31,4 +31,8 @@ export class UserLinksService {
     );
 
   }
+
+  updateSortOrder(userLinks: UserDefinitionValue[]): Observable<void> {
+    return this.http.put<void>(`${this.api}/sort`, userLinks);
+  }
 }

@@ -63,9 +63,8 @@ export class Profile implements OnInit {
   }
 
   get sortedLinks() {
-    return (this.profile?.links ?? []).slice().sort((a, b) =>
-      a.definitionName.localeCompare(b.definitionName)
-    );
+    // sortId'ye göre sıralı array döndür
+    return (this.profile?.links ?? []).slice().sort((a, b) => (a.sortId ?? 0) - (b.sortId ?? 0));
   }
 
   get profileUrl() {

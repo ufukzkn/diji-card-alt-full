@@ -3,6 +3,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { firstValueFrom } from 'rxjs';
 
 import { DefinitionsService } from '../../services/definitions';
@@ -13,7 +14,7 @@ import { UserDefinitionValue } from '../../models/user-definition-value.model';
 @Component({
   selector: 'app-link-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DragDropModule],
   templateUrl: './link-editor.html',
   styleUrls: ['./link-editor.scss']
 })
@@ -22,9 +23,10 @@ export class LinkEditor implements OnInit {
 
   definitions: Definition[] = [];
   userLinks: UserDefinitionValue[] = [];
+  userLinksArray: UserDefinitionValue[] = [];
 
-  mode: 'add' | 'delete' | 'edit' | '' = '';
-  lastOpenedDropdown: 'add' | 'delete' | 'edit' | '' = '';
+  mode: 'add' | 'delete' | 'edit' | 'sort' | '' = '';
+  lastOpenedDropdown: 'add' | 'delete' | 'edit' | 'sort' | '' = '';
 
   // add-mod için
   selectedDefinitionId = '';
@@ -38,19 +40,10 @@ export class LinkEditor implements OnInit {
   selectedToEdit?: number;
   editValue = '';
 
-  /** Default (sabit) tanım ID’leri: bunların yanına Sil butonu çıkmasın */
-  private defaultIds = [
-    /* Örnek ID’ler: */
-    1, // İsim
-    2, // Şirket
-    3, // E-posta
-    4  // Telefon
-  ];
-
   constructor(
     private defSvc: DefinitionsService,
     private linkSvc: UserLinksService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.mode = '';
@@ -59,7 +52,7 @@ export class LinkEditor implements OnInit {
     this.loadUserLinks();
   }
 
-  toggleMode(m: 'add' | 'delete' | 'edit') {
+  toggleMode(m: 'add' | 'delete' | 'edit' | 'sort') {
     if (this.mode === m) {
       this.mode = '';
       this.lastOpenedDropdown = '';
@@ -68,22 +61,11 @@ export class LinkEditor implements OnInit {
       this.mode = m;
       this.lastOpenedDropdown = m;
       this.resetForm();
+      if (m === 'sort') {
+        // Sıralama moduna girerken array'i güncelle
+        this.userLinksArray = [...this.userLinks].sort((a, b) => a.sortId - b.sortId);
+      }
     }
-  }
-
-  private loadDefinitions(): void {
-    this.defSvc.getAll().subscribe(d => (this.definitions = d));
-  }
-
-  private loadUserLinks(): void {
-    this.linkSvc.getByUser(this.userId).subscribe(l => {
-      // Definition adına göre alfabetik sırala
-      this.userLinks = l.sort((a, b) => {
-        const nameA = this.definitionName(a.definitionId).toLocaleLowerCase();
-        const nameB = this.definitionName(b.definitionId).toLocaleLowerCase();
-        return nameA.localeCompare(nameB);
-      });
-    });
   }
 
   availableDefinitions(): Definition[] {
@@ -96,9 +78,30 @@ export class LinkEditor implements OnInit {
     return this.definitions.find(d => d.definitionId === id)?.definitionName || '';
   }
 
-  /** Sabit olmayan tanımlar için */
-  isDefault(defId: number): boolean {
-    return this.defaultIds.includes(defId);
+  private loadDefinitions(): void {
+    this.defSvc.getAll().subscribe(d => (this.definitions = d));
+  }
+
+  private loadUserLinks(): void {
+    this.linkSvc.getByUser(this.userId).subscribe(l => {
+      this.userLinks = l.sort((a, b) => a.sortId - b.sortId);
+    });
+  }
+
+  drop(event: CdkDragDrop<UserDefinitionValue[]>) {
+    // Dikey sıralama için array mantığı
+    const prevIndex = event.previousIndex;
+    const currIndex = event.currentIndex;
+    const arr = this.userLinksArray;
+    const [movedItem] = arr.splice(prevIndex, 1);
+    arr.splice(currIndex, 0, movedItem);
+    // sortId'leri güncelle (array sırasına göre)
+    arr.forEach((link, idx) => link.sortId = idx);
+  }
+
+  async saveSortOrder(): Promise<void> {
+    await firstValueFrom(this.linkSvc.updateSortOrder(this.userLinksArray));
+    this.loadUserLinks();
   }
 
   async add(): Promise<void> {
@@ -126,7 +129,7 @@ export class LinkEditor implements OnInit {
     }
 
     await firstValueFrom(
-      this.linkSvc.add({ userId: this.userId, definitionId: defId, value: this.value })
+      this.linkSvc.add({ userId: this.userId, definitionId: defId, value: this.value, sortId: this.userLinks.length })
     );
 
     this.loadUserLinks();

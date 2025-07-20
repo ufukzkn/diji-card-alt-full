@@ -3,6 +3,7 @@
   <button (click)="toggleMode('add')" [class.active]="mode==='add'">➕</button>
   <button (click)="toggleMode('delete')" [class.active]="mode==='delete'">➖</button>
   <button (click)="toggleMode('edit')" [class.active]="mode==='edit'">✏️</button>
+  <button (click)="toggleMode('sort')" [class.active]="mode==='sort'">Sırala</button>
 </div>
 
 <!-- + MOD: yeni tanım / link ekle -->
@@ -49,5 +50,15 @@
   </select>
   <input *ngIf="selectedToEdit" [(ngModel)]="editValue" placeholder="Yeni değer" />
   <button [disabled]="!selectedToEdit || !editValue" (click)="edit()">Kaydet</button>
+</div>
+
+<!-- Sıralama Modu -->
+<div *ngIf="mode==='sort'" class="mode-panel">
+  <div cdkDropList class="example-list-vertical" (cdkDropListDropped)="drop($event)">
+    <div *ngFor="let link of userLinksArray" cdkDrag class="example-box-vertical">
+      {{ definitionName(link.definitionId) }}
+    </div>
+  </div>
+  <button class="save-sort-btn" (click)="saveSortOrder()">Sıralamayı Kaydet</button>
 </div>
 

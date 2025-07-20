@@ -94,6 +94,22 @@ namespace diji_card_alt_full.Controllers
             return NoContent();
         }
 
+        // PUT: api/userdefinitionvalues/sort
+        [HttpPut("sort")]
+        public async Task<IActionResult> UpdateSortOrder([FromBody] List<UserDefinitionValue> updatedValues)
+        {
+            foreach (var updatedValue in updatedValues)
+            {
+                var entity = await _context.UserDefinitionValues.FindAsync(updatedValue.UserId, updatedValue.DefinitionId);
+                if (entity != null)
+                {
+                    entity.SortId = updatedValue.SortId;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
 
     }
 }

@@ -1,0 +1,302 @@
+.example-list {
+  width: 100%;
+  max-width: 600px;
+  border: solid 1px #ccc;
+  min-height: 60px;
+  display: flex;
+  flex-direction: row;
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0 auto 1rem auto;
+}
+.example-box {
+  padding: 16px 18px;
+  border-right: solid 1px #eee;
+  color: #222;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  cursor: move;
+  background: #f8fafc;
+  font-size: 15px;
+  font-weight: 500;
+  flex-grow: 1;
+  flex-basis: 0;
+  transition: background 0.2s;
+  user-select: none;
+}
+.example-box:last-child {
+  border: none;
+}
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 4px;
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+              0 8px 10px 1px rgba(0, 0, 0, 0.14),
+              0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+.example-list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+.save-sort-btn,
+.mode-panel button,
+.mode-panel .action-btn {
+  margin-top: 1rem;
+  padding: 10px 24px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: background 0.2s, transform 0.2s;
+  display: inline-block;
+}
+.save-sort-btn:hover,
+.mode-panel button:hover,
+.mode-panel .action-btn:hover:not(:disabled) {
+  background: #0056b3;
+  transform: translateY(-2px);
+}
+.save-sort-btn:disabled,
+.mode-panel button:disabled,
+.mode-panel .action-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.mode-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  .mode-btn {
+    background: #ffffff;
+    border: 2px solid #007bff;
+    color: #007bff;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.1);
+      background: #e6f0ff;
+    }
+
+    &.active {
+      background: #007bff;
+      color: #ffffff;
+      box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+    }
+  }
+}
+
+/* Panel giriş/çıkış animasyonu */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mode-panel {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #fafafa;
+  animation: fadeInDown 0.25s ease-out;
+
+  select,
+  input {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s;
+
+    &:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 4px rgba(0, 123, 255, 0.4);
+    }
+  }
+
+  select {
+    width: 100%;
+    padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+    margin-bottom: 0.75rem;
+    border: 1.5px solid #007bff;
+    border-radius: 6px;
+    background: #f8fafc url('data:image/svg+xml;utf8,<svg fill="%23007bff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 0.75rem center/1.5rem 1.5rem;
+    color: #222;
+    font-size: 1rem;
+    font-weight: 500;
+    appearance: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.04);
+
+    &:focus {
+      border-color: #0056b3;
+      outline: none;
+      box-shadow: 0 0 4px rgba(0, 123, 255, 0.18);
+    }
+  }
+
+  .action-btn {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+
+    &.delete-btn {
+      background: #dc3545;
+      color: #fff;
+
+      &:hover:not(:disabled) {
+        background: #c82333;
+        transform: translateY(-2px);
+      }
+    }
+
+    &.edit-btn {
+      background: #28a745;
+      color: #fff;
+
+      &:hover:not(:disabled) {
+        background: #218838;
+        transform: translateY(-2px);
+      }
+    }
+
+    &:not(.delete-btn):not(.edit-btn) {
+      background: #007bff;
+      color: #fff;
+
+      &:hover:not(:disabled) {
+        background: #0056b3;
+        transform: translateY(-2px);
+      }
+    }
+
+    &:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+}
+
+.example-list-vertical {
+  width: 400px;
+  max-width: 100%;
+  border: solid 1px #ccc;
+  min-height: 60px;
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+  display: block;
+  margin: 0 auto 1rem auto;
+}
+.example-box-vertical {
+  padding: 20px 10px;
+  border-bottom: solid 1px #eee;
+  color: #222;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  cursor: move;
+  background: #f8fafc;
+  font-size: 15px;
+  font-weight: 500;
+  user-select: none;
+  transition: background 0.2s;
+}
+.example-box-vertical:last-child {
+  border: none;
+}
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 4px;
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+              0 8px 10px 1px rgba(0, 0, 0, 0.14),
+              0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+.example-list-vertical.cdk-drop-list-dragging .example-box-vertical:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+.save-sort-btn {
+  margin-top: 1rem;
+  padding: 10px 24px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: background 0.2s;
+}
+.save-sort-btn:hover {
+  background: #0056b3;
+}
+
+.mode-panel select {
+  width: 100%;
+  padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  border: 1.5px solid #007bff;
+  border-radius: 6px;
+  background: #f8fafc url('data:image/svg+xml;utf8,<svg fill="%23007bff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 0.75rem center/1.5rem 1.5rem;
+  color: #222;
+  font-size: 1rem;
+  font-weight: 500;
+  appearance: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 2px 8px rgba(0,123,255,0.04);
+}
+.mode-panel select:focus {
+  border-color: #0056b3;
+  outline: none;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.18);
+}
+.mode-panel option {
+  background: #fff;
+  color: #222;
+  font-size: 1rem;
+}

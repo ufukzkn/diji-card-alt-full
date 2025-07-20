@@ -271,5 +271,21 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "diji_card_alt_full.Controllers.UserDefinitionValuesController",
+    "Method": "UpdateSortOrder",
+    "RelativePath": "api/UserDefinitionValues/sort",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "updatedValues",
+        "Type": "System.Collections.Generic.List\u00601[[diji_card_alt.Models.UserDefinitionValue, diji-card-alt-full, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   }
 ]

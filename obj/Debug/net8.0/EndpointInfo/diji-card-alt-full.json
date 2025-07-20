@@ -441,6 +441,46 @@
           }
         }
       }
+    },
+    "/api/UserDefinitionValues/sort": {
+      "put": {
+        "tags": [
+          "UserDefinitionValues"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/UserDefinitionValue"
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/UserDefinitionValue"
+                }
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/UserDefinitionValue"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -472,6 +512,10 @@
           "value": {
             "type": "string",
             "nullable": true
+          },
+          "sortId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -495,27 +539,11 @@
             "type": "string",
             "nullable": true
           },
-          "locationLink": {
-            "type": "string",
-            "nullable": true
-          },
           "jobTitle": {
             "type": "string",
             "nullable": true
           },
           "company": {
-            "type": "string",
-            "nullable": true
-          },
-          "linkedin": {
-            "type": "string",
-            "nullable": true
-          },
-          "whatsappLink": {
-            "type": "string",
-            "nullable": true
-          },
-          "iban": {
             "type": "string",
             "nullable": true
           }
@@ -541,6 +569,10 @@
           "value": {
             "minLength": 1,
             "type": "string"
+          },
+          "sortId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
