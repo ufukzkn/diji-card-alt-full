@@ -1,9 +1,9 @@
 <!-- mod butonları -->
 <div class="mode-buttons">
-  <button (click)="toggleMode('add')" [class.active]="mode==='add'">➕</button>
-  <button (click)="toggleMode('delete')" [class.active]="mode==='delete'">➖</button>
-  <button (click)="toggleMode('edit')" [class.active]="mode==='edit'">✏️</button>
-  <button (click)="toggleMode('sort')" [class.active]="mode==='sort'">Sırala</button>
+  <button class="mode-btn" (click)="toggleMode('add')" [class.active]="mode==='add'">➕</button>
+  <button class="mode-btn" (click)="toggleMode('delete')" [class.active]="mode==='delete'">➖</button>
+  <button class="mode-btn" (click)="toggleMode('edit')" [class.active]="mode==='edit'">✏️</button>
+  <button class="mode-btn" (click)="toggleMode('sort')" [class.active]="mode==='sort'">⇅</button>
 </div>
 
 <!-- + MOD: yeni tanım / link ekle -->
@@ -22,7 +22,7 @@
 
   <input [(ngModel)]="value" placeholder="Bağlantı / değer" />
 
-  <button (click)="add()">Ekle</button>
+  <button class="action-btn" (click)="add()">➕ Ekle</button>
 </div>
 
 <!-- – MOD: var olan linkleri sil -->
@@ -34,9 +34,9 @@
     </option>
   </select>
 
-  <button [disabled]="!selectedToDelete"
+  <button class="action-btn delete-btn" [disabled]="!selectedToDelete"
           (click)="delete(selectedToDelete!)">
-    Sil
+    ➖ Sil
   </button>
 </div>
 
@@ -49,7 +49,7 @@
     </option>
   </select>
   <input *ngIf="selectedToEdit" [(ngModel)]="editValue" placeholder="Yeni değer" />
-  <button [disabled]="!selectedToEdit || !editValue" (click)="edit()">Kaydet</button>
+  <button class="action-btn edit-btn" [disabled]="!selectedToEdit || !editValue" (click)="edit()">✏️ Kaydet</button>
 </div>
 
 <!-- Sıralama Modu -->

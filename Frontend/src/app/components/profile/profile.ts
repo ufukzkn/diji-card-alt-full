@@ -67,6 +67,14 @@ export class Profile implements OnInit {
     return (this.profile?.links ?? []).slice().sort((a, b) => (a.sortId ?? 0) - (b.sortId ?? 0));
   }
 
+  get filteredLinks() {
+    // Dinamik bağlantılardan üstte gösterilen alanları filtrele
+    const excluded = [
+      'e-mail','email','mail','telefon','phone','full name','fullname','ad','ad soyad','isim','company','şirket'
+    ];
+    return this.sortedLinks.filter(link => !excluded.includes(link.definitionName?.toLowerCase?.() || ''));
+  }
+
   get profileUrl() {
     return window.location.origin + '/profile/' + this.userId;
   }

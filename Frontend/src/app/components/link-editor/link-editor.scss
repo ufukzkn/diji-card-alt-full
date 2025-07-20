@@ -1,3 +1,19 @@
+:host {
+  position: static;
+  display: block;
+}
+
+.mode-buttons {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  z-index: 10;
+}
+
 .example-list {
   width: 100%;
   max-width: 600px;
@@ -122,12 +138,18 @@
 }
 
 .mode-panel {
+  position: fixed;
+  top: 5.5rem;      // Butonların hemen altı
+  right: 2rem;
+  width: 340px;
+  max-width: 90vw;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
   background: #fafafa;
   animation: fadeInDown 0.25s ease-out;
+  z-index: 999;
 
   select,
   input {

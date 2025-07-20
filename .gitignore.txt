@@ -1,31 +1,41 @@
-﻿# Node ve Angular
+﻿# Node
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Angular build outputs
 dist/
 .angular/
-.Frontend/node_modules/
-.Frontend/angular/
+.cache/
+*.tgz
+
+# Frontend sub-folder
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.angular/
+Frontend/.cache/
 
 # VS Code
 .vscode/
-.Frontend/vscode/
 
-
+# Rider / VS
+.idea/
 .vs/
-.Frontend/vs/
-.vsidx
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 
-
-# Dotnet build klasörleri
+# .NET build
 bin/
 obj/
 
-# User secrets, SQLite gibi yerel veriler
+# User secrets & local DB
+secrets.json
 *.db
-*.suo
-*.user
+*.sqlite
 
-# Sistem dosyaları
+# Mac / Windows
 .DS_Store
 Thumbs.db
-
-

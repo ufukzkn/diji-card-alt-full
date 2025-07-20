@@ -46,31 +46,49 @@
   </div>
 
   <!-- 3) Dinamik bağlantılar (UserDefinitionValues) -->
-  <div *ngIf="sortedLinks.length" class="dynamic-links styled-links">
+  <div *ngIf="profile?.links?.length" class="dynamic-links styled-links">
     <h3>Diğer Bağlantılar</h3>
     <ul>
-      <li *ngFor="let l of sortedLinks">
-        <span class="icon" *ngIf="l.definitionName.toLowerCase().includes('mail')">📧</span>
-        <span class="icon" *ngIf="l.definitionName.toLowerCase().includes('tel') || l.definitionName.toLowerCase().includes('phone')">📞</span>
-        <span class="icon" *ngIf="l.definitionName.toLowerCase().includes('linkedin')">🔗</span>
-        <span class="icon" *ngIf="l.definitionName.toLowerCase().includes('whatsapp')">💬</span>
-        <span class="icon" *ngIf="l.definitionName.toLowerCase().includes('iban')">🏦</span>
-        <span class="icon" *ngIf="l.definitionName.toLowerCase().includes('adres') || l.definitionName.toLowerCase().includes('location')">📍</span>
-        <strong>{{ l.definitionName }}:</strong>
-        <ng-container *ngIf="l.value.startsWith('mailto:'); else notMail">
-          <a [href]="l.value">{{ l.value.replace('mailto:', '') }}</a>
-        </ng-container>
-        <ng-template #notMail>
-          <ng-container *ngIf="l.value.startsWith('tel:'); else notTel">
-            <a [href]="l.value">{{ l.value.replace('tel:', '') }}</a>
-          </ng-container>
-          <ng-template #notTel>
-            <ng-container *ngIf="l.value.startsWith('http'); else textOnly">
-              <a [href]="l.value" target="_blank">{{ l.value }}</a>
+      <li *ngFor="let link of filteredLinks" class="link-item">
+        <!-- Sadece özel iconlar -->
+        <span class="icon" *ngIf="
+          link.definitionName.toLowerCase().includes('mail') ||
+          link.definitionName.toLowerCase().includes('tel') ||
+          link.definitionName.toLowerCase().includes('phone') ||
+          link.definitionName.toLowerCase().includes('linkedin') ||
+          link.definitionName.toLowerCase().includes('whatsapp') ||
+          link.definitionName.toLowerCase().includes('iban') ||
+          link.definitionName.toLowerCase().includes('adres') ||
+          link.definitionName.toLowerCase().includes('location')
+        ">
+          <ng-container *ngIf="link.definitionName.toLowerCase().includes('mail')">📧</ng-container>
+          <ng-container *ngIf="link.definitionName.toLowerCase().includes('tel') || link.definitionName.toLowerCase().includes('phone')">📞</ng-container>
+          <ng-container *ngIf="link.definitionName.toLowerCase().includes('linkedin')">🔗</ng-container>
+          <ng-container *ngIf="link.definitionName.toLowerCase().includes('whatsapp')">💬</ng-container>
+          <ng-container *ngIf="link.definitionName.toLowerCase().includes('iban')">🏦</ng-container>
+          <ng-container *ngIf="link.definitionName.toLowerCase().includes('adres') || link.definitionName.toLowerCase().includes('location')">📍</ng-container>
+        </span>
+        <strong>{{ link.definitionName }}:</strong>
+        <span class="link-value">
+          <ng-container [ngSwitch]="true">
+            <!-- Email links -->
+            <ng-container *ngSwitchCase="link.value?.startsWith('mailto:')">
+              <a [href]="link.value">{{ link.value.substring(7) }}</a>
             </ng-container>
-            <ng-template #textOnly>{{ l.value }}</ng-template>
-          </ng-template>
-        </ng-template>
+            <!-- Phone links -->
+            <ng-container *ngSwitchCase="link.value?.startsWith('tel:')">
+              <a [href]="link.value">{{ link.value.substring(4) }}</a>
+            </ng-container>
+            <!-- Web links -->
+            <ng-container *ngSwitchCase="link.value?.startsWith('http')">
+              <a [href]="link.value" target="_blank" rel="noopener noreferrer">{{ link.value }}</a>
+            </ng-container>
+            <!-- Default text -->
+            <ng-container *ngSwitchDefault>
+              <span>{{ link.value }}</span>
+            </ng-container>
+          </ng-container>
+        </span>
       </li>
     </ul>
   </div>
