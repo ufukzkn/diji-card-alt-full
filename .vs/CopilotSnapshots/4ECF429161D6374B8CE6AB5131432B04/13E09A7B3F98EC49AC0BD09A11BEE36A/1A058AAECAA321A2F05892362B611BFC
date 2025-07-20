@@ -1,0 +1,55 @@
+﻿<!-- mod butonları -->
+<div class="mode-buttons">
+  <button (click)="toggleMode('add')">➕</button>
+  <button (click)="toggleMode('delete')">➖</button>
+  <button (click)="toggleMode('edit')">✏️</button>
+</div>
+
+
+
+<!-- + MOD: yeni tanım / link ekle -->
+<div *ngIf="mode==='add'">
+  <select [(ngModel)]="selectedDefinitionId">
+    <option value="" disabled>Tanım seç</option>
+    <option *ngFor="let d of availableDefinitions()" [value]="d.definitionId">
+      {{ d.definitionName }}
+    </option>
+    <option value="__new">+ Yeni Tanım…</option>
+  </select>
+
+  <input *ngIf="selectedDefinitionId==='__new'"
+         [(ngModel)]=" newDefinitionName"
+         placeholder="Yeni tanım adı" />
+
+  <input [(ngModel)]="value" placeholder="Bağlantı / değer" />
+
+  <button (click)="add()">Ekle</button>
+</div>
+
+<!-- – MOD: var olan linkleri sil -->
+<div *ngIf="mode==='delete'">
+  <select [(ngModel)]="selectedToDelete">
+    <option value="" disabled>Silinecek tanımı seç</option>
+    <option *ngFor="let l of userLinks" [value]="l.definitionId">
+      {{ definitionName(l.definitionId) }}
+    </option>
+  </select>
+
+  <button [disabled]="!selectedToDelete"
+          (click)="delete(selectedToDelete!)">
+    Sil
+  </button>
+</div>
+
+<!-- EDIT MODE: mevcut tanımı seçip değerini güncelle -->
+<div *ngIf="mode==='edit'">
+  <select [(ngModel)]="selectedToEdit">
+    <option value="" disabled>Düzenlenecek tanımı seç</option>
+    <option *ngFor="let l of userLinks" [value]="l.definitionId">
+      {{ definitionName(l.definitionId) }}
+    </option>
+  </select>
+  <input *ngIf="selectedToEdit" [(ngModel)]="editValue" placeholder="Yeni değer" />
+  <button [disabled]!="selectedToEdit || !editValue" (click)="edit()">Kaydet</button>
+</div>
+

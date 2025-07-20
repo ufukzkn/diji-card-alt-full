@@ -83,3 +83,4 @@ C:\Users\ufuk_\source\repos\diji-card-alt-full\bin\Debug\net7.0\diji-card-fronte
 C:\Users\ufuk_\source\repos\diji-card-alt-full\bin\Debug\net7.0\diji-card-frontend\tsconfig.json
 C:\Users\ufuk_\source\repos\diji-card-alt-full\bin\Debug\net7.0\diji-card-frontend\tsconfig.spec.json
 C:\Users\ufuk_\source\repos\diji-card-alt-full\obj\Debug\net7.0\staticwebassets.upToDateCheck.txt
+C:\Users\ufuk_\source\repos\diji-card-alt-full\obj\Debug\net7.0\diji-card-alt-full.sourcelink.json

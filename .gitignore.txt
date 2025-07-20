@@ -2,9 +2,12 @@
 node_modules/
 dist/
 .angular/
+.Frontend/node_modules/
+.Frontend/angular/
 
 # VS Code
 .vscode/
+.Frontend/vscode/
 
 # Dotnet build klasörleri
 bin/
@@ -18,3 +21,6 @@ obj/
 # Sistem dosyaları
 .DS_Store
 Thumbs.db
+
+
+.vsidx
