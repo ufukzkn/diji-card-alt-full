@@ -23,7 +23,8 @@ export class LinkEditor implements OnInit {
   definitions: Definition[] = [];
   userLinks: UserDefinitionValue[] = [];
 
-  mode: 'add' | 'delete' | 'edit' = 'add';
+  mode: 'add' | 'delete' | 'edit' | '' = '';
+  lastOpenedDropdown: 'add' | 'delete' | 'edit' | '' = '';
 
   // add-mod için
   selectedDefinitionId = '';
@@ -52,13 +53,22 @@ export class LinkEditor implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.mode = '';
+    this.lastOpenedDropdown = '';
     this.loadDefinitions();
     this.loadUserLinks();
   }
 
   toggleMode(m: 'add' | 'delete' | 'edit') {
-    this.mode = m;
-    this.resetForm();
+    if (this.mode === m) {
+      this.mode = '';
+      this.lastOpenedDropdown = '';
+      this.resetForm();
+    } else {
+      this.mode = m;
+      this.lastOpenedDropdown = m;
+      this.resetForm();
+    }
   }
 
   private loadDefinitions(): void {

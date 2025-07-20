@@ -7,20 +7,44 @@
       "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:.gitignore.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\services\\users.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
-      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\services\\users.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\components\\profile\\profile.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\components\\profile\\profile.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\services\\profile.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
-      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\services\\profile.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\components\\link-editor\\link-editor.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\components\\link-editor\\link-editor.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\components\\profile\\profile.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\components\\profile\\profile.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\components\\link-editor\\link-editor.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\components\\link-editor\\link-editor.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\components\\link-editor\\link-editor.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
-      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\components\\link-editor\\link-editor.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\components\\profile\\profile.scss||{181FE41B-5A5D-479F-9F8F-BF665F4EBC2A}",
+      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\components\\profile\\profile.scss||{181FE41B-5A5D-479F-9F8F-BF665F4EBC2A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\package-lock.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\package-lock.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\components\\link-editor\\link-editor.scss||{181FE41B-5A5D-479F-9F8F-BF665F4EBC2A}",
+      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\components\\link-editor\\link-editor.scss||{181FE41B-5A5D-479F-9F8F-BF665F4EBC2A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\services\\users.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\services\\users.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\services\\profile.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\services\\profile.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\services\\profile.spec.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
@@ -31,16 +55,8 @@
       "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\services\\user-links.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\components\\profile\\profile.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\components\\profile\\profile.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\controllers\\userdefinitionvaluescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:controllers\\userdefinitionvaluescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\components\\profile\\profile.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
-      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\components\\profile\\profile.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -87,14 +103,6 @@
       "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\models\\dtos\\linkdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\components\\profile\\profile.scss||{181FE41B-5A5D-479F-9F8F-BF665F4EBC2A}",
-      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\components\\profile\\profile.scss||{181FE41B-5A5D-479F-9F8F-BF665F4EBC2A}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\app.routes.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
       "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\app.routes.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     },
@@ -131,10 +139,6 @@
       "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\components\\link-editor\\link-editor.scss||{181FE41B-5A5D-479F-9F8F-BF665F4EBC2A}",
-      "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\components\\link-editor\\link-editor.scss||{181FE41B-5A5D-479F-9F8F-BF665F4EBC2A}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|c:\\users\\ufuk_\\source\\repos\\diji-card-alt-full\\frontend\\src\\app\\app.config.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
       "RelativeMoniker": "D:0:0:{6ABAFD5F-44D9-E120-557A-755AED319A57}|diji-card-alt-full.csproj|solutionrelative:frontend\\src\\app\\app.config.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     },
@@ -158,8 +162,103 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 17,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:2:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:3:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:4:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:16:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:5:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{74946827-37a0-11d2-a273-00c04f8ef4ff}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:13:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:12:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "package-lock.json",
+              "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\package-lock.json",
+              "RelativeDocumentMoniker": "Frontend\\package-lock.json",
+              "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\package-lock.json",
+              "RelativeToolTip": "Frontend\\package-lock.json",
+              "ViewState": "AgIAADsGAAAAAAAAAAAvwEUGAABqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-07-20T12:59:25.713Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "link-editor.ts",
+              "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\link-editor\\link-editor.ts",
+              "RelativeDocumentMoniker": "Frontend\\src\\app\\components\\link-editor\\link-editor.ts",
+              "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\link-editor\\link-editor.ts",
+              "RelativeToolTip": "Frontend\\src\\app\\components\\link-editor\\link-editor.ts",
+              "ViewState": "AgIAAFgAAAAAAAAAAAAQwCsAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2025-07-17T10:11:47.174Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "profile.ts",
+              "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\profile\\profile.ts",
+              "RelativeDocumentMoniker": "Frontend\\src\\app\\components\\profile\\profile.ts",
+              "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\profile\\profile.ts",
+              "RelativeToolTip": "Frontend\\src\\app\\components\\profile\\profile.ts",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAqwDUAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2025-07-17T10:38:16.064Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -168,14 +267,14 @@
               "RelativeDocumentMoniker": ".gitignore.txt",
               "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\.gitignore.txt",
               "RelativeToolTip": ".gitignore.txt",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAAABYAAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
-              "WhenOpened": "2025-07-20T02:30:08.171Z",
+              "WhenOpened": "2025-07-20T03:05:10.803Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 8,
               "Title": "User.cs",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Models\\User.cs",
               "RelativeDocumentMoniker": "Models\\User.cs",
@@ -187,19 +286,70 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 1,
+              "Title": "profile.html",
+              "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\profile\\profile.html",
+              "RelativeDocumentMoniker": "Frontend\\src\\app\\components\\profile\\profile.html",
+              "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\profile\\profile.html",
+              "RelativeToolTip": "Frontend\\src\\app\\components\\profile\\profile.html",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAAAE4AAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-07-17T10:10:46.377Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "profile.ts",
+              "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\services\\profile.ts",
+              "RelativeDocumentMoniker": "Frontend\\src\\app\\services\\profile.ts",
+              "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\services\\profile.ts",
+              "RelativeToolTip": "Frontend\\src\\app\\services\\profile.ts",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2025-07-18T11:48:14.013Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "profile.scss",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\profile\\profile.scss",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\components\\profile\\profile.scss",
               "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\profile\\profile.scss",
               "RelativeToolTip": "Frontend\\src\\app\\components\\profile\\profile.scss",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAADUAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAALoAAAAAAAAAAIAwwMUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002663|",
-              "WhenOpened": "2025-07-18T14:20:06.602Z"
+              "WhenOpened": "2025-07-18T14:20:06.602Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 4,
+              "Title": "link-editor.html",
+              "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\link-editor\\link-editor.html",
+              "RelativeDocumentMoniker": "Frontend\\src\\app\\components\\link-editor\\link-editor.html",
+              "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\link-editor\\link-editor.html",
+              "RelativeToolTip": "Frontend\\src\\app\\components\\link-editor\\link-editor.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-07-17T10:11:19.607Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "link-editor.scss",
+              "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\link-editor\\link-editor.scss",
+              "RelativeDocumentMoniker": "Frontend\\src\\app\\components\\link-editor\\link-editor.scss",
+              "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\link-editor\\link-editor.scss",
+              "RelativeToolTip": "Frontend\\src\\app\\components\\link-editor\\link-editor.scss",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAcwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002663|",
+              "WhenOpened": "2025-07-17T10:11:46.237Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
               "Title": "app.routes.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\app.routes.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\app.routes.ts",
@@ -211,44 +361,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "profile.ts",
-              "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\services\\profile.ts",
-              "RelativeDocumentMoniker": "Frontend\\src\\app\\services\\profile.ts",
-              "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\services\\profile.ts",
-              "RelativeToolTip": "Frontend\\src\\app\\services\\profile.ts",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAADAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
-              "WhenOpened": "2025-07-18T11:48:14.013Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 19,
               "Title": "user-profile.model.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\models\\user-profile.model.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\models\\user-profile.model.ts",
               "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\models\\user-profile.model.ts",
               "RelativeToolTip": "Frontend\\src\\app\\models\\user-profile.model.ts",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAgAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
               "WhenOpened": "2025-07-18T11:42:14.55Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "link-editor.html",
-              "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\link-editor\\link-editor.html",
-              "RelativeDocumentMoniker": "Frontend\\src\\app\\components\\link-editor\\link-editor.html",
-              "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\link-editor\\link-editor.html",
-              "RelativeToolTip": "Frontend\\src\\app\\components\\link-editor\\link-editor.html",
-              "ViewState": "AgIAACEAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
-              "WhenOpened": "2025-07-17T10:11:19.607Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 11,
               "Title": "profile.spec.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\services\\profile.spec.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\services\\profile.spec.ts",
@@ -260,7 +385,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 15,
               "Title": "users.spec.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\services\\users.spec.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\services\\users.spec.ts",
@@ -272,7 +397,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 26,
               "Title": "ProfileController.cs",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Controllers\\ProfileController.cs",
               "RelativeDocumentMoniker": "Controllers\\ProfileController.cs",
@@ -284,7 +409,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 13,
               "Title": "UserDefinitionValuesController.cs",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Controllers\\UserDefinitionValuesController.cs",
               "RelativeDocumentMoniker": "Controllers\\UserDefinitionValuesController.cs",
@@ -296,7 +421,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 23,
               "Title": "UserProfileDto.cs",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\models\\Dtos\\UserProfileDto.cs",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\models\\Dtos\\UserProfileDto.cs",
@@ -308,7 +433,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 24,
               "Title": "LinkDto.cs",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\models\\Dtos\\LinkDto.cs",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\models\\Dtos\\LinkDto.cs",
@@ -320,7 +445,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 30,
               "Title": "diji-card-alt-full.csproj",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\diji-card-alt-full.csproj",
               "RelativeDocumentMoniker": "diji-card-alt-full.csproj",
@@ -332,7 +457,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 14,
               "Title": "UserController.cs",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Controllers\\UserController.cs",
               "RelativeDocumentMoniker": "Controllers\\UserController.cs",
@@ -344,19 +469,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 21,
               "Title": "user.models.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\models\\user.models.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\models\\user.models.ts",
               "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\models\\user.models.ts",
               "RelativeToolTip": "Frontend\\src\\app\\models\\user.models.ts",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAgAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
               "WhenOpened": "2025-07-17T13:05:04.18Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 31,
               "Title": "README.md",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\README.md",
               "RelativeDocumentMoniker": "Frontend\\README.md",
@@ -368,7 +493,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 27,
               "Title": "DefinitionsController.cs",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Controllers\\DefinitionsController.cs",
               "RelativeDocumentMoniker": "Controllers\\DefinitionsController.cs",
@@ -380,7 +505,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 33,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
@@ -392,7 +517,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 9,
               "Title": "users.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\services\\users.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\services\\users.ts",
@@ -400,12 +525,11 @@
               "RelativeToolTip": "Frontend\\src\\app\\services\\users.ts",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
-              "WhenOpened": "2025-07-17T11:44:15.986Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-17T11:44:15.986Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 32,
               "Title": "link-editor.spec.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\link-editor\\link-editor.spec.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\components\\link-editor\\link-editor.spec.ts",
@@ -417,43 +541,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
-              "Title": "link-editor.scss",
-              "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\link-editor\\link-editor.scss",
-              "RelativeDocumentMoniker": "Frontend\\src\\app\\components\\link-editor\\link-editor.scss",
-              "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\link-editor\\link-editor.scss",
-              "RelativeToolTip": "Frontend\\src\\app\\components\\link-editor\\link-editor.scss",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002663|",
-              "WhenOpened": "2025-07-17T10:11:46.237Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 29,
               "Title": "search.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\search\\search.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\components\\search\\search.ts",
               "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\search\\search.ts",
               "RelativeToolTip": "Frontend\\src\\app\\components\\search\\search.ts",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAAAAYAAAAKAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAIBJwAYAAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
               "WhenOpened": "2025-07-17T10:38:37.165Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "profile.ts",
-              "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\profile\\profile.ts",
-              "RelativeDocumentMoniker": "Frontend\\src\\app\\components\\profile\\profile.ts",
-              "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\profile\\profile.ts",
-              "RelativeToolTip": "Frontend\\src\\app\\components\\profile\\profile.ts",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAEAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
-              "WhenOpened": "2025-07-17T10:38:16.064Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 36,
               "Title": "main.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\main.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\main.ts",
@@ -465,43 +565,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 34,
               "Title": "app.config.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\app.config.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\app.config.ts",
               "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\app.config.ts",
               "RelativeToolTip": "Frontend\\src\\app\\app.config.ts",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAAA8AAAAzAAAAAAAAAA==",
+              "ViewState": "AgIAAAMAAAAAAAAAAIBJwA8AAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
               "WhenOpened": "2025-07-17T10:13:18.985Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "link-editor.ts",
-              "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\link-editor\\link-editor.ts",
-              "RelativeDocumentMoniker": "Frontend\\src\\app\\components\\link-editor\\link-editor.ts",
-              "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\link-editor\\link-editor.ts",
-              "RelativeToolTip": "Frontend\\src\\app\\components\\link-editor\\link-editor.ts",
-              "ViewState": "AgIAAFUAAAAAAAAAAAAQwBYAAAAhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
-              "WhenOpened": "2025-07-17T10:11:47.174Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "profile.html",
-              "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\profile\\profile.html",
-              "RelativeDocumentMoniker": "Frontend\\src\\app\\components\\profile\\profile.html",
-              "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\profile\\profile.html",
-              "RelativeToolTip": "Frontend\\src\\app\\components\\profile\\profile.html",
-              "ViewState": "AgIAACAAAAAAAAAAAAAtwCgAAAAkAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
-              "WhenOpened": "2025-07-17T10:10:46.377Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 37,
               "Title": "profile.spec.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\components\\profile\\profile.spec.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\components\\profile\\profile.spec.ts",
@@ -513,7 +589,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 12,
               "Title": "user-links.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\services\\user-links.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\services\\user-links.ts",
@@ -525,7 +601,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 16,
               "Title": "user-links.spec.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\services\\user-links.spec.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\services\\user-links.spec.ts",
@@ -537,7 +613,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 17,
               "Title": "definitions.spec.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\services\\definitions.spec.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\services\\definitions.spec.ts",
@@ -549,19 +625,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 18,
               "Title": "definitions.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\services\\definitions.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\services\\definitions.ts",
               "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\services\\definitions.ts",
               "RelativeToolTip": "Frontend\\src\\app\\services\\definitions.ts",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAABEAAAADAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAIBJwBEAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
               "WhenOpened": "2025-07-17T09:48:37.936Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 20,
               "Title": "user-definition-value.model.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\models\\user-definition-value.model.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\models\\user-definition-value.model.ts",
@@ -573,19 +649,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 22,
               "Title": "definition.model.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\models\\definition.model.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\models\\definition.model.ts",
               "ToolTip": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\models\\definition.model.ts",
               "RelativeToolTip": "Frontend\\src\\app\\models\\definition.model.ts",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAQAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAA+wAQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
               "WhenOpened": "2025-07-17T09:47:23.746Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 28,
               "Title": "Definition.cs",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Models\\Definition.cs",
               "RelativeDocumentMoniker": "Models\\Definition.cs",
@@ -597,7 +673,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 35,
               "Title": "app.ts",
               "DocumentMoniker": "C:\\Users\\ufuk_\\source\\repos\\diji-card-alt-full\\Frontend\\src\\app\\app.ts",
               "RelativeDocumentMoniker": "Frontend\\src\\app\\app.ts",

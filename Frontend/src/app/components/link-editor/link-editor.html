@@ -5,18 +5,6 @@
   <button (click)="toggleMode('edit')" [class.active]="mode==='edit'">✏️</button>
 </div>
 
-<hr />
-
-<!-- LİSTE: Dinamik linkler -->
-<ul class="link-list">
-  <li *ngFor="let l of userLinks">
-    <span class="def-name">{{ definitionName(l.definitionId) }}</span>
-    <span class="def-value">{{ l.value }}</span>
-  </li>
-</ul>
-
-<hr />
-
 <!-- + MOD: yeni tanım / link ekle -->
 <div *ngIf="mode==='add'" class="mode-panel">
   <select [(ngModel)]="selectedDefinitionId">

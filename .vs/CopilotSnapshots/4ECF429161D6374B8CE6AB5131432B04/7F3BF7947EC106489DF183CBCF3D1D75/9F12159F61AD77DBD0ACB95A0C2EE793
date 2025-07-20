@@ -1,0 +1,76 @@
+﻿<!-- src/app/components/profile/profile.html -->
+<div class="profile-container">
+  <div class="top-bar">
+    <!-- Sol üstte QR kod ikonu -->
+    <div class="qr-icon-box" (click)="showQr = !showQr" title="QR Kodu Göster">
+      <span class="qr-icon">� QR</span>
+      <div class="qr-popup" *ngIf="showQr">
+        <qrcode [qrdata]="profileUrl" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>
+      </div>
+    </div>
+    <a routerLink="/" class="back-link">← Ana Sayfaya Dön</a>
+  </div>
+
+  <!-- 1) LinkEditor en üstte -->
+  <app-link-editor [userId]="userId"></app-link-editor>
+
+  <!-- 2) Default bilgiler (Users tablosu) -->
+  <div *ngIf="user" class="default-info">
+    <img src="https://img.a.transfermarkt.technology/portrait/big/238055-1727356372.png?lm=1"
+         alt="Profil Fotoğrafı"
+         width="120"
+         height="150"
+         class="avatar centered-avatar" />
+
+    <!-- İsim -->
+    <h1 class="name">{{ user.fullName }}</h1>
+    <!-- Meslek @ Şirket -->
+    <p class="subheading">{{ user.jobTitle }} <strong>&mdash; &#64; {{ user.company }}</strong></p>
+
+    <!-- E-posta -->
+    <p *ngIf="user.email" class="contact">
+      <span class="icon">📧</span>
+      <a [href]="'mailto:' + user.email">{{ user.email }}</a>
+    </p>
+    <!-- Telefon -->
+    <p *ngIf="user.phoneNumber" class="contact">
+      <span class="icon">📞</span>
+      <a [href]="'tel:' + user.phoneNumber">{{ user.phoneNumber }}</a>
+    </p>
+  </div>
+
+  <!-- 3) Dinamik bağlantılar (UserDefinitionValues) -->
+  <div *ngIf="sortedLinks.length" class="dynamic-links styled-links">
+    <h3>Diğer Bağlantılar</h3>
+    <ul>
+      <li *ngFor="let l of sortedLinks">
+        <span class="icon" *ngIf="l.definitionName.toLowerCase().includes('mail')">📧</span>
+        <span class="icon" *ngIf="l.definitionName.toLowerCase().includes('tel') || l.definitionName.toLowerCase().includes('phone')">📞</span>
+        <span class="icon" *ngIf="l.definitionName.toLowerCase().includes('linkedin')">🔗</span>
+        <span class="icon" *ngIf="l.definitionName.toLowerCase().includes('whatsapp')">💬</span>
+        <span class="icon" *ngIf="l.definitionName.toLowerCase().includes('iban')">🏦</span>
+        <span class="icon" *ngIf="l.definitionName.toLowerCase().includes('adres') || l.definitionName.toLowerCase().includes('location')">📍</span>
+        <strong>{{ l.definitionName }}:</strong>
+        <ng-container *ngIf="l.value.startsWith('mailto:'); else notMail">
+          <a [href]="l.value">{{ l.value.replace('mailto:', '') }}</a>
+        </ng-container>
+        <ng-template #notMail>
+          <ng-container *ngIf="l.value.startsWith('tel:'); else notTel">
+            <a [href]="l.value">{{ l.value.replace('tel:', '') }}</a>
+          </ng-container>
+          <ng-template #notTel>
+            <ng-container *ngIf="l.value.startsWith('http'); else textOnly">
+              <a [href]="l.value" target="_blank">{{ l.value }}</a>
+            </ng-container>
+            <ng-template #textOnly>{{ l.value }}</ng-template>
+          </ng-template>
+        </ng-template>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 4) Kullanıcı bulunamazsa -->
+  <div *ngIf="!user" class="no-profile">
+    <p>Profil bulunamadı.</p>
+  </div>
+</div>

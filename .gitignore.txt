@@ -9,6 +9,10 @@ dist/
 .vscode/
 .Frontend/vscode/
 
+
+.vsidx
+
+
 # Dotnet build klasörleri
 bin/
 obj/
@@ -23,4 +27,3 @@ obj/
 Thumbs.db
 
 
-.vsidx
