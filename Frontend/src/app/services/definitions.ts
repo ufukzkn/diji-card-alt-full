@@ -13,8 +13,11 @@ export class DefinitionsService {
     return this.http.get<Definition[]>(this.api);
   }
 
-  add(definitionName: string): Observable<Definition> {
-    return this.http.post<Definition>(this.api, { definitionName });
+  add(name: string): Observable<Definition> {
+    return this.http.post<Definition>(this.api, { definitionName: name });
   }
 
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.api}/${id}`);
+  }
 }

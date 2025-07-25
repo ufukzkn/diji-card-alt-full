@@ -30,11 +30,13 @@ export class LinkEditor implements OnInit {
 
   // add-mod için
   selectedDefinitionId = '';
+  selectedToAdd?: number;
   newDefinitionName = '';
   value = '';
 
   // delete-mod için
-  selectedToDelete?: number;
+  selectedToDelete?: number | string;
+  deleteDefinitionName = '';
 
   // edit-mod için
   selectedToEdit?: number;
@@ -153,6 +155,43 @@ export class LinkEditor implements OnInit {
     this.resetForm();
   }
 
+  /** Tanım silme işlemi */
+  async deleteDefinition(): Promise<void> {
+    if (!this.deleteDefinitionName) return;
+
+    // Silinecek tanımı bul
+    const defToDelete = this.definitions.find(
+      d => d.definitionName.toLowerCase() === this.deleteDefinitionName.toLowerCase()
+    );
+
+    if (!defToDelete) {
+      alert('Böyle bir tanım bulunamadı!');
+      return;
+    }
+
+    if (!confirm(`"${defToDelete.definitionName}" tanımını silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve bu tanımı kullanan tüm kullanıcıların ilgili bağlantıları da silinecektir.`)) {
+      return;
+    }
+
+    try {
+      await firstValueFrom(this.defSvc.delete(defToDelete.definitionId));
+      // Başarılı silme işleminden sonra listeleri güncelle
+      this.loadDefinitions();
+      this.loadUserLinks();
+      this.resetForm();
+      alert('Tanım başarıyla silindi!');
+    } catch (err) {
+      alert('Tanım silinirken bir hata oluştu!');
+      console.error('Tanım silme hatası:', err);
+    }
+  }
+
+  onDeleteClick() {
+    if (typeof this.selectedToDelete === 'number') {
+      this.delete(this.selectedToDelete);
+    }
+  }
+
   private resetForm() {
     this.selectedDefinitionId = '';
     this.newDefinitionName = '';
@@ -160,5 +199,6 @@ export class LinkEditor implements OnInit {
     this.selectedToDelete = undefined;
     this.selectedToEdit = undefined;
     this.editValue = '';
+    this.deleteDefinitionName = '';
   }
 }

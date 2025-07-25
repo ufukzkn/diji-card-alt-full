@@ -228,9 +228,11 @@
     }
 
     &:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      transform: none;
+      background: #e0e0e0 !important;
+      border-color: #ccc !important;
+      cursor: not-allowed !important;
+      box-shadow: none !important;
+      transform: none !important;
     }
   }
 }

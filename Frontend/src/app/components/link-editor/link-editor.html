@@ -1,4 +1,4 @@
-<!-- mod butonları -->
+<!-- mode butonları -->
 <div class="mode-buttons">
   <button class="mode-btn" (click)="toggleMode('add')" [class.active]="mode==='add'">➕</button>
   <button class="mode-btn" (click)="toggleMode('delete')" [class.active]="mode==='delete'">➖</button>
@@ -17,27 +17,45 @@
   </select>
 
   <input *ngIf="selectedDefinitionId==='__new'"
-         [(ngModel)]=" newDefinitionName"
+         [(ngModel)]="newDefinitionName"
          placeholder="Yeni tanım adı" />
 
   <input [(ngModel)]="value" placeholder="Bağlantı / değer" />
 
-  <button class="action-btn" (click)="add()">➕ Ekle</button>
+  <button class="action-btn" 
+          [disabled]="!selectedDefinitionId || (selectedDefinitionId==='__new' && !newDefinitionName.trim()) || !value.trim()"
+          (click)="add()">➕ Ekle</button>
 </div>
 
 <!-- – MOD: var olan linkleri sil -->
 <div *ngIf="mode==='delete'" class="mode-panel">
   <select [(ngModel)]="selectedToDelete">
     <option value="" disabled>Silinecek tanımı seç</option>
-    <option *ngFor="let l of userLinks" [value]="l.definitionId">
+    <option *ngFor="let l of userLinks" [ngValue]="l.definitionId">
       {{ definitionName(l.definitionId) }}
     </option>
+    <option [ngValue]="'__delete'">- Tanımı Tablodan Sil...</option>
   </select>
 
-  <button class="action-btn delete-btn" [disabled]="!selectedToDelete"
-          (click)="delete(selectedToDelete!)">
-    ➖ Sil
-  </button>
+  <input *ngIf="selectedToDelete === '__delete'"
+         [(ngModel)]="deleteDefinitionName"
+         placeholder="Silmek istediğiniz tanımın adı" />
+
+  <ng-container *ngIf="selectedToDelete === '__delete'">
+    <button class="action-btn delete-btn" 
+            [disabled]="!deleteDefinitionName"
+            (click)="deleteDefinition()">
+      ➖ Tanımı Sil
+    </button>
+  </ng-container>
+
+  <ng-container *ngIf="selectedToDelete !== '__delete'">
+    <button class="action-btn delete-btn" 
+            [disabled]="!selectedToDelete && selectedToDelete !== 0"
+            (click)="onDeleteClick()">
+      ➖ Sil
+    </button>
+  </ng-container>
 </div>
 
 <!-- EDIT MODE: mevcut tanımı seçip değerini güncelle -->

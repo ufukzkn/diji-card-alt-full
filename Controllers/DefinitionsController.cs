@@ -52,7 +52,33 @@ namespace diji_card_alt_full.Controllers
             return CreatedAtAction(nameof(GetDefinitionById), new { id = entity.DefinitionId }, entity);
         }
 
+        // DELETE: api/definitions/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteDefinition(int id)
+        {
+            var definition = await _context.Definitions.FindAsync(id);
+            
+            if (definition == null)
+            {
+                return NotFound();
+            }
 
+            // İlgili UserDefinitionValue'ları da sil
+            var relatedValues = await _context.UserDefinitionValues
+                .Where(udv => udv.DefinitionId == id)
+                .ToListAsync();
+                
+            _context.UserDefinitionValues.RemoveRange(relatedValues);
+            _context.Definitions.Remove(definition);
 
+            // Sequence'i güncelle
+            await _context.Database.ExecuteSqlRawAsync(
+                "SELECT setval('\"Definitions_DefinitionId_seq\"', (SELECT COALESCE(MAX(\"DefinitionId\"), 0) FROM \"Definitions\"));"
+            );
+            
+            await _context.SaveChangesAsync();
+            
+            return NoContent();
+        }
     }
 }
