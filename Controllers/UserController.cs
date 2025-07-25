@@ -68,12 +68,10 @@ namespace diji_card_alt.Controllers
             existingUser.FullName = updatedUser.FullName;
             existingUser.Email = updatedUser.Email;
             existingUser.PhoneNumber = updatedUser.PhoneNumber;
-            existingUser.LocationLink = updatedUser.LocationLink;
-            existingUser.WhatsappLink = updatedUser.WhatsappLink;
-            existingUser.Iban = updatedUser.Iban;
+            
             existingUser.JobTitle = updatedUser.JobTitle;
             existingUser.Company = updatedUser.Company;
-            existingUser.Linkedin = updatedUser.Linkedin;
+            
 
             _context.SaveChanges();
 

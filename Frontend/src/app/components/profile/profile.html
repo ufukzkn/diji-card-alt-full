@@ -1,0 +1,100 @@
+<!-- src/app/components/profile/profile.html -->
+<!-- Dil seçici sayfanın en üstünde ortada -->
+<div class="global-lang-select">
+  <select [(ngModel)]="selectedLang" (change)="onLangChange($event)">
+    <option value="tr">🇹🇷 Türkçe</option>
+    <option value="en">🇬🇧 English</option>
+  </select>
+</div>
+
+<div class="profile-container">
+  <div class="top-bar">
+    <!-- Sol üstte QR kod ikonu -->
+    <img class="qr-icon-absolute" src="https://cdn-icons-png.flaticon.com/512/2313/2313147.png" alt="QR Kod" width="32" height="32" (click)="showQr = !showQr" title="QR Kodu Göster" />
+    <div class="qr-popup" *ngIf="showQr">
+      <qrcode [qrdata]="profileUrl" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>
+    </div>
+    <a routerLink="/" class="back-link">‹ Ana Sayfaya Dön</a>
+  </div>
+
+  <!-- 1) LinkEditor en üstte -->
+  <app-link-editor [userId]="userId"></app-link-editor>
+
+  <!-- 2) Default bilgiler (Users tablosu) -->
+  <div *ngIf="user" class="default-info">
+    <img src="https://img.a.transfermarkt.technology/portrait/big/238055-1727356372.png?lm=1"
+         alt="Profil Fotoğrafı"
+         width="120"
+         height="150"
+         class="avatar centered-avatar" />
+
+    <!-- İsim -->
+    <h1 class="name">{{ user.fullName }}</h1>
+    <!-- Meslek @ Şirket -->
+    <p class="subheading">{{ user.jobTitle }} <strong> &#64; {{ user.company }}</strong></p>
+
+    <!-- E-posta -->
+    <p *ngIf="user.email" class="contact">
+      <span class="icon">📧</span>
+      <a [href]="'mailto:' + user.email">{{ user.email }}</a>
+    </p>
+    <!-- Telefon -->
+    <p *ngIf="user.phoneNumber" class="contact">
+      <span class="icon">📞</span>
+      <a [href]="'tel:' + user.phoneNumber">{{ user.phoneNumber }}</a>
+    </p>
+  </div>
+
+  <!-- 3) Dinamik bağlantılar (UserDefinitionValues) -->
+  <div *ngIf="profile?.links?.length" class="dynamic-links styled-links">
+    <h3>Diğer Bağlantılar</h3>
+    <ul>
+      <li *ngFor="let link of filteredLinks" class="link-item">
+        <!-- Sadece özel iconlar -->
+        <span class="icon" *ngIf="
+          link.definitionName.toLowerCase().includes('mail') ||
+          link.definitionName.toLowerCase().includes('tel') ||
+          link.definitionName.toLowerCase().includes('phone') ||
+          link.definitionName.toLowerCase().includes('linkedin') ||
+          link.definitionName.toLowerCase().includes('whatsapp') ||
+          link.definitionName.toLowerCase().includes('iban') ||
+          link.definitionName.toLowerCase().includes('adres') ||
+          link.definitionName.toLowerCase().includes('location')
+        ">
+          <ng-container *ngIf="link.definitionName.toLowerCase().includes('mail')">📧</ng-container>
+          <ng-container *ngIf="link.definitionName.toLowerCase().includes('tel') || link.definitionName.toLowerCase().includes('phone')">📞</ng-container>
+          <ng-container *ngIf="link.definitionName.toLowerCase().includes('linkedin')">🔗</ng-container>
+          <ng-container *ngIf="link.definitionName.toLowerCase().includes('whatsapp')">💬</ng-container>
+          <ng-container *ngIf="link.definitionName.toLowerCase().includes('iban')">🏦</ng-container>
+          <ng-container *ngIf="link.definitionName.toLowerCase().includes('adres') || link.definitionName.toLowerCase().includes('location')">📍</ng-container>
+        </span>
+        <strong>{{ link.definitionName }}:</strong>
+        <span class="link-value">
+          <ng-container [ngSwitch]="true">
+            <!-- Email links -->
+            <ng-container *ngSwitchCase="link.value?.startsWith('mailto:')">
+              <a [href]="link.value">{{ link.value.substring(7) }}</a>
+            </ng-container>
+            <!-- Phone links -->
+            <ng-container *ngSwitchCase="link.value?.startsWith('tel:')">
+              <a [href]="link.value">{{ link.value.substring(4) }}</a>
+            </ng-container>
+            <!-- Web links -->
+            <ng-container *ngSwitchCase="link.value?.startsWith('http')">
+              <a [href]="link.value" target="_blank" rel="noopener noreferrer">{{ link.value }}</a>
+            </ng-container>
+            <!-- Default text -->
+            <ng-container *ngSwitchDefault>
+              <span>{{ link.value }}</span>
+            </ng-container>
+          </ng-container>
+        </span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 4) Kullanıcı bulunamazsa -->
+  <div *ngIf="!user" class="no-profile">
+    <p>Profil bulunamadı.</p>
+  </div>
+</div>

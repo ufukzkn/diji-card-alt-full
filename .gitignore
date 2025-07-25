@@ -1,0 +1,41 @@
+﻿# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Angular build outputs
+dist/
+.angular/
+.cache/
+*.tgz
+
+# Frontend sub-folder
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.angular/
+Frontend/.cache/
+
+# VS Code
+.vscode/
+
+# Rider / VS
+.idea/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# .NET build
+bin/
+obj/
+
+# User secrets & local DB
+secrets.json
+*.db
+*.sqlite
+
+# Mac / Windows
+.DS_Store
+Thumbs.db
