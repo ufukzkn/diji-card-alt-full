@@ -1,0 +1,1 @@
+const String logoImageUrl = 'https://meet.octapull.com/assets/images/octapull-dark-icon.png';
