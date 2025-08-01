@@ -13,26 +13,76 @@
 Bu özellikler sayesinde, fiziksel kartvizitlere gerek kalmadan, profesyonel ve modern bir ortamda kendinizi ve iletişim bilgilerinizi etkili biçimde tanıtabilirsiniz.  
 
 ## Özellikler
+
 - [ ] QR Link
 - [ ] Özelleştirilebilir uniq link
 - [ ] Sonsuz link vb. ekleme imkanı
 - [ ] Profil ziyaretçi loglaması
 
-### Notlar
-- .NET 7+
-- Angular 19
-- Postgresql
-- Flutter Mobile
-
 ## Gereksinimler
+
+- .NET 8 SDK
+- Node.js (v18+ önerilir)
+- npm
+- Angular CLI (v20+)
+- PostgreSQL (veritabanı)
+- Flutter (mobil uygulama için)
 
 ## Kurulum
 
+1. **Backend (API) Kurulumu**
+   - `dotnet restore` ile bağımlılıkları yükleyin.
+   - PostgreSQL veritabanı oluşturun ve bağlantı ayarlarını `appsettings.json` dosyasında düzenleyin.
+   - Gerekirse migration işlemlerini çalıştırın: `dotnet ef database update`
+
+2. **Frontend (Angular) Kurulumu**
+   - `cd Frontend`
+   - `npm install` ile bağımlılıkları yükleyin.
+   - `ng serve` ile Angular uygulamasını başlatın.
+
+3. **Mobil (Flutter) Kurulumu**
+   - Mobil kurulum ilgili klasörün Readme dosyasında mevcuttur.
+
 ## Kullanım
+
+1. **Backend'i Başlatmak için:**
+   - Ana dizinde: `dotnet run`
+
+2. **Frontend'i Başlatmak için:**
+   - `cd Frontend`
+   - `ng serve`
+
+3. **Mobil Uygulama:**
+   - `cd src/mobile`
+   - `flutter run`
+
+Uygulama varsayılan olarak `http://localhost:5078` (backend) ve `http://localhost:4200` (frontend) adreslerinde çalışır.
 
 ## Proje Hiyerarşisi
 
+```
+digital-business-card/
+├── Controllers/           # .NET API controller dosyaları
+├── Data/                  # DbContext ve veri erişim katmanı
+├── Models/                # Veri modelleri
+├── Migrations/            # EF Core migration dosyaları
+├── Frontend/              # Angular uygulaması
+│   ├── src/app/components # Angular bileşenleri
+│   ├── src/app/models     # Angular modelleri
+│   ├── src/app/services   # Angular servisleri
+├── wwwroot/               # Statik dosyalar (profil fotoğrafları vb.)
+├── src/
+│   ├── api/               # API ile ilgili dokümantasyon
+│   ├── mobile/            # Flutter mobil uygulama
+│   └── ui/                # UI ile ilgili dokümantasyon
+├── appsettings.json       # API yapılandırma dosyası
+├── Program.cs             # .NET giriş noktası
+├── digital-business-card.csproj # Proje dosyası
+└── README.md              # Proje açıklamaları
+```
+
 ## Contributing
+
 Fork the repository
 
 Create a feature branch

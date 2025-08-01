@@ -1,41 +1,90 @@
-<div class="header-centered">
-  <div class="logo-wrapper">
-  <img src="https://i.hizliresim.com/tnhf1uk.png"
-       alt="Logo" />
-</div>
-
-      
-  <h2 style="margin-bottom: 2rem;">Diji-Card</h2>
-</div>
-
-<div class="search-container">
-  <input type="text"
-         [(ngModel)]="searchQuery"
-         (keydown.enter)="triggerSearch()"
-         placeholder="İsim ara..."
-         class="search-input" />
-
-
-  <button (click)="triggerSearch()" class="search-button">
-    Ara
-  </button>
-
-  <p *ngIf="searchQuery.length > 0 && searchQuery.length < 3" class="info-message">
-    Lütfen en az 3 harf girin...
-  </p>
-
-  <div *ngFor="let user of filteredUsers" class="user-card">
-    <h3>{{ user.fullName }}</h3>
-    <p>{{ user.jobTitle }} &#64; {{ user.company }}</p>
-    <a [routerLink]="['/profil', user.userId]">Profili Gör</a>
+<div class="search-page">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="logo-container">
+      <img src="https://i.hizliresim.com/tnhf1uk.png" alt="Diji-Card Logo" class="logo" />
+      <h1 class="brand-title">Digital Business Card</h1>
+      <p class="brand-subtitle">Dijital kartvizit platformu</p>
+    </div>
   </div>
 
-  <p *ngIf="filteredUsers.length === 3" class="info-message">
-    Daha fazla sonuç için enter’a basın veya aramayı detaylandırın.
-  </p>
+  <!-- Search Section -->
+  <div class="search-section">
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input 
+          type="text"
+          [(ngModel)]="searchQuery"
+          (keydown.enter)="triggerSearch()"
+          placeholder="İsim, meslek veya şirket ara..."
+          class="search-input"
+          autocomplete="off" />
+        <button 
+          (click)="triggerSearch()" 
+          class="search-button"
+          [disabled]="searchQuery.length < 3">
+          Ara
+        </button>
+      </div>
+      
+      <!-- Search Info -->
+      <div class="search-info">
+        <p *ngIf="searchQuery.length > 0 && searchQuery.length < 3" class="info-message warning">
+          <span class="icon">ⓘ</span>
+          Lütfen en az 3 karakter girin
+        </p>
+        <p *ngIf="searchQuery.length >= 3 && filteredUsers.length === 0" class="info-message empty">
+          <span class="icon">🔍</span>
+          Aradığınız kriterlere uygun kullanıcı bulunamadı
+        </p>
+      </div>
+    </div>
+  </div>
 
-  <p *ngIf="showAllResults && filteredUsers.length > 3" class="info-message">
-    Tüm sonuçlar gösteriliyor.
-  </p>
+  <!-- Results Section -->
+  <div class="results-section" *ngIf="filteredUsers.length > 0">
+    <div class="results-header">
+      <h3>Arama Sonuçları</h3>
+      <span class="results-count">{{ filteredUsers.length }} sonuç bulundu</span>
+    </div>
+    
+    <div class="user-grid">
+      <div *ngFor="let user of filteredUsers" class="user-card">
+        <div class="user-avatar">
+          <img 
+            [src]="user.profilePhotoUrl ? 'http://localhost:5078' + user.profilePhotoUrl : '/assets/default-avatar.png'" 
+            [alt]="user.fullName"
+            class="avatar-img" />
+          <div class="status-indicator"></div>
+        </div>
+        
+        <div class="user-info">
+          <h4 class="user-name">{{ user.fullName }}</h4>
+          <p class="user-job">{{ user.jobTitle }}</p>
+          <p class="user-company">{{ user.company }}</p>
+          <div class="contact-info">
+            <span class="email">✉ {{ user.email }}</span>
+            <span class="phone" *ngIf="user.phoneNumber">📞 {{ user.phoneNumber }}</span>
+          </div>
+        </div>
+        
+        <div class="user-actions">
+          <a [routerLink]="['/profil', user.userId]" class="profile-button">
+            👤 Profili Görüntüle
+          </a>
+        </div>
+      </div>
+    </div>
 
+    <!-- Load More -->
+    <div class="load-more-section" *ngIf="!showAllResults && filteredUsers.length >= 3">
+      <button (click)="showMoreResults()" class="load-more-button">
+        ⬇ Tüm Sonuçları Göster
+      </button>
+    </div>
+  </div>
 </div>

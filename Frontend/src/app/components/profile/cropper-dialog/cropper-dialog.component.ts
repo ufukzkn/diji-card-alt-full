@@ -117,3 +117,4 @@ export class CropperDialogComponent {
     this.onResult(undefined);
   }
 } 
+// CropperDialogComponent bir tutorial'dan direkt olarak aldığım için diğer bileşenlerdeki gibi parçalara ayırmadım.

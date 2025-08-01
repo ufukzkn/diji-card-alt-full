@@ -19,6 +19,7 @@ namespace diji_card_alt_full.Controllers
             var links = await _context.UserDefinitionValues
                 .Include(x => x.Definition)
                 .Where(x => x.UserId == userId)
+                .OrderBy(x => x.SortId)
                 .ToListAsync();
 
             return Ok(links);
@@ -50,6 +51,57 @@ namespace diji_card_alt_full.Controllers
 
             return CreatedAtAction(nameof(GetById),
                 new { userId = dto.UserId, definitionId = dto.DefinitionId }, dto);
+        }
+
+        // POST: api/userdefinitionvalues/custom
+        [HttpPost("custom")]
+        public async Task<IActionResult> AddCustomUserLink([FromBody] AddCustomDefinitionRequest request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    return BadRequest(new { Success = false, Message = "Request boş olamaz" });
+                }
+
+                if (string.IsNullOrEmpty(request.UserId) || string.IsNullOrEmpty(request.CustomDefinitionName) || string.IsNullOrEmpty(request.Value))
+                {
+                    return BadRequest(new { Success = false, Message = "Gerekli alanlar boş olamaz" });
+                }
+
+                // Yeni custom definition ID'si oluştur (20'den başlayarak)
+                var maxCustomId = await _context.UserDefinitionValues
+                    .Where(x => x.DefinitionId >= 20)
+                    .Select(x => x.DefinitionId)
+                    .DefaultIfEmpty(19)
+                    .MaxAsync();
+
+                var newCustomId = maxCustomId + 1;
+
+                // Custom definition entry oluştur
+                var customEntry = new UserDefinitionValue
+                {
+                    UserId = request.UserId,
+                    DefinitionId = newCustomId,
+                    CustomDefinitionName = request.CustomDefinitionName,
+                    Value = request.Value,
+                    SortId = request.SortId
+                };
+
+                _context.UserDefinitionValues.Add(customEntry);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { 
+                    Success = true, 
+                    Message = "Custom definition eklendi",
+                    DefinitionId = newCustomId,
+                    CustomEntry = customEntry 
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Success = false, Message = $"Hata: {ex.Message}", StackTrace = ex.StackTrace });
+            }
         }
 
 

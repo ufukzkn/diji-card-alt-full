@@ -1,112 +1,120 @@
 <!-- src/app/components/profile/profile.html -->
-<!-- Dil seçici sayfanın en üstünde ortada -->
-<div class="global-lang-select">
-  <select [(ngModel)]="selectedLang" (change)="onLangChange($event)">
-    <option value="tr">🇹🇷 Türkçe</option>
-    <option value="en">🇬🇧 English</option>
-  </select>
-</div>
+<div class="profile-page">
+  <!-- Language Selector (Top Center) -->
+  <div class="language-selector">
+    <select [(ngModel)]="selectedLang" (change)="onLangChange($event)" class="lang-select">
+      <option value="tr">🇹🇷 Türkçe</option>
+      <option value="en">🇺🇸 English</option>
+      <option value="de">🇩🇪 Deutsch</option>
+    </select>
+  </div>
 
-<div class="profile-container">
-  <div class="top-bar">
-    <!-- Sol üstte QR kod ikonu -->
-    <img class="qr-icon-absolute" src="https://cdn-icons-png.flaticon.com/512/2313/2313147.png" alt="QR Kod" width="32" height="32" (click)="showQr = !showQr" title="QR Kodu Göster" />
-    <div class="qr-popup" *ngIf="showQr">
-      <qrcode [qrdata]="profileUrl" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>
+  <!-- QR Code Button (Top Left) -->
+  <div class="qr-fab">
+    <div class="qr-icon" (click)="showQr = !showQr">
+      <img src="https://cdn-icons-png.flaticon.com/512/2313/2313147.png" alt="QR Kod" width="24" height="24" />
     </div>
-    <a routerLink="/" class="back-link">‹ Ana Sayfaya Dön</a>
+    
+    <!-- QR Code Display (Top Left) -->
+    <div class="qr-display" *ngIf="showQr">
+      <qrcode [qrdata]="profileUrl" [width]="150" [errorCorrectionLevel]="'M'"></qrcode>
+    </div>
   </div>
 
-  <!-- 1) LinkEditor en üstte -->
-  <app-link-editor [userId]="userId"></app-link-editor>
+  <!-- Settings Button (Top Right) -->
+  <div class="settings-fab" [class.active]="showSettings" (click)="toggleSettings()">
+    <div class="settings-icon">⚙️</div>
+    
+    <!-- Settings Menu - Link Editor Controls (Always exists, but hidden/shown) -->
+    <div class="settings-menu" [style.display]="showSettings ? 'block' : 'none'" (click)="$event.stopPropagation()">
+      <app-link-editor [userId]="userId" (linksChanged)="onLinksChanged()"></app-link-editor>
+      
+      <!-- Logout Button -->
+      <div class="settings-actions">
+        <button class="logout-btn" (click)="logout()">
+          🚪 Çıkış Yap
+        </button>
+      </div>
+    </div>
+  </div>
 
-  <!-- 2) Default bilgiler (Users tablosu) -->
-  <div *ngIf="user" class="default-info">
-    <img [src]="profile?.profilePhotoUrl ? (imageBaseUrl + profile?.profilePhotoUrl) : 'https://img.a.transfermarkt.technology/portrait/big/238055-1727356372.png?lm=1'"
-         alt="Profil Fotoğrafı"
-         width="120"
-         height="150"
-         class="avatar centered-avatar" />
-    <div class="profile-photo-actions">
-      <button class="photo-btn" (click)="fileInput.click()">Profil Fotoğrafı Ekle</button>
-      <button class="photo-btn delete" (click)="onDeletePhoto()" [disabled]="!profile?.profilePhotoUrl">Sil</button>
-      <input #fileInput type="file" (change)="onPhotoSelected($event)" accept="image/*" style="display:none" />
+  <!-- Share Button (Bottom Right) -->
+  <div class="share-fab">
+    <div class="share-icon" (click)="shareProfile()">
+      📤
+    </div>
+  </div>
+
+  <!-- Profile Card -->
+  <div class="profile-card">
+    <!-- Profile Avatar & Basic Info -->
+    <div class="profile-header">
+      <div class="avatar-section">
+        <img [src]="profile?.profilePhotoUrl ? (imageBaseUrl + profile?.profilePhotoUrl) : (imageBaseUrl + '/profile-photos/default.png')"
+             alt="Profil Fotoğrafı"
+             class="profile-avatar" />
+        
+        <!-- Photo Edit Button (Always visible) -->
+        <button class="photo-edit-btn" (click)="togglePhotoActions()">
+          ✏️
+        </button>
+        
+        <!-- Photo Actions (Show when photo edit is active) -->
+        <div class="photo-actions" *ngIf="showPhotoActions">
+          <button class="photo-btn" (click)="fileInput.click()">📷 Ekle</button>
+          <button class="photo-btn delete" (click)="onDeletePhoto()" [disabled]="!profile?.profilePhotoUrl">🗑️ Sil</button>
+          <input #fileInput type="file" (change)="onPhotoSelected($event)" accept="image/*" style="display:none" />
+        </div>
+      </div>
+
+      <div class="profile-info" *ngIf="user">
+        <h1 class="profile-name">{{ user.fullName }}</h1>
+        <p class="profile-title">{{ user.jobTitle }}</p>
+        <p class="profile-company">{{ user.company }}</p>
+      </div>
     </div>
 
-    <!-- Cropper Dialog -->
-    <app-cropper-dialog 
-      *ngIf="showCropper && cropperData"
-      [data]="cropperData"
-      [onResult]="onCropperResult.bind(this)">
-    </app-cropper-dialog>
+    <!-- Contact Info -->
+    <div class="contact-section">
+      <div class="contact-item" *ngIf="user?.email">
+        <span class="contact-icon">📧</span>
+        <a [href]="'mailto:' + user?.email" class="contact-link">{{ user?.email }}</a>
+      </div>
+      <div class="contact-item" *ngIf="user?.phoneNumber">
+        <span class="contact-icon">📞</span>
+        <a [href]="'tel:' + user?.phoneNumber" class="contact-link">{{ user?.phoneNumber }}</a>
+      </div>
+    </div>
 
-    <!-- İsim -->
-    <h1 class="name">{{ user.fullName }}</h1>
-    <!-- Meslek @ Şirket -->
-    <p class="subheading">{{ user.jobTitle }} <strong> &#64; {{ user.company }}</strong></p>
-
-    <!-- E-posta -->
-    <p *ngIf="user.email" class="contact">
-      <span class="icon">📧</span>
-      <a [href]="'mailto:' + user.email">{{ user.email }}</a>
-    </p>
-    <!-- Telefon -->
-    <p *ngIf="user.phoneNumber" class="contact">
-      <span class="icon">📞</span>
-      <a [href]="'tel:' + user.phoneNumber">{{ user.phoneNumber }}</a>
-    </p>
+    <!-- Dynamic Links -->
+    <div class="links-section" *ngIf="profile?.links?.length">
+      <h3 class="section-title">Bağlantılar</h3>
+      <div class="links-grid">
+        <div *ngFor="let link of filteredLinks" class="link-card">
+          <span class="link-icon">{{ getLinkIcon(link.definitionName) }}</span>
+          <div class="link-content">
+            <span class="link-label">{{ link.definitionName }}</span>
+            <div class="link-value">
+              <ng-container [ngSwitch]="true">
+                <a *ngSwitchCase="link.value?.startsWith('mailto:')" 
+                   [href]="link.value" class="link-anchor">{{ link.value.substring(7) }}</a>
+                <a *ngSwitchCase="link.value?.startsWith('tel:')" 
+                   [href]="link.value" class="link-anchor">{{ link.value.substring(4) }}</a>
+                <a *ngSwitchCase="link.value?.startsWith('http')" 
+                   [href]="link.value" target="_blank" rel="noopener noreferrer" class="link-anchor">{{ link.value }}</a>
+                <span *ngSwitchDefault class="link-text">{{ link.value }}</span>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- 3) Dinamik bağlantılar (UserDefinitionValues) -->
-  <div *ngIf="profile?.links?.length" class="dynamic-links styled-links">
-    <h3>Diğer Bağlantılar</h3>
-    <ul>
-      <li *ngFor="let link of filteredLinks" class="link-item">
-        <!-- Sadece özel iconlar -->
-        <span class="icon" *ngIf="
-          link.definitionName.toLowerCase().includes('mail') ||
-          link.definitionName.toLowerCase().includes('tel') ||
-          link.definitionName.toLowerCase().includes('phone') ||
-          link.definitionName.toLowerCase().includes('linkedin') ||
-          link.definitionName.toLowerCase().includes('whatsapp') ||
-          link.definitionName.toLowerCase().includes('iban') ||
-          link.definitionName.toLowerCase().includes('adres') ||
-          link.definitionName.toLowerCase().includes('location')
-        ">
-          <ng-container *ngIf="link.definitionName.toLowerCase().includes('mail')">📧</ng-container>
-          <ng-container *ngIf="link.definitionName.toLowerCase().includes('tel') || link.definitionName.toLowerCase().includes('phone')">📞</ng-container>
-          <ng-container *ngIf="link.definitionName.toLowerCase().includes('linkedin')">🔗</ng-container>
-          <ng-container *ngIf="link.definitionName.toLowerCase().includes('whatsapp')">💬</ng-container>
-          <ng-container *ngIf="link.definitionName.toLowerCase().includes('iban')">🏦</ng-container>
-          <ng-container *ngIf="link.definitionName.toLowerCase().includes('adres') || link.definitionName.toLowerCase().includes('location')">📍</ng-container>
-        </span>
-        <strong>{{ link.definitionName }}:</strong>
-        <span class="link-value">
-          <ng-container [ngSwitch]="true">
-            <!-- Email links -->
-            <ng-container *ngSwitchCase="link.value?.startsWith('mailto:')">
-              <a [href]="link.value">{{ link.value.substring(7) }}</a>
-            </ng-container>
-            <!-- Phone links -->
-            <ng-container *ngSwitchCase="link.value?.startsWith('tel:')">
-              <a [href]="link.value">{{ link.value.substring(4) }}</a>
-            </ng-container>
-            <!-- Web links -->
-            <ng-container *ngSwitchCase="link.value?.startsWith('http')">
-              <a [href]="link.value" target="_blank" rel="noopener noreferrer">{{ link.value }}</a>
-            </ng-container>
-            <!-- Default text -->
-            <ng-container *ngSwitchDefault>
-              <span>{{ link.value }}</span>
-            </ng-container>
-          </ng-container>
-        </span>
-      </li>
-    </ul>
-  </div>
-
-  <!-- 4) Kullanıcı bulunamazsa -->
-  <div *ngIf="!user" class="no-profile">
-    <p>Profil bulunamadı.</p>
-  </div>
+  <!-- Cropper Dialog -->
+  <app-cropper-dialog 
+    *ngIf="showCropper && cropperData"
+    [data]="cropperData"
+    [onResult]="onCropperResult.bind(this)">
+  </app-cropper-dialog>
 </div>

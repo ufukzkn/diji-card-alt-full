@@ -1,6 +1,6 @@
 // src/app/components/link-editor/link-editor.ts
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
@@ -20,6 +20,7 @@ import { UserDefinitionValue } from '../../models/user-definition-value.model';
 })
 export class LinkEditor implements OnInit {
   @Input() userId!: string;
+  @Output() linksChanged = new EventEmitter<void>();
 
   definitions: Definition[] = [];
   userLinks: UserDefinitionValue[] = [];
@@ -42,12 +43,16 @@ export class LinkEditor implements OnInit {
   selectedToEdit?: number;
   editValue = '';
 
+  // custom-mod için
+  customDefinitionName = '';
+
   constructor(
     private defSvc: DefinitionsService,
     private linkSvc: UserLinksService
   ) {}
 
   ngOnInit(): void {
+    console.log('Link-editor ngOnInit, userId:', this.userId);
     this.mode = '';
     this.lastOpenedDropdown = '';
     this.loadDefinitions();
@@ -55,6 +60,7 @@ export class LinkEditor implements OnInit {
   }
 
   toggleMode(m: 'add' | 'delete' | 'edit' | 'sort') {
+    console.log('toggleMode çağrıldı:', m, 'mevcut mode:', this.mode);
     if (this.mode === m) {
       this.mode = '';
       this.lastOpenedDropdown = '';
@@ -68,24 +74,49 @@ export class LinkEditor implements OnInit {
         this.userLinksArray = [...this.userLinks].sort((a, b) => a.sortId - b.sortId);
       }
     }
+    console.log('Yeni mode:', this.mode);
   }
 
   availableDefinitions(): Definition[] {
-    return this.definitions.filter(
+    const available = this.definitions.filter(
       d => !this.userLinks.some(l => l.definitionId === d.definitionId)
     );
+    console.log('availableDefinitions:', available, 'tüm definitions:', this.definitions);
+    return available;
   }
 
   definitionName(id: number): string {
     return this.definitions.find(d => d.definitionId === id)?.definitionName || '';
   }
 
+  canAddLink(): boolean {
+    if (!this.selectedDefinitionId || !this.value.trim()) {
+      return false;
+    }
+    
+    if (this.selectedDefinitionId === '__new') {
+      return this.newDefinitionName.trim() !== '';
+    }
+    
+    if (this.selectedDefinitionId === '__custom') {
+      return this.customDefinitionName.trim() !== '';
+    }
+    
+    return true;
+  }
+
   private loadDefinitions(): void {
-    this.defSvc.getAll().subscribe(d => (this.definitions = d));
+    console.log('loadDefinitions çağrıldı');
+    this.defSvc.getAll().subscribe(d => {
+      console.log('Definitions yüklendi:', d);
+      this.definitions = d;
+    });
   }
 
   private loadUserLinks(): void {
+    console.log('loadUserLinks çağrıldı, userId:', this.userId);
     this.linkSvc.getByUser(this.userId).subscribe(l => {
+      console.log('User links yüklendi:', l);
       this.userLinks = l.sort((a, b) => a.sortId - b.sortId);
     });
   }
@@ -104,6 +135,7 @@ export class LinkEditor implements OnInit {
   async saveSortOrder(): Promise<void> {
     await firstValueFrom(this.linkSvc.updateSortOrder(this.userLinksArray));
     this.loadUserLinks();
+    this.linksChanged.emit(); // Parent'a değişiklik bildir
   }
 
   async add(): Promise<void> {
@@ -121,6 +153,32 @@ export class LinkEditor implements OnInit {
       );
       this.definitions.push(created);
       defId = created.definitionId;
+    } else if (this.selectedDefinitionId === '__custom') {
+      // Kişisel tanım ekleme
+      if (!this.customDefinitionName.trim()) {
+        alert('Kişisel tanım adı gir');
+        return;
+      }
+      
+      try {
+        const result = await firstValueFrom(
+          this.linkSvc.addCustomDefinition({
+            userId: this.userId,
+            customDefinitionName: this.customDefinitionName.trim(),
+            value: this.value,
+            sortId: this.userLinks.length
+          })
+        );
+        
+        this.loadUserLinks();
+        this.resetForm();
+        this.linksChanged.emit();
+        return;
+      } catch (error) {
+        console.error('Custom definition ekleme hatası:', error);
+        alert('Kişisel tanım eklenirken hata oluştu');
+        return;
+      }
     } else {
       defId = +this.selectedDefinitionId;
     }
@@ -136,6 +194,7 @@ export class LinkEditor implements OnInit {
 
     this.loadUserLinks();
     this.resetForm();
+    this.linksChanged.emit(); // Parent'a değişiklik bildir
   }
 
   /** Silme işlemi */
@@ -143,6 +202,7 @@ export class LinkEditor implements OnInit {
     if (!confirm('Bu bağlantıyı silmek istediğine emin misin?')) return;
     await firstValueFrom(this.linkSvc.delete(this.userId, defId));
     this.loadUserLinks();
+    this.linksChanged.emit(); // Parent'a değişiklik bildir
   }
 
   /** Edit işlemi */
@@ -152,6 +212,8 @@ export class LinkEditor implements OnInit {
       this.linkSvc.update(this.userId, this.selectedToEdit, this.editValue)
     );
     this.loadUserLinks();
+    this.resetForm();
+    this.linksChanged.emit(); // Parent'a değişiklik bildir
     this.resetForm();
   }
 
@@ -179,6 +241,7 @@ export class LinkEditor implements OnInit {
       this.loadDefinitions();
       this.loadUserLinks();
       this.resetForm();
+      this.linksChanged.emit(); // Parent'a değişiklik bildir
       alert('Tanım başarıyla silindi!');
     } catch (err) {
       alert('Tanım silinirken bir hata oluştu!');
@@ -200,5 +263,7 @@ export class LinkEditor implements OnInit {
     this.selectedToEdit = undefined;
     this.editValue = '';
     this.deleteDefinitionName = '';
+    this.customDefinitionName = '';
   }
+
 }

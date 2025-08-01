@@ -5,7 +5,7 @@ import { Definition } from '../models/definition.model';
 
 @Injectable({ providedIn: 'root' })
 export class DefinitionsService {
-  private api = 'https://localhost:7220/api/definitions';
+  private api = 'http://localhost:5078/api/definitions';
 
   constructor(private http: HttpClient) { }
 

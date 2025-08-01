@@ -4,14 +4,49 @@
 }
 
 .mode-buttons {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  z-index: 10;
+  flex-wrap: wrap;
+}
+
+.mode-btn {
+  padding: 8px 16px;
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.mode-btn:hover {
+  background: #e9ecef;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.mode-btn.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.custom-fields {
+  margin: 0.5rem 0;
+}
+
+.custom-fields input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
 }
 
 .example-list {
@@ -138,18 +173,17 @@
 }
 
 .mode-panel {
-  position: fixed;
-  top: 5.5rem;      // Butonların hemen altı
-  right: 2rem;
-  width: 340px;
-  max-width: 90vw;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background: #fafafa;
-  animation: fadeInDown 0.25s ease-out;
-  z-index: 999;
+  // Eğer parent container settings-menu ise relative position kullan
+  position: relative;
+  width: 100%;
+  max-width: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 0;
+  background: transparent;
+  animation: none;
+  z-index: auto;
 
   select,
   input {

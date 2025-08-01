@@ -38,7 +38,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Geliştirme ortamında HTTPS yönlendirmesini kapatıyoruz
+// app.UseHttpsRedirection();
 
 // Configure static files with cache control
 app.UseStaticFiles(new StaticFileOptions

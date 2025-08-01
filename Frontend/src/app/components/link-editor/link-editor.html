@@ -1,9 +1,17 @@
 <!-- mode butonları -->
 <div class="mode-buttons">
-  <button class="mode-btn" (click)="toggleMode('add')" [class.active]="mode==='add'">➕</button>
-  <button class="mode-btn" (click)="toggleMode('delete')" [class.active]="mode==='delete'">➖</button>
-  <button class="mode-btn" (click)="toggleMode('edit')" [class.active]="mode==='edit'">✏️</button>
-  <button class="mode-btn" (click)="toggleMode('sort')" [class.active]="mode==='sort'">⇅</button>
+  <button class="mode-btn" (click)="toggleMode('add')" [class.active]="mode==='add'">
+    ➕ Link Ekle
+  </button>
+  <button class="mode-btn" (click)="toggleMode('delete')" [class.active]="mode==='delete'">
+    ➖ Link Sil
+  </button>
+  <button class="mode-btn" (click)="toggleMode('edit')" [class.active]="mode==='edit'">
+    ✏️ Link Düzenle
+  </button>
+  <button class="mode-btn" (click)="toggleMode('sort')" [class.active]="mode==='sort'">
+    ⇅ Sırala
+  </button>
 </div>
 
 <!-- + MOD: yeni tanım / link ekle -->
@@ -13,19 +21,27 @@
     <option *ngFor="let d of availableDefinitions()" [value]="d.definitionId">
       {{ d.definitionName }}
     </option>
-    <option value="__new">+ Yeni Tanım…</option>
+    <option value="__new">+ Tabloya Yeni Tanım Ekle…</option>
+    <option value="__custom">+ Kişisel Tanım Ekle</option>
   </select>
 
   <input *ngIf="selectedDefinitionId==='__new'"
          [(ngModel)]="newDefinitionName"
          placeholder="Yeni tanım adı" />
 
+  <!-- Kişisel tanım alanları -->
+  <div *ngIf="selectedDefinitionId==='__custom'" class="custom-fields">
+    <input [(ngModel)]="customDefinitionName" placeholder="Kişisel tanım adı (örn: Portfolio)" />
+  </div>
+
   <input [(ngModel)]="value" placeholder="Bağlantı / değer" />
 
   <button class="action-btn" 
-          [disabled]="!selectedDefinitionId || (selectedDefinitionId==='__new' && !newDefinitionName.trim()) || !value.trim()"
+          [disabled]="!canAddLink()"
           (click)="add()">➕ Ekle</button>
 </div>
+
+<!-- CUSTOM MOD kaldırıldı çünkü dropdown'a entegre edildi -->
 
 <!-- – MOD: var olan linkleri sil -->
 <div *ngIf="mode==='delete'" class="mode-panel">

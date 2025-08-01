@@ -14,24 +14,39 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 export class Search implements OnInit {
   searchQuery = '';
   users: any[] = [];
+  showAllResults = false;
+  isLoading = false;
 
   constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
-    this.http.get<any[]>('https://localhost:7220/api/user') // 
-      .subscribe(data => {
-        this.users = data;
-      });
+    this.loadUsers();
   }
 
-
+  loadUsers(): void {
+    this.isLoading = true;
+    this.http.get<any[]>('http://localhost:5078/api/user')
+      .subscribe({
+        next: (data) => {
+          this.users = data;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Kullanıcılar yüklenirken hata:', error);
+          this.isLoading = false;
+        }
+      });
+  }
 
   get filteredUsers(): any[] {
     const query = this.searchQuery.trim().toLowerCase();
     if (query.length < 3) return [];
 
     const results = this.users.filter(user =>
-      user.fullName.toLowerCase().includes(query)
+      user.fullName.toLowerCase().includes(query) ||
+      user.jobTitle?.toLowerCase().includes(query) ||
+      user.company?.toLowerCase().includes(query) ||
+      user.email?.toLowerCase().includes(query)
     );
 
     return this.showAllResults ? results : results.slice(0, 3);
@@ -40,11 +55,11 @@ export class Search implements OnInit {
   triggerSearch(): void {
     this.searchQuery = this.searchQuery.trim();
     if (this.searchQuery.length >= 3) {
-      this.showAllResults = true;
+      this.showAllResults = false; // Reset to show limited results first
     }
   }
 
-  showAllResults = false;
-
-
+  showMoreResults(): void {
+    this.showAllResults = true;
+  }
 }

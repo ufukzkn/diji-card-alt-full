@@ -5,7 +5,7 @@ import { UserProfile } from '../models/user-profile.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
-  private readonly api = 'https://localhost:7220/api/profile';
+  private readonly api = 'http://localhost:5078/api/profile';
 
   constructor(private http: HttpClient) { }
 

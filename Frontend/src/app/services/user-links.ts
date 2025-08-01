@@ -5,7 +5,7 @@ import { UserDefinitionValue } from '../models/user-definition-value.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserLinksService {
-  private api = 'https://localhost:7220/api/userdefinitionvalues';
+  private api = 'http://localhost:5078/api/userdefinitionvalues';
 
   constructor(private http: HttpClient) { }
 
@@ -18,6 +18,15 @@ export class UserLinksService {
 
   add(link: UserDefinitionValue): Observable<UserDefinitionValue> {
     return this.http.post<UserDefinitionValue>(this.api, link);
+  }
+
+  addCustomDefinition(request: {
+    userId: string;
+    customDefinitionName: string;
+    value: string;
+    sortId: number;
+  }): Observable<any> {
+    return this.http.post<any>(`${this.api}/custom`, request);
   }
 
   delete(userId: string, definitionId: number): Observable<void> {
