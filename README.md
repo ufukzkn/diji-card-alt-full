@@ -14,9 +14,9 @@ Bu özellikler sayesinde, fiziksel kartvizitlere gerek kalmadan, profesyonel ve 
 
 ## Özellikler
 
-- [ ] QR Link
-- [ ] Özelleştirilebilir uniq link
-- [ ] Sonsuz link vb. ekleme imkanı
+- [x] QR Link
+- [x] Özelleştirilebilir uniq link
+- [x] Sonsuz link vb. ekleme imkanı
 - [ ] Profil ziyaretçi loglaması
 
 ## Gereksinimler
@@ -60,25 +60,36 @@ Uygulama varsayılan olarak `http://localhost:5078` (backend) ve `http://localho
 
 ## Proje Hiyerarşisi
 
-```
+```text
 digital-business-card/
-├── Controllers/           # .NET API controller dosyaları
-├── Data/                  # DbContext ve veri erişim katmanı
-├── Models/                # Veri modelleri
-├── Migrations/            # EF Core migration dosyaları
-├── Frontend/              # Angular uygulaması
-│   ├── src/app/components # Angular bileşenleri
-│   ├── src/app/models     # Angular modelleri
-│   ├── src/app/services   # Angular servisleri
-├── wwwroot/               # Statik dosyalar (profil fotoğrafları vb.)
+├── Controllers/                # .NET API controller dosyaları
+│   ├── AuthController.cs
+│   ├── UserDefinitionValuesController.cs
+│   ├── DefinitionsController.cs
+│   └── ProfileController.cs
+├── Data/                       # DbContext ve veri erişim katmanı
+│   ├── AppDbContext.cs
+│   └── AppDbContextFactory.cs
+├── Models/                     # Veri modelleri
+│   ├── User.cs
+│   ├── UserDefinitionValue.cs
+│   ├── GlobalDefinition.cs
+│   ├── CustomDefinition.cs
+│   └── UpdateLinkRequest.cs
+├── Migrations/                 # EF Core migration dosyaları
+├── Frontend/                   # Angular uygulaması
+│   ├── src/app/components/     # Angular bileşenleri
+│   ├── src/app/models/         # Angular modelleri
+│   ├── src/app/services/       # Angular servisleri
+│   └── README.md               # Frontend özel dökümanı
+├── wwwroot/                    # Statik dosyalar (profil fotoğrafları vb.)
+├── docs/                       # Proje dokümantasyonu (varsa)
 ├── src/
-│   ├── api/               # API ile ilgili dokümantasyon
-│   ├── mobile/            # Flutter mobil uygulama
-│   └── ui/                # UI ile ilgili dokümantasyon
-├── appsettings.json       # API yapılandırma dosyası
-├── Program.cs             # .NET giriş noktası
-├── digital-business-card.csproj # Proje dosyası
-└── README.md              # Proje açıklamaları
+│   └── mobile/                 # Flutter mobil uygulama
+├── appsettings.json            # API yapılandırma dosyası
+├── Program.cs                  # .NET giriş noktası
+├── digital-business-card.csproj# Proje dosyası
+└── README.md                   # Ana proje açıklamaları
 ```
 
 ## Contributing

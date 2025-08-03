@@ -47,8 +47,8 @@
 <div *ngIf="mode==='delete'" class="mode-panel">
   <select [(ngModel)]="selectedToDelete">
     <option value="" disabled>Silinecek tanımı seç</option>
-    <option *ngFor="let l of userLinks" [ngValue]="l.definitionId">
-      {{ definitionName(l.definitionId) }}
+    <option *ngFor="let l of userLinks" [ngValue]="l.id">
+      {{ l.displayName }}
     </option>
     <option [ngValue]="'__delete'">- Tanımı Tablodan Sil...</option>
   </select>
@@ -78,8 +78,8 @@
 <div *ngIf="mode==='edit'" class="mode-panel">
   <select [(ngModel)]="selectedToEdit">
     <option value="" disabled>Düzenlenecek tanımı seç</option>
-    <option *ngFor="let l of userLinks" [value]="l.definitionId">
-      {{ definitionName(l.definitionId) }}
+    <option *ngFor="let l of userLinks" [value]="l.id">
+      {{ l.displayName }} (ID: {{l.id}})
     </option>
   </select>
   <input *ngIf="selectedToEdit" [(ngModel)]="editValue" placeholder="Yeni değer" />
@@ -90,7 +90,7 @@
 <div *ngIf="mode==='sort'" class="mode-panel">
   <div cdkDropList class="example-list-vertical" (cdkDropListDropped)="drop($event)">
     <div *ngFor="let link of userLinksArray" cdkDrag class="example-box-vertical">
-      {{ definitionName(link.definitionId) }}
+      {{ link.displayName }}
     </div>
   </div>
   <button class="save-sort-btn" (click)="saveSortOrder()">Sıralamayı Kaydet</button>

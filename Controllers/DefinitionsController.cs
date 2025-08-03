@@ -41,8 +41,19 @@ namespace diji_card_alt_full.Controllers
         [HttpPost]
         public async Task<IActionResult> AddDefinition([FromBody] Definition definition)
         {
+            // Eğer ID gönderilmişse, o ID'nin mevcut olup olmadığını kontrol et
+            if (definition.DefinitionId > 0)
+            {
+                var existingDefinition = await _context.Definitions.FindAsync(definition.DefinitionId);
+                if (existingDefinition != null)
+                {
+                    return Conflict($"Definition with ID {definition.DefinitionId} already exists.");
+                }
+            }
+
             var entity = new Definition
             {
+                DefinitionId = definition.DefinitionId > 0 ? definition.DefinitionId : 0, // 0 ise auto-increment
                 DefinitionName = definition.DefinitionName
             };
 

@@ -18,10 +18,5 @@ namespace diji_card_alt.Models
 
         // Profile photo properties
         public string? ProfilePhotoUrl { get; set; }
-        
-        // Theme settings
-        public string? ThemeColor { get; set; }
-        public string? FontFamily { get; set; }
-        public string? CardLayout { get; set; }
     }
 }

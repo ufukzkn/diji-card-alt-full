@@ -14,8 +14,31 @@ namespace diji_card_alt.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Auto-increment primary key
             modelBuilder.Entity<UserDefinitionValue>()
-                .HasKey(udv => new { udv.UserId, udv.DefinitionId });
+                .HasKey(udv => udv.Id);
+
+            // Foreign key to Users table
+            modelBuilder.Entity<UserDefinitionValue>()
+                .HasOne(udv => udv.User)
+                .WithMany()
+                .HasForeignKey(udv => udv.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Foreign key to Definitions table
+            modelBuilder.Entity<UserDefinitionValue>()
+                .HasOne(udv => udv.Definition)
+                .WithMany()
+                .HasForeignKey(udv => udv.DefinitionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Regular definitions için unique constraint (DefinitionId != 11)
+            // Bir kullanıcı aynı regular definition'dan sadece 1 tane ekleyebilir
+            // Custom definitions (DefinitionId = 11) için serbest - birden fazla eklenebilir
+            modelBuilder.Entity<UserDefinitionValue>()
+                .HasIndex(udv => new { udv.UserId, udv.DefinitionId })
+                .IsUnique()
+                .HasFilter("\"DefinitionId\" != 11");
         }
 
         public DbSet<User> Users { get; set; }

@@ -3,6 +3,24 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UserDefinitionValue } from '../models/user-definition-value.model';
 
+// DTO interfaces for API calls
+export interface AddUserLinkRequest {
+  userId: string;
+  definitionId: number;
+  value: string;
+  sortId: number;
+  customDefinitionName?: string;
+}
+
+export interface UpdateUserLinkRequest {
+  id: number;
+  userId: string;
+  definitionId: number;
+  value: string;
+  sortId: number;
+  customDefinitionName?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UserLinksService {
   private api = 'http://localhost:5078/api/userdefinitionvalues';
@@ -14,9 +32,7 @@ export class UserLinksService {
     return this.http.get<UserDefinitionValue[]>(`${this.api}/${userId}`);
   }
 
-
-
-  add(link: UserDefinitionValue): Observable<UserDefinitionValue> {
+  add(link: AddUserLinkRequest): Observable<UserDefinitionValue> {
     return this.http.post<UserDefinitionValue>(this.api, link);
   }
 
@@ -29,16 +45,27 @@ export class UserLinksService {
     return this.http.post<any>(`${this.api}/custom`, request);
   }
 
+  deleteById(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.api}/${id}`);
+  }
+
   delete(userId: string, definitionId: number): Observable<void> {
     return this.http.delete<void>(`${this.api}/${userId}/${definitionId}`);
+  }
+
+  updateById(id: number, link: UpdateUserLinkRequest): Observable<void> {
+    return this.http.put<void>(`${this.api}/${id}`, link);
+  }
+
+  updateByIdOnly(id: number, payload: { value: string }): Observable<void> {
+    return this.http.put<void>(`${this.api}/byid/${id}`, payload);
   }
 
   update(userId: string, definitionId: number, value: string) {
     return this.http.put<void>(
       `${this.api}/${userId}/${definitionId}`,
-      { userId, definitionId, value }
+      { value }
     );
-
   }
 
   updateSortOrder(userLinks: UserDefinitionValue[]): Observable<void> {

@@ -7,7 +7,7 @@ import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { firstValueFrom } from 'rxjs';
 
 import { DefinitionsService } from '../../services/definitions';
-import { UserLinksService } from '../../services/user-links';
+import { UserLinksService, AddUserLinkRequest, UpdateUserLinkRequest } from '../../services/user-links';
 import { Definition } from '../../models/definition.model';
 import { UserDefinitionValue } from '../../models/user-definition-value.model';
 
@@ -86,6 +86,13 @@ export class LinkEditor implements OnInit {
   }
 
   definitionName(id: number): string {
+    // Önce userLinks'te bu ID'yi ara
+    const userLink = this.userLinks.find(l => l.definitionId === id);
+    if (userLink && userLink.displayName) {
+      return userLink.displayName;
+    }
+    
+    // Fallback: definitions tablosundan çek
     return this.definitions.find(d => d.definitionId === id)?.definitionName || '';
   }
 
@@ -189,7 +196,12 @@ export class LinkEditor implements OnInit {
     }
 
     await firstValueFrom(
-      this.linkSvc.add({ userId: this.userId, definitionId: defId, value: this.value, sortId: this.userLinks.length })
+      this.linkSvc.add({ 
+        userId: this.userId, 
+        definitionId: defId, 
+        value: this.value, 
+        sortId: this.userLinks.length 
+      } as AddUserLinkRequest)
     );
 
     this.loadUserLinks();
@@ -198,23 +210,42 @@ export class LinkEditor implements OnInit {
   }
 
   /** Silme işlemi */
-  async delete(defId: number): Promise<void> {
+  async delete(id: number): Promise<void> {
     if (!confirm('Bu bağlantıyı silmek istediğine emin misin?')) return;
-    await firstValueFrom(this.linkSvc.delete(this.userId, defId));
+    await firstValueFrom(this.linkSvc.deleteById(id));
     this.loadUserLinks();
     this.linksChanged.emit(); // Parent'a değişiklik bildir
   }
 
   /** Edit işlemi */
   async edit(): Promise<void> {
-    if (!this.selectedToEdit || !this.editValue) return;
-    await firstValueFrom(
-      this.linkSvc.update(this.userId, this.selectedToEdit, this.editValue)
-    );
-    this.loadUserLinks();
-    this.resetForm();
-    this.linksChanged.emit(); // Parent'a değişiklik bildir
-    this.resetForm();
+    console.log('Edit fonksiyonu çağrıldı:', this.selectedToEdit, this.editValue);
+    console.log('selectedToEdit type:', typeof this.selectedToEdit);
+    
+    if (!this.selectedToEdit || !this.editValue) {
+      console.log('Edit validasyon hatası - selectedToEdit veya editValue boş');
+      return;
+    }
+    
+    // selectedToEdit'i number'a çevir (select'ten string geliyorsa)
+    const id = typeof this.selectedToEdit === 'string' ? parseInt(this.selectedToEdit) : this.selectedToEdit;
+    console.log('Çevrilen ID:', id);
+    
+    try {
+      console.log('API çağrısı yapılıyor...');
+      // Sadece value'yu güncelle - hem custom hem normal için aynı endpoint
+      await firstValueFrom(
+        this.linkSvc.updateByIdOnly(id, { value: this.editValue })
+      );
+      
+      console.log('API çağrısı başarılı');
+      this.loadUserLinks();
+      this.resetForm();
+      this.linksChanged.emit(); // Parent'a değişiklik bildir
+    } catch (error) {
+      console.error('Edit hatası:', error);
+      alert('Güncelleme sırasında hata oluştu');
+    }
   }
 
   /** Tanım silme işlemi */

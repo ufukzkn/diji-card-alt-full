@@ -140,9 +140,10 @@ namespace diji_card_alt.Controllers
             if (user == null)
                 return NotFound();
 
-            user.ThemeColor = theme.ThemeColor;
-            user.FontFamily = theme.FontFamily;
-            user.CardLayout = theme.CardLayout;
+            // Theme ayarları kaldırıldı - şimdilik sadece kullanıcı bilgilerini güncelliyoruz
+            // user.ThemeColor = theme.ThemeColor;
+            // user.FontFamily = theme.FontFamily;
+            // user.CardLayout = theme.CardLayout;
 
             await _context.SaveChangesAsync();
 

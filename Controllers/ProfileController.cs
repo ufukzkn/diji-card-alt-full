@@ -1,4 +1,5 @@
 ﻿using diji_card_alt.Data;
+using diji_card_alt.Models;
 using diji_card_alt_full.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,11 +21,14 @@ public class ProfileController : ControllerBase
         if (user is null) return NotFound();
 
         // 2) Dinamik linkler (UserDefinitionValues) + DefinitionName
-        // allowedDefinitions filtresi kaldırıldı, tüm UserDefinitionValues gösterilecek
+        // DefinitionId = 11 ise CustomDefinitionName kullan, değilse Definition.DefinitionName kullan
         var linksFromUdvs = await _ctx.UserDefinitionValues
             .Where(x => x.UserId == userId)
             .Include(x => x.Definition)
-            .Select(x => new LinkDto(x.Definition.DefinitionName, x.Value, x.SortId))
+            .Select(x => new LinkDto(
+                x.DefinitionId == 11 ? x.CustomDefinitionName ?? "Custom" : x.Definition!.DefinitionName, 
+                x.Value, 
+                x.SortId))
             .ToListAsync();
 
         // 3) Sabit alanları DefinitionName’leriyle birlikte DTO’ya ekle
@@ -99,5 +103,43 @@ public class ProfileController : ControllerBase
             await _ctx.SaveChangesAsync();
         }
         return NoContent();
+    }
+
+    // GET: api/profile/{userId}/custom-definitions
+    [HttpGet("{userId}/custom-definitions")]
+    public async Task<ActionResult> GetUserCustomDefinitions(string userId)
+    {
+        var user = await _ctx.Users.FindAsync(userId);
+        if (user is null) return NotFound();
+
+        var customDefinitions = await _ctx.UserDefinitionValues
+            .Where(x => x.UserId == userId && x.DefinitionId == 11)
+            .Select(x => new 
+            {
+                UserId = x.UserId,
+                DefinitionId = x.DefinitionId,
+                Value = x.Value,
+                SortId = x.SortId,
+                DefinitionName = x.CustomDefinitionName
+            })
+            .ToListAsync();
+
+        return Ok(customDefinitions);
+    }
+
+    // GET: api/profile/{userId}/custom-definition-names
+    [HttpGet("{userId}/custom-definition-names")]
+    public async Task<ActionResult<List<string>>> GetUserCustomDefinitionNames(string userId)
+    {
+        var user = await _ctx.Users.FindAsync(userId);
+        if (user is null) return NotFound();
+
+        var customDefinitionNames = await _ctx.UserDefinitionValues
+            .Where(x => x.UserId == userId && x.DefinitionId == 11 && !string.IsNullOrEmpty(x.CustomDefinitionName))
+            .Select(x => x.CustomDefinitionName!)
+            .Distinct()
+            .ToListAsync();
+
+        return Ok(customDefinitionNames);
     }
 }

@@ -10,10 +10,8 @@ namespace diji_card_alt.Models
         public int DefinitionId { get; set; }
 
         [Required]
-        public string DefinitionName { get; set; }
+        public string DefinitionName { get; set; } = string.Empty;
 
-        [JsonIgnore]
-        public List<UserDefinitionValue>? UserDefinitionValues { get; set; }
-
+        // Navigation property kaldırıldı - AppDbContext'te relationship tanımlandı
     }
 }

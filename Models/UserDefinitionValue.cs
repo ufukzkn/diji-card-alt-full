@@ -6,6 +6,9 @@ namespace diji_card_alt.Models
 {
     public class UserDefinitionValue
     {
+        [Key]
+        public int Id { get; set; } // Auto-increment primary key
+
         [Required]
         public string UserId { get; set; } = string.Empty;
 
@@ -27,5 +30,15 @@ namespace diji_card_alt.Models
         [JsonIgnore]
         [ForeignKey(nameof(DefinitionId))]
         public Definition? Definition { get; set; }
+
+        // Frontend için gösterilecek isim
+        [NotMapped]
+        public string DisplayName => DefinitionId == 11 ? 
+            (CustomDefinitionName ?? "Custom") : 
+            (Definition?.DefinitionName ?? "Unknown");
+
+        // Helper property
+        [NotMapped]
+        public bool IsCustom => DefinitionId == 11;
     }
 }
