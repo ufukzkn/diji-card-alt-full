@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Diji Card Logo">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="50%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#g)" stroke="#1e293b" stroke-width="2"/>
+  <path d="M40 42c0-2.2 1.8-4 4-4h18c8.8 0 16 7.2 16 16s-7.2 16-16 16H52v12c0 2.2-1.8 4-4 4s-4-1.8-4-4V42zm12 8v16h10c4.4 0 8-3.6 8-8s-3.6-8-8-8H52z" fill="#fff"/>
+  <path d="M34 86h52" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".4"/>
+</svg>

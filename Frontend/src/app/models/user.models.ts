@@ -5,5 +5,6 @@ export interface User {
   email?: string;
   phoneNumber?: string;
   jobTitle?: string;
+  isPublic?: boolean;
   // backend’de varsa diğer sabit alanlar
 }

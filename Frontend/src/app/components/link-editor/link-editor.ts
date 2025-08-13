@@ -20,6 +20,7 @@ import { UserDefinitionValue } from '../../models/user-definition-value.model';
 })
 export class LinkEditor implements OnInit {
   @Input() userId!: string;
+  @Input() canEdit: boolean = false;
   @Output() linksChanged = new EventEmitter<void>();
 
   definitions: Definition[] = [];

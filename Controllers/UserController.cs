@@ -3,6 +3,7 @@ using diji_card_alt.Models;
 using diji_card_alt.Data;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace diji_card_alt.Controllers
 {
@@ -19,6 +20,20 @@ namespace diji_card_alt.Controllers
             _environment = environment;
         }
 
+        private string? GetTokenUserId()
+        {
+            var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer ")) return null;
+            var token = authHeader.Substring("Bearer ".Length).Trim();
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwt = handler.ReadJwtToken(token);
+                return jwt.Claims.FirstOrDefault(c => c.Type == "uid" || c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+            }
+            catch { return null; }
+        }
+
         [HttpGet("{userId}")]
         public IActionResult GetUserById(string userId)
         {
@@ -33,7 +48,17 @@ namespace diji_card_alt.Controllers
         [HttpGet]
         public IActionResult GetAllUsers()
         {
-            var users = _context.Users.ToList();
+            var caller = GetTokenUserId();
+            var query = _context.Users.AsQueryable();
+            if (string.IsNullOrEmpty(caller))
+            {
+                query = query.Where(u => u.IsPublic);
+            }
+            else
+            {
+                query = query.Where(u => u.IsPublic || u.UserId == caller);
+            }
+            var users = query.ToList();
             return Ok(users);
         }
 
@@ -88,8 +113,14 @@ namespace diji_card_alt.Controllers
         {
             if (string.IsNullOrWhiteSpace(name))
                 return BadRequest("İsim sorgusu boş olamaz.");
+            var caller = GetTokenUserId();
+            var query = _context.Users.AsQueryable();
+            if (string.IsNullOrEmpty(caller))
+                query = query.Where(u => u.IsPublic);
+            else
+                query = query.Where(u => u.IsPublic || u.UserId == caller);
 
-            var users = _context.Users
+            var users = query
                 .Where(u => u.FullName.Contains(name))
                 .ToList();
 

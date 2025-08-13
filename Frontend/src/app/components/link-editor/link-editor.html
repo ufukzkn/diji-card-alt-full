@@ -1,5 +1,5 @@
 <!-- mode butonları -->
-<div class="mode-buttons">
+<div class="mode-buttons" *ngIf="canEdit">
   <button class="mode-btn" (click)="toggleMode('add')" [class.active]="mode==='add'">
     ➕ Link Ekle
   </button>
@@ -15,7 +15,7 @@
 </div>
 
 <!-- + MOD: yeni tanım / link ekle -->
-<div *ngIf="mode==='add'" class="mode-panel">
+<div *ngIf="mode==='add' && canEdit" class="mode-panel">
   <select [(ngModel)]="selectedDefinitionId">
     <option value="" disabled>Tanım seç</option>
     <option *ngFor="let d of availableDefinitions()" [value]="d.definitionId">
@@ -44,7 +44,7 @@
 <!-- CUSTOM MOD kaldırıldı çünkü dropdown'a entegre edildi -->
 
 <!-- – MOD: var olan linkleri sil -->
-<div *ngIf="mode==='delete'" class="mode-panel">
+<div *ngIf="mode==='delete' && canEdit" class="mode-panel">
   <select [(ngModel)]="selectedToDelete">
     <option value="" disabled>Silinecek tanımı seç</option>
     <option *ngFor="let l of userLinks" [ngValue]="l.id">
@@ -75,11 +75,11 @@
 </div>
 
 <!-- EDIT MODE: mevcut tanımı seçip değerini güncelle -->
-<div *ngIf="mode==='edit'" class="mode-panel">
+<div *ngIf="mode==='edit' && canEdit" class="mode-panel">
   <select [(ngModel)]="selectedToEdit">
     <option value="" disabled>Düzenlenecek tanımı seç</option>
     <option *ngFor="let l of userLinks" [value]="l.id">
-      {{ l.displayName }} (ID: {{l.id}})
+      {{ l.displayName }} (ID: {{l.id}})      <!-- debug için-->
     </option>
   </select>
   <input *ngIf="selectedToEdit" [(ngModel)]="editValue" placeholder="Yeni değer" />
@@ -87,7 +87,7 @@
 </div>
 
 <!-- Sıralama Modu -->
-<div *ngIf="mode==='sort'" class="mode-panel">
+<div *ngIf="mode==='sort' && canEdit" class="mode-panel">
   <div cdkDropList class="example-list-vertical" (cdkDropListDropped)="drop($event)">
     <div *ngFor="let link of userLinksArray" cdkDrag class="example-box-vertical">
       {{ link.displayName }}

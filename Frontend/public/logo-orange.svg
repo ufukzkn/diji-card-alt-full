@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Diji Card Logo" fill="none">
+  <rect x="32" y="128" width="448" height="256" rx="56" stroke="#ff7a17" stroke-width="32"/>
+  <circle cx="176" cy="240" r="56" fill="#ff7a17"/>
+  <rect x="120" y="320" width="112" height="32" rx="16" fill="#ff7a17"/>
+  <rect x="272" y="208" width="80" height="80" rx="8" stroke="#ff7a17" stroke-width="28"/>
+  <circle cx="408" cy="208" r="16" fill="#ff7a17"/>
+  <rect x="344" y="320" width="64" height="64" rx="8" stroke="#ff7a17" stroke-width="28"/>
+  <rect x="272" y="320" width="48" height="32" rx="8" fill="#ff7a17"/>
+  <circle cx="408" cy="288" r="16" fill="#ff7a17"/>
+</svg>

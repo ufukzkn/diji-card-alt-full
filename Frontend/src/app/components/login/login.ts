@@ -103,15 +103,14 @@ export class LoginComponent {
 
   private getUserIdFromToken(token: string): string | null {
     try {
-      // Base64 decode token (new format: "userId:expires:timestamp...")
-      const decoded = atob(token);
-      const parts = decoded.split(':');
-      if (parts.length >= 1) {
-        return parts[0]; // userId part
-      }
-      return null;
-    } catch (error) {
-      console.error('Token decode error:', error);
+      // JWT format: header.payload.signature
+      const parts = token.split('.');
+      if (parts.length < 2) return null;
+      const payloadJson = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+      const payload = JSON.parse(payloadJson);
+      return payload["uid"] || payload["sub"] || null;
+    } catch (e) {
+      console.error('JWT decode error', e);
       return null;
     }
   }

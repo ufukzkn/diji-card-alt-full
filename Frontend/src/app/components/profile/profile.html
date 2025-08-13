@@ -27,7 +27,7 @@
     
     <!-- Settings Menu - Link Editor Controls (Always exists, but hidden/shown) -->
     <div class="settings-menu" [style.display]="showSettings ? 'block' : 'none'" (click)="$event.stopPropagation()">
-      <app-link-editor [userId]="userId" (linksChanged)="onLinksChanged()"></app-link-editor>
+  <app-link-editor [userId]="userId" [canEdit]="canEdit" (linksChanged)="onLinksChanged()"></app-link-editor>
       
       <!-- Logout Button -->
       <div class="settings-actions">
@@ -45,22 +45,38 @@
     </div>
   </div>
 
+  <!-- Session Timeout Popup -->
+  <div *ngIf="sessionExpired" class="session-timeout-popup">Oturumunuz zaman aşımına uğradı</div>
+
   <!-- Profile Card -->
+  <div *ngIf="accessDenied" class="access-denied">
+    👀 Bu profile erişim izniniz yok.
+    <div class="actions">
+  <button (click)="navigateToSearch()">🔍 Arama Sayfası</button>
+      <button (click)="logout()">🚪 Çıkış</button>
+    </div>
+  </div>
+
+  <div *ngIf="!accessDenied">
   <div class="profile-card">
     <!-- Profile Avatar & Basic Info -->
     <div class="profile-header">
-      <div class="avatar-section">
-        <img [src]="profile?.profilePhotoUrl ? (imageBaseUrl + profile?.profilePhotoUrl) : (imageBaseUrl + '/profile-photos/default.png')"
-             alt="Profil Fotoğrafı"
-             class="profile-avatar" />
-        
-        <!-- Photo Edit Button (Always visible) -->
-        <button class="photo-edit-btn" (click)="togglePhotoActions()">
+      <div class="avatar-section" *ngIf="profileSectionReady">
+        <img 
+          *ngIf="profile?.profilePhotoUrl || avatarFallbackReady"
+          [src]="profile?.profilePhotoUrl ? (imageBaseUrl + profile?.profilePhotoUrl + '?v=' + photoCacheBuster) : (imageBaseUrl + '/profile-photos/default.png')"
+          alt="Profil Fotoğrafı"
+          class="profile-avatar" 
+          (load)="onAvatarLoad()" 
+          [class.loaded]="avatarLoaded" />
+
+        <!-- Photo Edit Button (only if canEdit) -->
+        <button *ngIf="canEdit" class="photo-edit-btn" (click)="togglePhotoActions()" [attr.aria-expanded]="showPhotoActions">
           ✏️
         </button>
-        
-        <!-- Photo Actions (Show when photo edit is active) -->
-        <div class="photo-actions" *ngIf="showPhotoActions">
+
+        <!-- Photo Actions (only if canEdit & active) -->
+        <div class="photo-actions" *ngIf="canEdit && showPhotoActions">
           <button class="photo-btn" (click)="fileInput.click()">📷 Ekle</button>
           <button class="photo-btn delete" (click)="onDeletePhoto()" [disabled]="!profile?.profilePhotoUrl">🗑️ Sil</button>
           <input #fileInput type="file" (change)="onPhotoSelected($event)" accept="image/*" style="display:none" />
@@ -113,8 +129,14 @@
 
   <!-- Cropper Dialog -->
   <app-cropper-dialog 
-    *ngIf="showCropper && cropperData"
+    *ngIf="showCropper && cropperData && !accessDenied"
     [data]="cropperData"
     [onResult]="onCropperResult.bind(this)">
   </app-cropper-dialog>
+  </div>
+
+  <!-- Arama sayfasına git butonu (her zaman sağ alt) -->
+  <div class="search-fab" (click)="navigateToSearch()" title="Ara" aria-label="Arama sayfasına git">
+    🔍
+  </div>
 </div>

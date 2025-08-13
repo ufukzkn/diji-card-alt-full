@@ -2,6 +2,8 @@
 using diji_card_alt.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace diji_card_alt_full.Controllers
 {
@@ -89,10 +91,27 @@ namespace diji_card_alt_full.Controllers
             return link is null ? NotFound() : Ok(link);
         }
 
+        private bool IsOwner(string targetUserId)
+        {
+            // Extract userId from JWT (uid or sub)
+            var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ")) return false;
+            var token = authHeader.Substring("Bearer ".Length).Trim();
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwt = handler.ReadJwtToken(token);
+                var userId = jwt.Claims.FirstOrDefault(c => c.Type == "uid" || c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+                return userId == targetUserId;
+            }
+            catch { return false; }
+        }
+
         // POST: api/userdefinitionvalues
         [HttpPost]
         public async Task<IActionResult> AddUserLink([FromBody] UserDefinitionValue dto)
         {
+            if (!IsOwner(dto.UserId)) return Unauthorized(new { Message = "CanEdit=false" });
             // For regular definitions (non-custom), check if already exists
             if (dto.DefinitionId != 11 && string.IsNullOrEmpty(dto.CustomDefinitionName))
             {
@@ -125,6 +144,7 @@ namespace diji_card_alt_full.Controllers
         {
             try
             {
+                if (!IsOwner(request.UserId)) return Unauthorized(new { Message = "CanEdit=false" });
                 if (request == null)
                 {
                     return BadRequest(new { Success = false, Message = "Request boş olamaz" });
@@ -173,6 +193,8 @@ namespace diji_card_alt_full.Controllers
             if (entity is null)
                 return NotFound();
 
+            if (!IsOwner(entity.UserId)) return Unauthorized(new { Message = "CanEdit=false" });
+
             _context.UserDefinitionValues.Remove(entity);
             await _context.SaveChangesAsync();
 
@@ -188,6 +210,8 @@ namespace diji_card_alt_full.Controllers
 
             if (entity is null)
                 return NotFound();
+
+            if (!IsOwner(entity.UserId)) return Unauthorized(new { Message = "CanEdit=false" });
 
             _context.UserDefinitionValues.Remove(entity);
             await _context.SaveChangesAsync();
@@ -212,6 +236,8 @@ namespace diji_card_alt_full.Controllers
             if (entity == null)
                 return NotFound();
 
+            if (!IsOwner(entity.UserId)) return Unauthorized(new { Message = "CanEdit=false" });
+
             entity.Value = dto.Value;
             entity.CustomDefinitionName = dto.CustomDefinitionName; // Update custom name if provided
             entity.SortId = dto.SortId;
@@ -235,6 +261,8 @@ namespace diji_card_alt_full.Controllers
             if (entity == null)
                 return NotFound();
 
+            if (!IsOwner(entity.UserId)) return Unauthorized(new { Message = "CanEdit=false" });
+
             entity.Value = dto.Value;
             await _context.SaveChangesAsync();
 
@@ -257,6 +285,8 @@ namespace diji_card_alt_full.Controllers
             if (entity == null)
                 return NotFound();
 
+            if (!IsOwner(entity.UserId)) return Unauthorized(new { Message = "CanEdit=false" });
+
             entity.Value = dto.Value;
             await _context.SaveChangesAsync();
 
@@ -267,6 +297,7 @@ namespace diji_card_alt_full.Controllers
         [HttpPut("sort")]
         public async Task<IActionResult> UpdateSortOrder([FromBody] List<UserDefinitionValue> updatedValues)
         {
+            if (updatedValues.Any() && !IsOwner(updatedValues.First().UserId)) return Unauthorized(new { Message = "CanEdit=false" });
             foreach (var updatedValue in updatedValues)
             {
                 // Use auto-increment ID

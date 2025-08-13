@@ -9,6 +9,7 @@ import { ImageCropperComponent, ImageCroppedEvent } from 'ngx-image-cropper';
 
 import { ProfileService } from '../../services/profile';
 import { UsersService } from '../../services/users';
+import { AuthService } from '../../services/auth.service';
 
 import { LinkEditor } from '../link-editor/link-editor';
 import { CropperDialogComponent, CropperDialogData, CropperDialogResult } from './cropper-dialog/cropper-dialog.component';
@@ -39,9 +40,17 @@ export class Profile implements OnInit {
   showSettings = false;
   showEditMode = false;
   showPhotoActions = false;
+  canEdit = false;
+  sessionExpired = false;
+  accessDenied = false;
   selectedLang: 'tr' | 'en' = 'tr';
   imageBaseUrl = 'http://localhost:5078';
   cropperData?: CropperDialogData;
+  // Avatar rendering control to avoid default flash
+  profileSectionReady = false; // becomes true after user+profile fetch attempt
+  avatarLoaded = false;
+  avatarFallbackReady = false; // when we allow showing default after timeout
+  photoCacheBuster = Date.now();
   
   // Mode management - simplified (link-editor handles its own modes)
   showQrCode = false;
@@ -49,8 +58,9 @@ export class Profile implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private profSvc: ProfileService,
-    private userSvc: UsersService
+  private profSvc: ProfileService,
+  private userSvc: UsersService,
+  private auth: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -59,9 +69,7 @@ export class Profile implements OnInit {
       if (!id) return;
       this.userId = id;
       
-      // Token kontrolü - sadece kendi profiline erişebilir
-      this.checkOwnership();
-      this.loadData();
+  this.validateAccess();
     });
   }
 
@@ -69,25 +77,25 @@ export class Profile implements OnInit {
     return `${window.location.origin}/profil/${this.userId}`;
   }
 
-  private checkOwnership(): void {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    try {
-      const decoded = atob(token);
-      const tokenUserId = decoded.split(':')[0];
-      
-      if (tokenUserId !== this.userId) {
-        alert('Bu profile erişim yetkiniz yok!');
-        this.router.navigate(['/search']);
-        return;
+  private validateAccess(): void {
+    const token = this.auth.getToken();
+    if (!token) { this.router.navigate(['/login']); return; }
+    this.auth.validateToken(token, this.userId).subscribe({
+      next: res => {
+        if (!res.success) return;
+        this.canEdit = !!res.canEdit;
+        this.loadDataWithPrivacy();
+      },
+      error: err => {
+        const msg = err?.error?.message || err?.error?.Message;
+        if (msg && msg.includes('zaman aşımı')) {
+          this.sessionExpired = true;
+          setTimeout(() => this.logout(), 2500);
+        } else {
+          this.router.navigate(['/login']);
+        }
       }
-    } catch (error) {
-      this.router.navigate(['/login']);
-    }
+    });
   }
 
   onLangChange(event: any) {
@@ -95,12 +103,29 @@ export class Profile implements OnInit {
     // Burada ileride i18n desteği eklenebilir
   }
 
-  private loadData(): void {
-    // Default user info from Users table
-    this.userSvc.getById(this.userId).subscribe(u => (this.user = u));
-
-    // Dynamic links from UserDefinitionValues
-    this.profSvc.get(this.userId).subscribe(p => (this.profile = p));
+  private loadDataWithPrivacy(): void {
+    this.userSvc.getById(this.userId).subscribe({
+      next: u => {
+        this.user = u;
+        if (!u.isPublic && !this.canEdit) {
+          this.accessDenied = true;
+          this.profileSectionReady = true;
+          return; // linkleri çekme
+        }
+        this.profSvc.get(this.userId).subscribe(p => {
+          this.profile = p;
+          this.profileSectionReady = true;
+          // If no custom photo, allow default after a tiny delay to avoid layout shift
+          if (!p?.profilePhotoUrl) {
+            setTimeout(() => { this.avatarFallbackReady = true; }, 30);
+          }
+        });
+      },
+      error: _ => {
+        this.accessDenied = true;
+        this.profileSectionReady = true;
+      }
+    });
   }
 
   get sortedLinks() {
@@ -117,7 +142,7 @@ export class Profile implements OnInit {
   }
 
   onLinksChanged = () => {
-    this.loadData();
+  this.loadDataWithPrivacy();
   }
 
   onPhotoSelected(event: any) {
@@ -159,9 +184,25 @@ export class Profile implements OnInit {
     const formData = new FormData();
     formData.append('file', blob, 'profile.jpg');
     
-    this.profSvc.uploadPhoto(this.userId, formData).subscribe({
+      this.profSvc.uploadPhoto(this.userId, formData).subscribe({
       next: () => {
-        this.loadData();
+        // Refresh only photo info; avoid full reload
+        this.profSvc.get(this.userId).subscribe(p => {
+          if (this.profile) {
+            this.profile.profilePhotoUrl = p.profilePhotoUrl;
+          } else {
+            this.profile = p;
+          }
+          this.avatarLoaded = false;
+          this.photoCacheBuster = Date.now();
+          // allow image element to re-bind
+          setTimeout(() => {
+            // If no photo returned, enable fallback
+            if (!this.profile?.profilePhotoUrl) {
+              this.avatarFallbackReady = true;
+            }
+          });
+        });
       },
       error: err => alert('Fotoğraf yüklenemedi: ' + (err?.error?.message || err.message))
     });
@@ -176,9 +217,15 @@ export class Profile implements OnInit {
 
     this.profSvc.deletePhoto(this.userId).subscribe({
       next: () => {
-        this.loadData();
-        // Sayfayı yenile
-        window.location.reload();
+        // Just clear local state & show fallback without full reload
+        if (this.profile) {
+          this.profile.profilePhotoUrl = '';
+        }
+        this.avatarLoaded = false;
+        this.avatarFallbackReady = true;
+        this.photoCacheBuster = Date.now();
+        // trigger fade-in of fallback
+        setTimeout(() => { this.avatarLoaded = true; }, 30);
       },
       error: err => alert('Fotoğraf silinemedi: ' + (err?.error?.message || err.message))
     });
@@ -250,5 +297,14 @@ export class Profile implements OnInit {
   // Photo Management
   togglePhotoActions(): void {
     this.showPhotoActions = !this.showPhotoActions;
+  }
+
+  navigateToSearch(): void {
+    this.router.navigate(['/search']);
+  }
+
+  // Avatar load handler to fade-in
+  onAvatarLoad(): void {
+    this.avatarLoaded = true;
   }
 }

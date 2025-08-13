@@ -3,6 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using digital_business_card.Models;
 using diji_card_alt.Data;
 using diji_card_alt.Models;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace digital_business_card.Controllers
 {
@@ -12,13 +16,16 @@ namespace digital_business_card.Controllers
     {
         private readonly ILogger<AuthController> _logger;
         private readonly AppDbContext _context;
-        private static readonly Dictionary<string, string> _activeTokens = new(); // RequestId -> UserId mapping
-        private static readonly Dictionary<string, DateTime> _tokenExpiryTimes = new(); // AuthToken -> Expiry time mapping
+        private static readonly Dictionary<string, string> _activeTokens = new(); // RequestId -> UserId mapping (legacy step1)
+        private static readonly Dictionary<string, DateTime> _tokenExpiryTimes = new(); // AuthToken -> Expiry time mapping (legacy step1)
+        private static readonly Dictionary<string, (string UserId, DateTime ExpiresAt)> _refreshTokens = new(); // refreshToken -> data
+        private readonly IConfiguration _config;
 
-        public AuthController(ILogger<AuthController> logger, AppDbContext context)
+        public AuthController(ILogger<AuthController> logger, AppDbContext context, IConfiguration config)
         {
             _logger = logger;
             _context = context;
+            _config = config;
         }
 
         [HttpPost("KullaniciGirisYap")]
@@ -111,13 +118,18 @@ namespace digital_business_card.Controllers
                     {
                         var userId = _activeTokens[request.RequestId];
                         
+                        var accessToken = await GenerateJwtTokenAsync(userId);
+                        var refreshToken = Guid.NewGuid().ToString();
+                        var refreshExpiry = DateTime.UtcNow.AddDays(_config.GetValue<int>("Jwt:RefreshTokenDays", 7));
+                        _refreshTokens[refreshToken] = (userId, refreshExpiry);
+
                         return Ok(new TokenResponse
                         {
                             Success = true,
                             Message = "Token başarıyla oluşturuldu",
-                            AccessToken = await GenerateJwtTokenAsync(userId),
-                            RefreshToken = Guid.NewGuid().ToString(),
-                            ExpiresAt = _tokenExpiryTimes[request.AuthToken], // 10 dakikalık süre
+                            AccessToken = accessToken,
+                            RefreshToken = refreshToken,
+                            ExpiresAt = _tokenExpiryTimes[request.AuthToken], // 10 dakikalık süre (legacy for now)
                             TokenType = "Bearer"
                         });
                     }
@@ -154,12 +166,50 @@ namespace digital_business_card.Controllers
 
         private async Task<string> GenerateJwtTokenAsync(string userId)
         {
-            // Basit token oluşturma (gerçek projede JWT kütüphanesi kullanılır)
-            await Task.Delay(1); // async method yapmak için
-            var token = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(
-                $"{userId}:expires:{DateTime.UtcNow.AddMinutes(10):yyyy-MM-dd HH:mm:ss}:timestamp:{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
-            ));
-            return token;
+            await Task.Delay(1); // async signature
+            var key = _config["Jwt:Key"] ?? "dev-secret-key-change-me-32chars";
+            var creds = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)), SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.UtcNow.AddMinutes(_config.GetValue<int>("Jwt:AccessTokenMinutes", 10));
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, userId),
+                new Claim("uid", userId),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: expires,
+                signingCredentials: creds
+            );
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        [HttpPost("Refresh")] // body: { refreshToken }
+        public IActionResult Refresh([FromBody] dynamic body)
+        {
+            string? refreshToken = body?.refreshToken;
+            if (string.IsNullOrEmpty(refreshToken) || !_refreshTokens.ContainsKey(refreshToken))
+            {
+                return Unauthorized(new { Success = false, Message = "Geçersiz refresh token" });
+            }
+            var (userId, expiresAt) = _refreshTokens[refreshToken];
+            if (expiresAt <= DateTime.UtcNow)
+            {
+                _refreshTokens.Remove(refreshToken);
+                return Unauthorized(new { Success = false, Message = "Refresh token süresi dolmuş" });
+            }
+            var accessTask = GenerateJwtTokenAsync(userId);
+            var newRefreshToken = Guid.NewGuid().ToString();
+            var newRefreshExpiry = DateTime.UtcNow.AddDays(_config.GetValue<int>("Jwt:RefreshTokenDays", 7));
+            _refreshTokens[newRefreshToken] = (userId, newRefreshExpiry);
+            // eski refresh token'ı isteğe bağlı sil
+            _refreshTokens.Remove(refreshToken);
+            return Ok(new {
+                Success = true,
+                AccessToken = accessTask.Result,
+                RefreshToken = newRefreshToken,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(_config.GetValue<int>("Jwt:AccessTokenMinutes", 10))
+            });
         }
 
         [HttpPost("ValidateToken")]
@@ -172,40 +222,47 @@ namespace digital_business_card.Controllers
                     return BadRequest(new { Success = false, Message = "Access token gereklidir." });
                 }
 
-                // Token'ı decode et
+                var handler = new JwtSecurityTokenHandler();
                 try
                 {
-                    var decoded = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(request.AccessToken));
-                    var parts = decoded.Split(':');
-
-                    if (parts.Length >= 4)
+                    var key = _config["Jwt:Key"] ?? "dev-secret-key-change-me-32chars";
+                    var principal = handler.ValidateToken(request.AccessToken, new TokenValidationParameters
                     {
-                        var userId = parts[0];
-                        var expiryDateStr = parts[2];
-                        
-                        if (DateTime.TryParseExact(expiryDateStr, "yyyy-MM-dd HH:mm:ss", null, System.Globalization.DateTimeStyles.None, out var expiryDate))
-                        {
-                            if (expiryDate > DateTime.UtcNow)
-                            {
-                                // Token geçerli
-                                return Ok(new { 
-                                    Success = true, 
-                                    Message = "Token geçerli",
-                                    UserId = userId,
-                                    ExpiresAt = expiryDate,
-                                    CanEdit = request.RequestedUserId == userId // Sadece kendi profilini düzenleyebilir
-                                });
-                            }
-                            else
-                            {
-                                return Unauthorized(new { Success = false, Message = "Token süresi dolmuş" });
-                            }
-                        }
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+                        ClockSkew = TimeSpan.Zero
+                    }, out var validatedToken);
+
+                    var userId = principal.Claims.FirstOrDefault(c => c.Type == "uid" || c.Type == ClaimTypes.NameIdentifier || c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+                    if (userId == null)
+                    {
+                        _logger.LogInformation("Token userId claim missing");
+                        return Unauthorized(new { Success = false, Message = "Geçersiz token" });
                     }
+                    var jwt = (JwtSecurityToken)validatedToken;
+                    var expiryDate = jwt.ValidTo;
+                    if (expiryDate <= DateTime.UtcNow)
+                        return Unauthorized(new { Success = false, Message = "Oturumunuz zaman aşımına uğradı" });
+
+                    bool canEdit = request.RequestedUserId == userId;
+                    return Ok(new {
+                        Success = true,
+                        Message = "Token geçerli",
+                        UserId = userId,
+                        ExpiresAt = expiryDate,
+                        CanEdit = canEdit
+                    });
                 }
-                catch
+                catch (SecurityTokenExpiredException)
                 {
-                    return Unauthorized(new { Success = false, Message = "Geçersiz token formatı" });
+                    return Unauthorized(new { Success = false, Message = "Oturumunuz zaman aşımına uğradı" });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Token validation failed");
+                    return Unauthorized(new { Success = false, Message = "Geçersiz token" });
                 }
 
                 return Unauthorized(new { Success = false, Message = "Geçersiz token" });
