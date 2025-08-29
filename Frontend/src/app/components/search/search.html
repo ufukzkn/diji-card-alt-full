@@ -1,4 +1,22 @@
 <div class="search-page">
+  <!-- Settings Button (Top Right) -->
+  <div class="settings-fab" [class.active]="showSettings" (click)="toggleSettings()">
+    <div class="settings-icon"><i class="fas fa-cog"></i></div>
+    
+    <!-- Settings Menu -->
+    <div class="settings-menu" [style.display]="showSettings ? 'block' : 'none'" (click)="$event.stopPropagation()">
+      <!-- Navigation & Logout Actions -->
+      <div class="settings-actions">
+        <button class="nav-btn" (click)="goToMyProfile()">
+          <i class="fas fa-user"></i> Profilime Dön
+        </button>
+        <button class="logout-btn" (click)="logout()">
+          <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Header Section -->
   <div class="header-section">
     <div class="logo-container">
@@ -35,58 +53,70 @@
       
       <!-- Search Info -->
       <div class="search-info">
-        <p *ngIf="searchQuery.length > 0 && searchQuery.length < 3" class="info-message warning">
-          <span class="icon">ⓘ</span>
-          Lütfen en az 3 karakter girin
-        </p>
-        <p *ngIf="searchQuery.length >= 3 && filteredUsers.length === 0" class="info-message empty">
-          <span class="icon">🔍</span>
-          Aradığınız kriterlere uygun kullanıcı bulunamadı
-        </p>
+        @if (searchQuery.length > 0 && searchQuery.length < 3) {
+          <p class="info-message warning">
+            <span class="icon"><i class="fas fa-info-circle"></i></span>
+            Lütfen en az 3 karakter girin
+          </p>
+        }
+        @if (searchQuery.length >= 3 && filteredUsers.length === 0) {
+          <p class="info-message empty">
+            <span class="icon"><i class="fas fa-search"></i></span>
+            Aradığınız kriterlere uygun kullanıcı bulunamadı
+          </p>
+        }
       </div>
     </div>
   </div>
 
   <!-- Results Section -->
-  <div class="results-section" *ngIf="filteredUsers.length > 0">
-    <div class="results-header">
-      <h3>Arama Sonuçları</h3>
-      <span class="results-count">{{ filteredUsers.length }} sonuç bulundu</span>
-    </div>
-    
-    <div class="user-grid">
-      <div *ngFor="let user of filteredUsers" class="user-card">
-        <div class="user-avatar">
-          <img 
-            [src]="user.profilePhotoUrl ? 'http://localhost:5078' + user.profilePhotoUrl : '/assets/default-avatar.png'" 
-            [alt]="user.fullName"
-            class="avatar-img" />
-          <div class="status-indicator"></div>
-        </div>
-        
-        <div class="user-info">
-          <h4 class="user-name">{{ user.fullName }}</h4>
-          <p class="user-job">{{ user.jobTitle }}</p>
-          <p class="user-company">{{ user.company }}</p>
-          <div class="contact-info">
-            <span class="email">✉ {{ user.email }}</span>
-            <span class="phone" *ngIf="user.phoneNumber">📞 {{ user.phoneNumber }}</span>
-          </div>
-        </div>
-        
-        <div class="user-actions">
-          <a [routerLink]="['/profil', user.userId]" class="profile-button">
-            👤 Profili Görüntüle
-          </a>
-        </div>
+  @if (filteredUsers.length > 0) {
+    <div class="results-section">
+      <div class="results-header">
+        <h3>Arama Sonuçları</h3>
+        <span class="results-count">{{ filteredUsers.length }} sonuç bulundu</span>
       </div>
-    </div>
+    
+      <div class="user-grid">
+        @for (user of filteredUsers; track user.userId) {
+          <div class="user-card">
+            <div class="user-avatar">
+              <img 
+                [src]="user.profilePhotoUrl ? 'http://localhost:5078' + user.profilePhotoUrl : '/assets/default-avatar.png'" 
+                [alt]="user.fullName"
+                class="avatar-img" />
+              <div class="status-indicator"></div>
+            </div>
+            
+            <div class="user-info">
+              <h4 class="user-name">{{ user.fullName }}</h4>
+              <p class="user-job">{{ user.jobTitle }}</p>
+              <p class="user-company">{{ user.company }}</p>
+              <div class="contact-info">
+                <span class="email"><i class="fas fa-envelope"></i> {{ user.email }}</span>
+                @if (user.phoneNumber) {
+                  <span class="phone"><i class="fas fa-phone"></i> {{ user.phoneNumber }}</span>
+                }
+              </div>
+            </div>
+            
+            <div class="user-actions">
+              <a [routerLink]="['/profil', user.userId]" class="profile-button">
+                <i class="fas fa-user"></i> Profili Görüntüle
+              </a>
+            </div>
+          </div>
+        }
+      </div>
 
-    <!-- Load More -->
-    <div class="load-more-section" *ngIf="!showAllResults && filteredUsers.length >= 3">
-      <button (click)="showMoreResults()" class="load-more-button">
-        ⬇ Tüm Sonuçları Göster
-      </button>
+      <!-- Load More -->
+      @if (!showAllResults && filteredUsers.length >= 3) {
+        <div class="load-more-section">
+          <button (click)="showMoreResults()" class="load-more-button">
+            ⬇ Tüm Sonuçları Göster
+          </button>
+        </div>
+      }
     </div>
-  </div>
+  }
 </div>

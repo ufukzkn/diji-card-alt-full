@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { LoginRequest, OAuthTokenRequest, LoginResponse, TokenResponse } from '../models/auth.model';
+import { NotificationService } from './notification.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,12 +16,27 @@ export class AuthService {
   public token$ = this.tokenSubject.asObservable();
   public isLoggedIn$ = this.isLoggedInSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private notificationService: NotificationService
+  ) {
     // Sayfa yüklendiğinde localStorage'dan token'ı kontrol et
     const savedToken = localStorage.getItem('accessToken');
     if (savedToken) {
-      this.tokenSubject.next(savedToken);
-      this.isLoggedInSubject.next(true);
+      // Token varsa süresini kontrol et
+      if (this.isTokenExpired()) {
+        // Token süresi dolmuşsa temizle
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('tokenExpiry');
+        this.tokenSubject.next(null);
+        this.isLoggedInSubject.next(false);
+      } else {
+        // Token geçerliyse set et
+        this.tokenSubject.next(savedToken);
+        this.isLoggedInSubject.next(true);
+      }
     }
   }
 
@@ -49,13 +66,22 @@ export class AuthService {
     }
   }
 
-  logout(): void {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('tokenExpiry');
+  // Global logout method with confirmation
+  async logout(): Promise<void> {
+    const confirmed = await this.notificationService.showConfirmation(
+      'Çıkış Yap',
+      'Çıkış yapmak istediğinizden emin misiniz?'
+    );
     
-    this.tokenSubject.next(null);
-    this.isLoggedInSubject.next(false);
+    if (confirmed) {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('tokenExpiry');
+      
+      this.tokenSubject.next(null);
+      this.isLoggedInSubject.next(false);
+      this.router.navigate(['/login']);
+    }
   }
 
   getToken(): string | null {
@@ -64,22 +90,24 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     const token = this.getToken();
-    const expiry = localStorage.getItem('tokenExpiry');
-    
-    if (!token || !expiry) {
+    if (!token) {
       return false;
     }
+    return true; // Sadece token varlığını kontrol et, expiry kontrolü ayrı yapılacak
+  }
 
-    // Token'ın süresi dolmuş mu kontrol et
+  // Token süresini kontrol et ama logout yapma (popup için)
+  isTokenExpired(): boolean {
+    const expiry = localStorage.getItem('tokenExpiry');
+    
+    if (!expiry) {
+      return true;
+    }
+
     const expiryDate = new Date(expiry);
     const now = new Date();
     
-    if (now >= expiryDate) {
-      this.logout();
-      return false;
-    }
-
-    return true;
+    return now >= expiryDate;
   }
 
   // Token'ı decode et ve içeriğini döndür

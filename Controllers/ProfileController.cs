@@ -3,6 +3,7 @@ using diji_card_alt.Models;
 using diji_card_alt_full.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace diji_card_alt_full.Controllers;
 
@@ -13,6 +14,25 @@ public class ProfileController : ControllerBase
     private readonly AppDbContext _ctx;
     public ProfileController(AppDbContext ctx) => _ctx = ctx;
 
+    private string? GetTokenUserId()
+    {
+        var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+        if (authHeader == null || !authHeader.StartsWith("Bearer "))
+            return null;
+
+        var token = authHeader.Substring("Bearer ".Length).Trim();
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadJwtToken(token);
+            return jsonToken.Claims.FirstOrDefault(x => x.Type == "userId")?.Value;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     [HttpGet("{userId}")]
     public async Task<ActionResult<UserProfileDto>> GetProfile(string userId)
     {
@@ -20,16 +40,32 @@ public class ProfileController : ControllerBase
         var user = await _ctx.Users.FindAsync(userId);
         if (user is null) return NotFound();
 
+        // 2) Privacy kontrolü - UserPreferences'tan IsPublic kontrol et
+        var caller = GetTokenUserId(); // Token'dan gelen kullanıcı ID'si
+        var preferences = await _ctx.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId);
+        
+        // Eğer profil private ise ve caller kendisi değilse erişimi engelle
+        if (preferences != null && !preferences.IsPublic && caller != userId)
+        {
+            return Forbid("Bu profile erişim izniniz bulunmamaktadır.");
+        }
+        
+        // Eğer preferences yoksa ve caller kendisi değilse erişimi engelle (default private)
+        if (preferences == null && caller != userId)
+        {
+            return Forbid("Bu profile erişim izniniz bulunmamaktadır.");
+        }
+
         // 2) Dinamik linkler (UserDefinitionValues) + DefinitionName
         // DefinitionId = 11 ise CustomDefinitionName kullan, değilse Definition.DefinitionName kullan
-        var linksFromUdvs = await _ctx.UserDefinitionValues
-            .Where(x => x.UserId == userId)
-            .Include(x => x.Definition)
-            .Select(x => new LinkDto(
-                x.DefinitionId == 11 ? x.CustomDefinitionName ?? "Custom" : x.Definition!.DefinitionName, 
-                x.Value, 
-                x.SortId))
-            .ToListAsync();
+        var linksFromUdvs = await (from udv in _ctx.UserDefinitionValues
+                                  join d in _ctx.Definitions on udv.DefinitionId equals d.DefinitionId
+                                  where udv.UserId == userId
+                                  select new LinkDto(
+                                      udv.DefinitionId == 11 ? udv.CustomDefinitionName ?? "Custom" : d.DefinitionName, 
+                                      udv.Value, 
+                                      udv.SortId))
+                                  .ToListAsync();
 
         // 3) Sabit alanları DefinitionName’leriyle birlikte DTO’ya ekle
         var defaultLinks = new List<LinkDto>

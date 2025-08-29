@@ -18,24 +18,23 @@ namespace diji_card_alt_full.Controllers
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetUserLinks(string userId)
         {
-            var links = await _context.UserDefinitionValues
-                .Include(x => x.Definition)
-                .Where(x => x.UserId == userId)
-                .OrderBy(x => x.SortId)
-                .Select(x => new
-                {
-                    x.Id,
-                    x.UserId,
-                    x.DefinitionId,
-                    x.Value,
-                    x.SortId,
-                    x.CustomDefinitionName,
-                    DisplayName = x.DefinitionId == 11 ? 
-                        (x.CustomDefinitionName ?? "Custom") : 
-                        (x.Definition!.DefinitionName ?? "Unknown"),
-                    IsCustom = x.DefinitionId == 11
-                })
-                .ToListAsync();
+            var links = await (from udv in _context.UserDefinitionValues
+                              join d in _context.Definitions on udv.DefinitionId equals d.DefinitionId
+                              where udv.UserId == userId
+                              orderby udv.SortId
+                              select new
+                              {
+                                  udv.Id,
+                                  udv.UserId,
+                                  udv.DefinitionId,
+                                  udv.Value,
+                                  udv.SortId,
+                                  udv.CustomDefinitionName,
+                                  DisplayName = udv.DefinitionId == 11 ? 
+                                      (udv.CustomDefinitionName ?? "Custom") : 
+                                      d.DefinitionName,
+                                  IsCustom = udv.DefinitionId == 11
+                              }).ToListAsync();
 
             return Ok(links);
         }
@@ -44,24 +43,23 @@ namespace diji_card_alt_full.Controllers
         [HttpGet("{userId}/{definitionId}")]
         public async Task<IActionResult> GetById(string userId, int definitionId)
         {
-            var links = await _context.UserDefinitionValues
-                .Include(x => x.Definition)
-                .Where(x => x.UserId == userId && x.DefinitionId == definitionId)
-                .OrderBy(x => x.SortId)
-                .Select(x => new
-                {
-                    x.Id,
-                    x.UserId,
-                    x.DefinitionId,
-                    x.Value,
-                    x.SortId,
-                    x.CustomDefinitionName,
-                    DisplayName = x.DefinitionId == 11 ? 
-                        (x.CustomDefinitionName ?? "Custom") : 
-                        (x.Definition!.DefinitionName ?? "Unknown"),
-                    IsCustom = x.DefinitionId == 11
-                })
-                .ToListAsync();
+            var links = await (from udv in _context.UserDefinitionValues
+                              join d in _context.Definitions on udv.DefinitionId equals d.DefinitionId
+                              where udv.UserId == userId && udv.DefinitionId == definitionId
+                              orderby udv.SortId
+                              select new
+                              {
+                                  udv.Id,
+                                  udv.UserId,
+                                  udv.DefinitionId,
+                                  udv.Value,
+                                  udv.SortId,
+                                  udv.CustomDefinitionName,
+                                  DisplayName = udv.DefinitionId == 11 ? 
+                                      (udv.CustomDefinitionName ?? "Custom") : 
+                                      d.DefinitionName,
+                                  IsCustom = udv.DefinitionId == 11
+                              }).ToListAsync();
 
             return Ok(links);
         }
@@ -70,23 +68,22 @@ namespace diji_card_alt_full.Controllers
         [HttpGet("byid/{id}")]
         public async Task<IActionResult> GetByAutoId(int id)
         {
-            var link = await _context.UserDefinitionValues
-                .Include(x => x.Definition)
-                .Where(x => x.Id == id)
-                .Select(x => new
-                {
-                    x.Id,
-                    x.UserId,
-                    x.DefinitionId,
-                    x.Value,
-                    x.SortId,
-                    x.CustomDefinitionName,
-                    DisplayName = x.DefinitionId == 11 ? 
-                        (x.CustomDefinitionName ?? "Custom") : 
-                        (x.Definition!.DefinitionName ?? "Unknown"),
-                    IsCustom = x.DefinitionId == 11
-                })
-                .FirstOrDefaultAsync();
+            var link = await (from udv in _context.UserDefinitionValues
+                             join d in _context.Definitions on udv.DefinitionId equals d.DefinitionId
+                             where udv.Id == id
+                             select new
+                             {
+                                 udv.Id,
+                                 udv.UserId,
+                                 udv.DefinitionId,
+                                 udv.Value,
+                                 udv.SortId,
+                                 udv.CustomDefinitionName,
+                                 DisplayName = udv.DefinitionId == 11 ? 
+                                     (udv.CustomDefinitionName ?? "Custom") : 
+                                     d.DefinitionName,
+                                 IsCustom = udv.DefinitionId == 11
+                             }).FirstOrDefaultAsync();
 
             return link is null ? NotFound() : Ok(link);
         }

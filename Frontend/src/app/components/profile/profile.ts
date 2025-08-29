@@ -8,8 +8,9 @@ import { FormsModule } from '@angular/forms';
 import { ImageCropperComponent, ImageCroppedEvent } from 'ngx-image-cropper';
 
 import { ProfileService } from '../../services/profile';
-import { UsersService } from '../../services/users';
+import { UsersService, UserPreferences } from '../../services/users';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
 
 import { LinkEditor } from '../link-editor/link-editor';
 import { CropperDialogComponent, CropperDialogData, CropperDialogResult } from './cropper-dialog/cropper-dialog.component';
@@ -52,15 +53,25 @@ export class Profile implements OnInit {
   avatarFallbackReady = false; // when we allow showing default after timeout
   photoCacheBuster = Date.now();
   
+  
+  // Link display preference
+  linkViewMode: 'list' | 'grid' = 'list';
+  gridColumns: number = 3; // Default 3 columns, range 3-5
+  
   // Mode management - simplified (link-editor handles its own modes)
   showQrCode = false;
+
+  // Modal for content display
+  showContentModal = false;
+  selectedContent = { title: '', value: '', type: 'text' };
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
   private profSvc: ProfileService,
   private userSvc: UsersService,
-  private auth: AuthService
+  private auth: AuthService,
+  private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -69,7 +80,8 @@ export class Profile implements OnInit {
       if (!id) return;
       this.userId = id;
       
-  this.validateAccess();
+      this.validateAccess();
+      // Token kontrolü auth service constructor ve auth interceptor'da yapılıyor
     });
   }
 
@@ -87,13 +99,8 @@ export class Profile implements OnInit {
         this.loadDataWithPrivacy();
       },
       error: err => {
-        const msg = err?.error?.message || err?.error?.Message;
-        if (msg && msg.includes('zaman aşımı')) {
-          this.sessionExpired = true;
-          setTimeout(() => this.logout(), 2500);
-        } else {
-          this.router.navigate(['/login']);
-        }
+        // Auth interceptor timeout'ları halledecek, buradan kaldırıyoruz
+        this.router.navigate(['/login']);
       }
     });
   }
@@ -107,17 +114,34 @@ export class Profile implements OnInit {
     this.userSvc.getById(this.userId).subscribe({
       next: u => {
         this.user = u;
-        if (!u.isPublic && !this.canEdit) {
-          this.accessDenied = true;
-          this.profileSectionReady = true;
-          return; // linkleri çekme
-        }
-        this.profSvc.get(this.userId).subscribe(p => {
-          this.profile = p;
-          this.profileSectionReady = true;
-          // If no custom photo, allow default after a tiny delay to avoid layout shift
-          if (!p?.profilePhotoUrl) {
-            setTimeout(() => { this.avatarFallbackReady = true; }, 30);
+        // Backend'den preferences'ları da çek
+        this.userSvc.getPreferences(this.userId).subscribe({
+          next: (prefs: UserPreferences) => {
+            // Preferences'ları uygula
+            this.linkViewMode = prefs.viewMode === 'grid' ? 'grid' : 'list';
+            this.gridColumns = prefs.gridColumns || 3;
+          },
+          error: () => {
+            // Default values kalır
+            console.log('Preferences yüklenemedi, default değerler kullanılıyor');
+          }
+        });
+        
+        // IsPublic artık UserPreferences tablosunda - backend'de kontrol ediliyor
+        // Frontend'te sadece canEdit kontrolü yeterli
+        this.profSvc.get(this.userId).subscribe({
+          next: p => {
+            this.profile = p;
+            this.profileSectionReady = true;
+            // If no custom photo, allow default after a tiny delay to avoid layout shift
+            if (!p?.profilePhotoUrl) {
+              setTimeout(() => { this.avatarFallbackReady = true; }, 30);
+            }
+          },
+          error: _ => {
+            // Profile erişimi reddedildi - muhtemelen private profil
+            this.accessDenied = true;
+            this.profileSectionReady = true;
           }
         });
       },
@@ -258,27 +282,25 @@ export class Profile implements OnInit {
   }
 
   logout() {
-    if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('tokenExpiry');
-      this.router.navigate(['/login']);
-    }
+    this.auth.logout();
   }
 
   getLinkIcon(definitionName: string): string {
     const name = definitionName.toLowerCase();
-    if (name.includes('mail')) return '📧';
-    if (name.includes('tel') || name.includes('phone')) return '📞';
-    if (name.includes('linkedin')) return '💼';
-    if (name.includes('whatsapp')) return '💬';
-    if (name.includes('instagram')) return '📷';
-    if (name.includes('twitter')) return '🐦';
-    if (name.includes('facebook')) return '📘';
-    if (name.includes('website') || name.includes('web')) return '🌐';
-    if (name.includes('iban') || name.includes('bank')) return '🏦';
-    if (name.includes('address') || name.includes('adres')) return '📍';
-    return '🔗';
+    if (name.includes('mail')) return 'fas fa-envelope';
+    if (name.includes('tel') || name.includes('phone')) return 'fas fa-phone';
+    if (name.includes('linkedin')) return 'fab fa-linkedin';
+    if (name.includes('whatsapp')) return 'fab fa-whatsapp';
+    if (name.includes('instagram')) return 'fab fa-instagram';
+    if (name.includes('twitter') || name.includes('x.com')) return 'fab fa-x-twitter';
+    if (name.includes('facebook')) return 'fab fa-facebook';
+    if (name.includes('github')) return 'fab fa-github';
+    if (name.includes('website') || name.includes('web')) return 'fas fa-globe';
+    if (name.includes('iban') || name.includes('bank')) return 'fas fa-university';
+    if (name.includes('address') || name.includes('adres') || name.includes('location')) return 'fas fa-map-marker-alt';
+    if (name.includes('youtube')) return 'fab fa-youtube';
+    if (name.includes('tiktok')) return 'fab fa-tiktok';
+    return 'fas fa-link';
   }
 
   toggleSettings(): void {
@@ -303,8 +325,180 @@ export class Profile implements OnInit {
     this.router.navigate(['/search']);
   }
 
+  goToMyProfile(): void {
+    // Auth service'ten kendi userId'mizi alıp oraya yönlendir
+    const token = this.auth.getToken();
+    if (token) {
+      // Token'dan userId'yi parse et
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('Token payload:', payload); // Debug için
+        
+        // Farklı claim isimlerini dene
+        const myUserId = payload.userId || payload.uid || payload.sub || payload.nameid;
+        console.log('Found userId:', myUserId, 'Current userId:', this.userId); // Debug için
+        
+        if (myUserId && myUserId !== this.userId) {
+          console.log('Navigating to my profile:', myUserId); // Debug için
+          this.router.navigate(['/profil', myUserId]);
+        } else if (myUserId === this.userId) {
+          console.log('Already on my profile'); // Debug için
+        } else {
+          console.error('Token\'da userId bulunamadı:', payload);
+          alert('Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+          this.router.navigate(['/login']);
+        }
+      } catch (error) {
+        console.error('Token parse hatası:', error);
+        alert('Token hatası. Lütfen tekrar giriş yapın.');
+        this.router.navigate(['/login']);
+      }
+    } else {
+      console.error('Token bulunamadı');
+      alert('Oturum bulunamadı. Lütfen giriş yapın.');
+      this.router.navigate(['/login']);
+    }
+  }
+
   // Avatar load handler to fade-in
   onAvatarLoad(): void {
     this.avatarLoaded = true;
   }
+
+  toggleLinkView(): void {
+    this.linkViewMode = this.linkViewMode === 'list' ? 'grid' : 'list';
+    
+    // Backend'e preferences güncelleme
+    if (this.canEdit) {
+      const preferences: UserPreferences = {
+        viewMode: this.linkViewMode
+      };
+      this.userSvc.updatePreferences(this.userId, preferences).subscribe({
+        next: () => {
+          console.log('View mode updated to:', this.linkViewMode);
+        },
+        error: (err) => {
+          console.error('Failed to update view mode:', err);
+        }
+      });
+    }
+  }
+
+  changeGridColumns(columns: number): void {
+    if (columns >= 3 && columns <= 5) {
+      this.gridColumns = columns;
+      
+      // Backend'e preferences güncelleme
+      if (this.canEdit) {
+        const preferences: UserPreferences = {
+          gridColumns: columns
+        };
+        this.userSvc.updatePreferences(this.userId, preferences).subscribe({
+          next: () => {
+            console.log('Grid columns updated to:', columns);
+          },
+          error: (err) => {
+            console.error('Failed to update grid columns:', err);
+          }
+        });
+      }
+    }
+  }
+
+  onLinkClick(link: any): void {
+    if (this.linkViewMode === 'grid') {
+      // Grid görünümünde tıklama davranışı
+      if (link.value.startsWith('http')) {
+        // Link ise direkt yönlendir
+        window.open(link.value, '_blank');
+      } else if (link.value.startsWith('mailto:')) {
+        // Email ise mail uygulamasını aç
+        window.location.href = link.value;
+      } else if (link.value.startsWith('tel:')) {
+        // Telefon ise arama yap
+        window.location.href = link.value;
+      } else {
+        // Diğer durumlarda modal açıp içeriği göster
+        this.selectedContent = {
+          title: link.definitionName,
+          value: link.value,
+          type: this.getContentType(link.definitionName)
+        };
+        this.showContentModal = true;
+      }
+    }
+    // List görünümünde click eventi işlenmez, direkt link çalışır
+  }
+
+  // Handle both left click and right click for links in grid view
+  handleLinkClick(event: MouseEvent, link: any): void {
+    // Sol tık: Normal link davranışı (href çalışır)
+    // Sağ tık: Browser context menu çalışır
+    
+    // Eğer sol tık ise ve IBAN/Adres gibi özel içerik ise modal aç
+    if (event.button === 0) { // Sol tık
+      if (!link.value.startsWith('http') && !link.value.startsWith('mailto:') && !link.value.startsWith('tel:')) {
+        // IBAN, Adres vb. özel içerikler için modal aç
+        event.preventDefault(); // Link'in default davranışını engelle
+        this.selectedContent = {
+          title: link.definitionName,
+          value: link.value,
+          type: this.getContentType(link.definitionName)
+        };
+        this.showContentModal = true;
+      }
+      // HTTP, mailto, tel linkleri için href doğal olarak çalışır (preventDefault yok)
+    }
+    // Sağ tık (button !== 0) için hiçbir şey yapmayız, browser context menu çalışır
+  }
+
+  getContentType(definitionName: string): string {
+    const name = definitionName.toLowerCase();
+    if (name.includes('iban') || name.includes('bank')) return 'iban';
+    if (name.includes('address') || name.includes('adres')) return 'address';
+    return 'text';
+  }
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      this.notificationService.showToast('Panoya kopyalandı!', 'success');
+    }).catch(() => {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      this.notificationService.showToast('Panoya kopyalandı!', 'success');
+    });
+  }
+
+  closeContentModal(): void {
+    this.showContentModal = false;
+  }
+
+  openInMaps(address: string): void {
+    const url = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
+    window.open(url, '_blank');
+  }
+
+  private startTokenExpiryCheck(): void {
+    // Test için 10 saniyede bir kontrol et
+    setInterval(() => {
+      if (this.auth.isTokenExpired()) {
+        this.sessionExpired = true;
+        console.log('Token expired, showing session timeout popup');
+      }
+    }, 10000); // 10 saniye (test için)
+  }
+
+  goToLogin(): void {
+    // Token'ları temizle ve login'e git
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('tokenExpiry');
+    this.router.navigate(['/login']);
+  }
+
 }

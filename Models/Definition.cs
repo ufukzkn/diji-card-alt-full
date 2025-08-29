@@ -12,6 +12,7 @@ namespace diji_card_alt.Models
         [Required]
         public string DefinitionName { get; set; } = string.Empty;
 
-        // Navigation property kaldırıldı - AppDbContext'te relationship tanımlandı
+        // Navigation property
+        public virtual ICollection<UserDefinitionValue> UserDefinitionValues { get; set; } = new List<UserDefinitionValue>();
     }
 }

@@ -27,7 +27,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         const msg = (err.error?.message || err.error?.Message || '').toString().toLowerCase();
         // If token expired / session timeout
         if (msg.includes('zaman') || msg.includes('expire') || msg.includes('timeout')) {
-          auth.logout();
+          // Token süresi dolmuşsa direkt temizle (modal olmadan)
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('tokenExpiry');
           // Navigate to login with query param for informing user
           router.navigate(['/login'], { queryParams: { timeout: '1' } });
         }

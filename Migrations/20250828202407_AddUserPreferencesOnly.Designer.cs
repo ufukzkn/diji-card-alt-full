@@ -2,18 +2,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using diji_card_alt.Data;
 
 #nullable disable
 
-namespace diji_card_alt_full.Migrations
+namespace digitalbusinesscard.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250828202407_AddUserPreferencesOnly")]
+    partial class AddUserPreferencesOnly
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,41 @@ namespace diji_card_alt_full.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("DigitalBusinessCard.Models.UserPreferences", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("GridColumns")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Layout")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("ThemeColor")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ViewMode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("UserPreferences");
+                });
 
             modelBuilder.Entity("diji_card_alt.Models.Definition", b =>
                 {
@@ -89,9 +127,6 @@ namespace diji_card_alt_full.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("IsPublic")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("JobTitle")
                         .IsRequired()
                         .HasColumnType("text");
@@ -104,10 +139,15 @@ namespace diji_card_alt_full.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("PreferencesUserId")
+                        .HasColumnType("text");
+
                     b.Property<string>("ProfilePhotoUrl")
                         .HasColumnType("text");
 
                     b.HasKey("UserId");
+
+                    b.HasIndex("PreferencesUserId");
 
                     b.ToTable("Users");
                 });
@@ -126,6 +166,9 @@ namespace diji_card_alt_full.Migrations
                     b.Property<int>("DefinitionId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("DefinitionId1")
+                        .HasColumnType("integer");
+
                     b.Property<int>("SortId")
                         .HasColumnType("integer");
 
@@ -141,11 +184,24 @@ namespace diji_card_alt_full.Migrations
 
                     b.HasIndex("DefinitionId");
 
+                    b.HasIndex("DefinitionId1");
+
                     b.HasIndex("UserId", "DefinitionId")
                         .IsUnique()
                         .HasFilter("\"DefinitionId\" != 11");
 
                     b.ToTable("UserDefinitionValues");
+                });
+
+            modelBuilder.Entity("DigitalBusinessCard.Models.UserPreferences", b =>
+                {
+                    b.HasOne("diji_card_alt.Models.User", "User")
+                        .WithOne()
+                        .HasForeignKey("DigitalBusinessCard.Models.UserPreferences", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("diji_card_alt.Models.ProfileVisit", b =>
@@ -165,6 +221,15 @@ namespace diji_card_alt_full.Migrations
                     b.Navigation("VisitorUser");
                 });
 
+            modelBuilder.Entity("diji_card_alt.Models.User", b =>
+                {
+                    b.HasOne("DigitalBusinessCard.Models.UserPreferences", "Preferences")
+                        .WithMany()
+                        .HasForeignKey("PreferencesUserId");
+
+                    b.Navigation("Preferences");
+                });
+
             modelBuilder.Entity("diji_card_alt.Models.UserDefinitionValue", b =>
                 {
                     b.HasOne("diji_card_alt.Models.Definition", "Definition")
@@ -172,6 +237,10 @@ namespace diji_card_alt_full.Migrations
                         .HasForeignKey("DefinitionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("diji_card_alt.Models.Definition", null)
+                        .WithMany("UserDefinitionValues")
+                        .HasForeignKey("DefinitionId1");
 
                     b.HasOne("diji_card_alt.Models.User", "User")
                         .WithMany()
@@ -182,6 +251,11 @@ namespace diji_card_alt_full.Migrations
                     b.Navigation("Definition");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("diji_card_alt.Models.Definition", b =>
+                {
+                    b.Navigation("UserDefinitionValues");
                 });
 #pragma warning restore 612, 618
         }

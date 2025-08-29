@@ -12,27 +12,36 @@
   <!-- QR Code Button (Top Left) -->
   <div class="qr-fab">
     <div class="qr-icon" (click)="showQr = !showQr">
-      <img src="https://cdn-icons-png.flaticon.com/512/2313/2313147.png" alt="QR Kod" width="24" height="24" />
+      <img src="https://cdn-icons-png.flaticon.com/512/2313/2313147.png" alt="QR Kod"  width="24" height="24" />
     </div>
     
     <!-- QR Code Display (Top Left) -->
-    <div class="qr-display" *ngIf="showQr">
-      <qrcode [qrdata]="profileUrl" [width]="150" [errorCorrectionLevel]="'M'"></qrcode>
-    </div>
+    @if (showQr) {
+      <div class="qr-display">
+        <qrcode [qrdata]="profileUrl" [width]="150" [errorCorrectionLevel]="'M'"></qrcode>
+      </div>
+    }
   </div>
 
   <!-- Settings Button (Top Right) -->
   <div class="settings-fab" [class.active]="showSettings" (click)="toggleSettings()">
-    <div class="settings-icon">⚙️</div>
+    <div class="settings-icon"><i class="fas fa-cog"></i></div>
     
     <!-- Settings Menu - Link Editor Controls (Always exists, but hidden/shown) -->
     <div class="settings-menu" [style.display]="showSettings ? 'block' : 'none'" (click)="$event.stopPropagation()">
-  <app-link-editor [userId]="userId" [canEdit]="canEdit" (linksChanged)="onLinksChanged()"></app-link-editor>
+      @if (canEdit) {
+        <app-link-editor [userId]="userId" [canEdit]="canEdit" (linksChanged)="onLinksChanged()"></app-link-editor>
+      }
       
-      <!-- Logout Button -->
+      <!-- Navigation & Logout Actions -->
       <div class="settings-actions">
+        @if (!canEdit) {
+          <button class="nav-btn" (click)="goToMyProfile()">
+            <i class="fas fa-user"></i> Profilime Dön
+          </button>
+        }
         <button class="logout-btn" (click)="logout()">
-          🚪 Çıkış Yap
+          <i class="fas fa-sign-out-alt"></i> Çıkış Yap
         </button>
       </div>
     </div>
@@ -46,97 +55,227 @@
   </div>
 
   <!-- Session Timeout Popup -->
-  <div *ngIf="sessionExpired" class="session-timeout-popup">Oturumunuz zaman aşımına uğradı</div>
+  @if (sessionExpired) {
+    <div class="session-timeout-popup">
+      <div class="popup-content">
+        <h3>Oturum Zaman Aşımı</h3>
+        <p>Oturumunuz zaman aşımına uğradı. Lütfen tekrar giriş yapın.</p>
+        <button (click)="goToLogin()" class="login-btn">Giriş Yap</button>
+      </div>
+    </div>
+  }
 
   <!-- Profile Card -->
-  <div *ngIf="accessDenied" class="access-denied">
-    👀 Bu profile erişim izniniz yok.
-    <div class="actions">
-  <button (click)="navigateToSearch()">🔍 Arama Sayfası</button>
-      <button (click)="logout()">🚪 Çıkış</button>
+  @if (accessDenied) {
+    <div class="access-denied">
+      <i class="fas fa-eye-slash"></i> Bu profile erişim izniniz yok.
+      <div class="actions">
+        <button (click)="navigateToSearch()"><i class="fas fa-search"></i> Arama Sayfası</button>
+        <button (click)="logout()"><i class="fas fa-sign-out-alt"></i> Çıkış</button>
+      </div>
     </div>
-  </div>
+  }
 
-  <div *ngIf="!accessDenied">
+  @if (!accessDenied) {
   <div class="profile-card">
     <!-- Profile Avatar & Basic Info -->
     <div class="profile-header">
-      <div class="avatar-section" *ngIf="profileSectionReady">
-        <img 
-          *ngIf="profile?.profilePhotoUrl || avatarFallbackReady"
-          [src]="profile?.profilePhotoUrl ? (imageBaseUrl + profile?.profilePhotoUrl + '?v=' + photoCacheBuster) : (imageBaseUrl + '/profile-photos/default.png')"
-          alt="Profil Fotoğrafı"
-          class="profile-avatar" 
-          (load)="onAvatarLoad()" 
-          [class.loaded]="avatarLoaded" />
+      @if (profileSectionReady) {
+        <div class="avatar-section">
+          @if (profile?.profilePhotoUrl || avatarFallbackReady) {
+            <img 
+              [src]="profile?.profilePhotoUrl ? (imageBaseUrl + profile?.profilePhotoUrl + '?v=' + photoCacheBuster) : (imageBaseUrl + '/profile-photos/default.png')"
+              alt="Profil Fotoğrafı"
+              class="profile-avatar" 
+              (load)="onAvatarLoad()" 
+              [class.loaded]="avatarLoaded" />
+          }
 
-        <!-- Photo Edit Button (only if canEdit) -->
-        <button *ngIf="canEdit" class="photo-edit-btn" (click)="togglePhotoActions()" [attr.aria-expanded]="showPhotoActions">
-          ✏️
-        </button>
+          <!-- Photo Edit Button (only if canEdit) -->
+          @if (canEdit) {
+            <button class="photo-edit-btn" (click)="togglePhotoActions()" [attr.aria-expanded]="showPhotoActions">
+              <i class="fas fa-edit"></i>
+            </button>
+          }
 
-        <!-- Photo Actions (only if canEdit & active) -->
-        <div class="photo-actions" *ngIf="canEdit && showPhotoActions">
-          <button class="photo-btn" (click)="fileInput.click()">📷 Ekle</button>
-          <button class="photo-btn delete" (click)="onDeletePhoto()" [disabled]="!profile?.profilePhotoUrl">🗑️ Sil</button>
-          <input #fileInput type="file" (change)="onPhotoSelected($event)" accept="image/*" style="display:none" />
+          <!-- Photo Actions (only if canEdit & active) -->
+          @if (canEdit && showPhotoActions) {
+            <div class="photo-actions">
+              <button class="photo-btn" (click)="fileInput.click()"><i class="fas fa-camera"></i> Ekle</button>
+              <button class="photo-btn delete" (click)="onDeletePhoto()" [disabled]="!profile?.profilePhotoUrl"><i class="fas fa-trash"></i> Sil</button>
+              <input #fileInput type="file" (change)="onPhotoSelected($event)" accept="image/*" style="display:none" />
+            </div>
+          }
         </div>
-      </div>
+      }
 
-      <div class="profile-info" *ngIf="user">
-        <h1 class="profile-name">{{ user.fullName }}</h1>
-        <p class="profile-title">{{ user.jobTitle }}</p>
-        <p class="profile-company">{{ user.company }}</p>
-      </div>
+      @if (user) {
+        <div class="profile-info">
+          <h1 class="profile-name">{{ user.fullName }}</h1>
+          <p class="profile-title">{{ user.jobTitle }}</p>
+          <p class="profile-company">{{ user.company }}</p>
+        </div>
+      }
     </div>
 
     <!-- Contact Info -->
     <div class="contact-section">
-      <div class="contact-item" *ngIf="user?.email">
-        <span class="contact-icon">📧</span>
-        <a [href]="'mailto:' + user?.email" class="contact-link">{{ user?.email }}</a>
-      </div>
-      <div class="contact-item" *ngIf="user?.phoneNumber">
-        <span class="contact-icon">📞</span>
-        <a [href]="'tel:' + user?.phoneNumber" class="contact-link">{{ user?.phoneNumber }}</a>
-      </div>
+      @if (user?.email) {
+        <div class="contact-item">
+          <span class="contact-icon"><i class="fas fa-envelope"></i></span>
+          <a [href]="'mailto:' + user?.email" class="contact-link">{{ user?.email }}</a>
+        </div>
+      }
+      @if (user?.phoneNumber) {
+        <div class="contact-item">
+          <span class="contact-icon"><i class="fas fa-phone"></i></span>
+          <a [href]="'tel:' + user?.phoneNumber" class="contact-link">{{ user?.phoneNumber }}</a>
+        </div>
+      }
     </div>
 
     <!-- Dynamic Links -->
-    <div class="links-section" *ngIf="profile?.links?.length">
-      <h3 class="section-title">Bağlantılar</h3>
-      <div class="links-grid">
-        <div *ngFor="let link of filteredLinks" class="link-card">
-          <span class="link-icon">{{ getLinkIcon(link.definitionName) }}</span>
-          <div class="link-content">
-            <span class="link-label">{{ link.definitionName }}</span>
-            <div class="link-value">
-              <ng-container [ngSwitch]="true">
-                <a *ngSwitchCase="link.value?.startsWith('mailto:')" 
-                   [href]="link.value" class="link-anchor">{{ link.value.substring(7) }}</a>
-                <a *ngSwitchCase="link.value?.startsWith('tel:')" 
-                   [href]="link.value" class="link-anchor">{{ link.value.substring(4) }}</a>
-                <a *ngSwitchCase="link.value?.startsWith('http')" 
-                   [href]="link.value" target="_blank" rel="noopener noreferrer" class="link-anchor">{{ link.value }}</a>
-                <span *ngSwitchDefault class="link-text">{{ link.value }}</span>
-              </ng-container>
+    @if (profile?.links?.length) {
+      <div class="links-section">
+        <div class="section-header">
+          <h3 class="section-title">Bağlantılar</h3>
+          @if (canEdit) {
+            <div class="view-controls">
+              @if (linkViewMode === 'grid') {
+                <div class="column-selector">
+                  @for (col of [3,4,5]; track col) {
+                    <button 
+                      [class.active]="gridColumns === col"
+                      (click)="changeGridColumns(col)"
+                      class="column-btn">{{col}}</button>
+                  }
+                </div>
+              }
+              <button class="view-toggle-btn" (click)="toggleLinkView()" title="Görünüm değiştir">
+                <i [class]="linkViewMode === 'list' ? 'fas fa-th' : 'fas fa-list'"></i>
+              </button>
             </div>
+          }
+        </div>
+        <div class="links-grid" 
+             [class.grid-view]="linkViewMode === 'grid'" 
+             [class.list-view]="linkViewMode === 'list'"
+             [style.--grid-columns]="gridColumns">
+          @for (link of filteredLinks; track link.definitionName + link.value) {
+            @if (linkViewMode === 'grid' && (link.value.startsWith('http') || link.value.startsWith('mailto:') || link.value.startsWith('tel:'))) {
+              <!-- Grid view with real links for right-click context menu -->
+              <a [href]="link.value" 
+                 [target]="link.value.startsWith('http') ? '_blank' : ''"
+                 [rel]="link.value.startsWith('http') ? 'noopener noreferrer' : ''"
+                 class="link-card" 
+                 (click)="handleLinkClick($event, link)">
+                <span class="link-icon"><i [class]="getLinkIcon(link.definitionName)"></i></span>
+                <div class="link-tooltip">{{ link.definitionName }}</div>
+              </a>
+            }
+            @else {
+              <!-- Default div for non-links or list view -->
+              <div class="link-card" (click)="onLinkClick(link)">
+                <span class="link-icon"><i [class]="getLinkIcon(link.definitionName)"></i></span>
+                @if (linkViewMode === 'list') {
+                  <div class="link-content">
+                    <span class="link-label">{{ link.definitionName }}</span>
+                    <div class="link-value">
+                      @switch (true) {
+                        @case (link.value.startsWith('mailto:')) {
+                          <a [href]="link.value" class="link-anchor" (click)="$event.stopPropagation()">{{ link.value.substring(7) }}</a>
+                        }
+                        @case (link.value.startsWith('tel:')) {
+                          <a [href]="link.value" class="link-anchor" (click)="$event.stopPropagation()">{{ link.value.substring(4) }}</a>
+                        }
+                        @case (link.value.startsWith('http')) {
+                          <a [href]="link.value" target="_blank" rel="noopener noreferrer" class="link-anchor" (click)="$event.stopPropagation()">{{ link.value }}</a>
+                        }
+                        @default {
+                          <span class="link-text">{{ link.value }}</span>
+                        }
+                      }
+                    </div>
+                  </div>
+                }
+                @if (linkViewMode === 'grid') {
+                  <div class="link-tooltip">{{ link.definitionName }}</div>
+                }
+              </div>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Cropper Dialog -->
+  @if (showCropper && cropperData && !accessDenied) {
+    <app-cropper-dialog 
+      [data]="cropperData"
+      [onResult]="onCropperResult.bind(this)">
+    </app-cropper-dialog>
+  }
+
+  <!-- Content Modal -->
+  @if (showContentModal) {
+    <div class="content-modal-overlay" (click)="closeContentModal()">
+      <div class="content-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ selectedContent.title }}</h3>
+          <button class="close-btn" (click)="closeContentModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="content-display">
+            @switch (selectedContent.type) {
+              @case ('iban') {
+                <div class="iban-display">
+                  <div class="iban-content">
+                    <div class="iban-text">{{ selectedContent.value }}</div>
+                    <button class="inline-copy-btn" (click)="copyToClipboard(selectedContent.value)" title="Kopyala">
+                      <i class="fas fa-copy"></i>
+                    </button>
+                  </div>
+                </div>
+              }
+              @case ('address') {
+                <div class="address-display">
+                  <div class="address-content">
+                    <div class="address-text">{{ selectedContent.value }}</div>
+                    <button class="inline-copy-btn" (click)="copyToClipboard(selectedContent.value)" title="Kopyala">
+                      <i class="fas fa-copy"></i>
+                    </button>
+                  </div>
+                  <div class="address-actions">
+                    <button class="map-btn" (click)="openInMaps(selectedContent.value)">
+                      <i class="fas fa-map-marker-alt"></i> Haritada Göster
+                    </button>
+                  </div>
+                </div>
+              }
+              @default {
+                <div class="text-display">
+                  <div class="text-content-wrapper">
+                    <div class="text-content">{{ selectedContent.value }}</div>
+                    <button class="inline-copy-btn" (click)="copyToClipboard(selectedContent.value)" title="Kopyala">
+                      <i class="fas fa-copy"></i>
+                    </button>
+                  </div>
+                </div>
+              }
+            }
           </div>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Cropper Dialog -->
-  <app-cropper-dialog 
-    *ngIf="showCropper && cropperData && !accessDenied"
-    [data]="cropperData"
-    [onResult]="onCropperResult.bind(this)">
-  </app-cropper-dialog>
-  </div>
+  }
+  }
 
   <!-- Arama sayfasına git butonu (her zaman sağ alt) -->
   <div class="search-fab" (click)="navigateToSearch()" title="Ara" aria-label="Arama sayfasına git">
-    🔍
+    <i class="fas fa-search"></i>
   </div>
+  
 </div>

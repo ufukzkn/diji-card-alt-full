@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { LoginRequest, OAuthTokenRequest } from '../../models/auth.model';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-login',
@@ -12,7 +13,7 @@ import { LoginRequest, OAuthTokenRequest } from '../../models/auth.model';
   templateUrl: './login.html',
   styleUrls: ['./login.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   successMessage = '';
@@ -30,8 +31,20 @@ export class LoginComponent {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute,
+    private notificationService: NotificationService
   ) {}
+
+  ngOnInit(): void {
+    // Timeout parametresi varsa kullanıcıyı bilgilendir
+    this.route.queryParams.subscribe(params => {
+      if (params['timeout'] === '1') {
+        console.log('Timeout detected, showing toast...');
+        this.notificationService.showToast('Oturumunuz zaman aşımına uğradı. Lütfen tekrar giriş yapın.', 'error');
+      }
+    });
+  }
 
   onLogin(): void {
     this.isLoading = true;

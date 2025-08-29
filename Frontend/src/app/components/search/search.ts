@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-search',
@@ -16,8 +17,13 @@ export class Search implements OnInit {
   users: any[] = [];
   showAllResults = false;
   isLoading = false;
+  showSettings = false;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private auth: AuthService
+  ) { }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -61,5 +67,45 @@ export class Search implements OnInit {
 
   showMoreResults(): void {
     this.showAllResults = true;
+  }
+
+  toggleSettings(): void {
+    this.showSettings = !this.showSettings;
+  }
+
+  goToMyProfile(): void {
+    // Auth service'ten kendi userId'mizi alıp oraya yönlendir
+    const token = this.auth.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('Token payload:', payload); // Debug için
+        
+        // Farklı claim isimlerini dene
+        const myUserId = payload.userId || payload.uid || payload.sub || payload.nameid;
+        console.log('Found userId:', myUserId); // Debug için
+        
+        if (myUserId) {
+          console.log('Navigating to profile:', myUserId); // Debug için
+          this.router.navigate(['/profil', myUserId]);
+        } else {
+          console.error('Token\'da userId bulunamadı:', payload);
+          alert('Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+          this.router.navigate(['/login']);
+        }
+      } catch (error) {
+        console.error('Token parse hatası:', error);
+        alert('Token hatası. Lütfen tekrar giriş yapın.');
+        this.router.navigate(['/login']);
+      }
+    } else {
+      console.error('Token bulunamadı');
+      alert('Oturum bulunamadı. Lütfen giriş yapın.');
+      this.router.navigate(['/login']);
+    }
+  }
+
+  logout() {
+    this.auth.logout();
   }
 }

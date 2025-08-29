@@ -4,6 +4,7 @@ using diji_card_alt.Data;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.EntityFrameworkCore;
 
 namespace diji_card_alt.Controllers
 {
@@ -49,17 +50,26 @@ namespace diji_card_alt.Controllers
         public IActionResult GetAllUsers()
         {
             var caller = GetTokenUserId();
-            var query = _context.Users.AsQueryable();
+            
             if (string.IsNullOrEmpty(caller))
             {
-                query = query.Where(u => u.IsPublic);
+                // Sadece public profilleri göster
+                var publicUsers = from u in _context.Users
+                                 join p in _context.UserPreferences on u.UserId equals p.UserId
+                                 where p.IsPublic
+                                 select u;
+                return Ok(publicUsers.ToList());
             }
             else
             {
-                query = query.Where(u => u.IsPublic || u.UserId == caller);
+                // Public profiller + kendi profili
+                var visibleUsers = from u in _context.Users
+                                  join p in _context.UserPreferences on u.UserId equals p.UserId into prefs
+                                  from pref in prefs.DefaultIfEmpty()
+                                  where (pref != null && pref.IsPublic) || u.UserId == caller
+                                  select u;
+                return Ok(visibleUsers.ToList());
             }
-            var users = query.ToList();
-            return Ok(users);
         }
 
         [HttpPost]
@@ -114,17 +124,26 @@ namespace diji_card_alt.Controllers
             if (string.IsNullOrWhiteSpace(name))
                 return BadRequest("İsim sorgusu boş olamaz.");
             var caller = GetTokenUserId();
-            var query = _context.Users.AsQueryable();
+            
             if (string.IsNullOrEmpty(caller))
-                query = query.Where(u => u.IsPublic);
+            {
+                // Sadece public profilleri ara
+                var publicUsers = from u in _context.Users
+                                 join p in _context.UserPreferences on u.UserId equals p.UserId
+                                 where p.IsPublic && u.FullName.Contains(name)
+                                 select u;
+                return Ok(publicUsers.ToList());
+            }
             else
-                query = query.Where(u => u.IsPublic || u.UserId == caller);
-
-            var users = query
-                .Where(u => u.FullName.Contains(name))
-                .ToList();
-
-            return Ok(users);
+            {
+                // Public profiller + kendi profili
+                var visibleUsers = from u in _context.Users
+                                  join p in _context.UserPreferences on u.UserId equals p.UserId into prefs
+                                  from pref in prefs.DefaultIfEmpty()
+                                  where ((pref != null && pref.IsPublic) || u.UserId == caller) && u.FullName.Contains(name)
+                                  select u;
+                return Ok(visibleUsers.ToList());
+            }
         }
 
         [HttpPost("{userId}/profile-photo")]
@@ -180,6 +199,82 @@ namespace diji_card_alt.Controllers
 
             return Ok(user);
         }
+
+        [HttpPut("{userId}/preferences")]
+        public async Task<IActionResult> UpdatePreferences(string userId, [FromBody] PreferencesUpdateModel preferences)
+        {
+            var caller = GetTokenUserId();
+            if (caller != userId)
+                return Forbid("Bu işlem için yetkiniz yok.");
+
+            var userPreferences = await _context.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (userPreferences == null)
+            {
+                // Preferences yoksa oluştur
+                userPreferences = new DigitalBusinessCard.Models.UserPreferences
+                {
+                    UserId = userId,
+                    IsPublic = true,
+                    ViewMode = "list",
+                    GridColumns = 3,
+                    ThemeColor = "orange",
+                    FontFamily = "Inter"
+                };
+                _context.UserPreferences.Add(userPreferences);
+            }
+
+            // Güncelle
+            if (preferences.IsPublic.HasValue)
+                userPreferences.IsPublic = preferences.IsPublic.Value;
+            if (!string.IsNullOrEmpty(preferences.ViewMode))
+                userPreferences.ViewMode = preferences.ViewMode;
+            if (preferences.GridColumns.HasValue && preferences.GridColumns >= 3 && preferences.GridColumns <= 5)
+                userPreferences.GridColumns = preferences.GridColumns.Value;
+            if (!string.IsNullOrEmpty(preferences.ThemeColor))
+                userPreferences.ThemeColor = preferences.ThemeColor;
+            if (!string.IsNullOrEmpty(preferences.FontFamily))
+                userPreferences.FontFamily = preferences.FontFamily;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(userPreferences);
+        }
+
+        [HttpGet("{userId}/preferences")]
+        public async Task<IActionResult> GetPreferences(string userId)
+        {
+            try
+            {
+                var preferences = await _context.UserPreferences
+                    .FirstOrDefaultAsync(p => p.UserId == userId);
+
+                if (preferences == null)
+                {
+                    // Default preferences döndür
+                    return Ok(new PreferencesUpdateModel
+                    {
+                        IsPublic = true,
+                        ViewMode = "list",
+                        GridColumns = 3,
+                        ThemeColor = "#007bff",
+                        FontFamily = "Inter"
+                    });
+                }
+
+                return Ok(new PreferencesUpdateModel
+                {
+                    IsPublic = preferences.IsPublic,
+                    ViewMode = preferences.ViewMode,
+                    GridColumns = preferences.GridColumns,
+                    ThemeColor = preferences.ThemeColor,
+                    FontFamily = preferences.FontFamily
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Preferences alınırken hata oluştu.", error = ex.Message });
+            }
+        }
     }
 
     public class ThemeUpdateModel
@@ -187,5 +282,14 @@ namespace diji_card_alt.Controllers
         public string? ThemeColor { get; set; }
         public string? FontFamily { get; set; }
         public string? CardLayout { get; set; }
+    }
+
+    public class PreferencesUpdateModel
+    {
+        public bool? IsPublic { get; set; }
+        public string? ViewMode { get; set; }
+        public int? GridColumns { get; set; }
+        public string? ThemeColor { get; set; }
+        public string? FontFamily { get; set; }
     }
 }

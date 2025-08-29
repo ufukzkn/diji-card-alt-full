@@ -23,19 +23,8 @@ namespace diji_card_alt.Models
         // Custom Definition Name (nullable) - sadece custom tanımlar için
         public string? CustomDefinitionName { get; set; }
 
-        [JsonIgnore]
-        [ForeignKey(nameof(UserId))]
-        public User? User { get; set; }
-
-        [JsonIgnore]
-        [ForeignKey(nameof(DefinitionId))]
-        public Definition? Definition { get; set; }
-
-        // Frontend için gösterilecek isim
-        [NotMapped]
-        public string DisplayName => DefinitionId == 11 ? 
-            (CustomDefinitionName ?? "Custom") : 
-            (Definition?.DefinitionName ?? "Unknown");
+        // Frontend için gösterilecek isim - artık Definition navigation property olmadığı için bu computed'ı kaldırdık
+        // DisplayName'i controller'da query ile alıyoruz
 
         // Helper property
         [NotMapped]

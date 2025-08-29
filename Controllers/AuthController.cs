@@ -169,7 +169,7 @@ namespace digital_business_card.Controllers
             await Task.Delay(1); // async signature
             var key = _config["Jwt:Key"] ?? "dev-secret-key-change-me-32chars";
             var creds = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)), SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.UtcNow.AddMinutes(_config.GetValue<int>("Jwt:AccessTokenMinutes", 10));
+            var expires = DateTime.UtcNow.AddMinutes(10); // 10 dakika
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userId),
@@ -208,7 +208,7 @@ namespace digital_business_card.Controllers
                 Success = true,
                 AccessToken = accessTask.Result,
                 RefreshToken = newRefreshToken,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(_config.GetValue<int>("Jwt:AccessTokenMinutes", 10))
+                ExpiresAt = DateTime.UtcNow.AddMinutes(10) // 10 dakika
             });
         }
 
@@ -264,8 +264,6 @@ namespace digital_business_card.Controllers
                     _logger.LogWarning(ex, "Token validation failed");
                     return Unauthorized(new { Success = false, Message = "Geçersiz token" });
                 }
-
-                return Unauthorized(new { Success = false, Message = "Geçersiz token" });
             }
             catch (Exception ex)
             {

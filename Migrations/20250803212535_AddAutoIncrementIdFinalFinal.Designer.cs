@@ -138,11 +138,6 @@ namespace diji_card_alt_full.Migrations
 
                     b.Navigation("User");
                 });
-
-            modelBuilder.Entity("diji_card_alt.Models.Definition", b =>
-                {
-                    b.Navigation("UserDefinitionValues");
-                });
 #pragma warning restore 612, 618
         }
     }

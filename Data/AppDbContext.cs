@@ -1,5 +1,6 @@
 ﻿    using Microsoft.EntityFrameworkCore;
     using diji_card_alt.Models;
+    using DigitalBusinessCard.Models;
     using System.Collections.Generic;
 
 
@@ -14,38 +15,51 @@ namespace diji_card_alt.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Auto-increment primary key
-            modelBuilder.Entity<UserDefinitionValue>()
-                .HasKey(udv => udv.Id);
+            // UserDefinitionValue yapılandırması
+            modelBuilder.Entity<UserDefinitionValue>(entity =>
+            {
+                // Primary key
+                entity.HasKey(e => e.Id);
+                
+                // Properties
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.UserId).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.DefinitionId).IsRequired();
+                entity.Property(e => e.Value).IsRequired();
+                entity.Property(e => e.SortId);
+                entity.Property(e => e.CustomDefinitionName).HasMaxLength(100);
 
-            // Foreign key to Users table
-            modelBuilder.Entity<UserDefinitionValue>()
-                .HasOne(udv => udv.User)
-                .WithMany()
-                .HasForeignKey(udv => udv.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                // Foreign key constraints - explicit configuration without navigation properties
+                entity.HasIndex(e => e.UserId).HasDatabaseName("IX_UserDefinitionValues_UserId");
+                entity.HasIndex(e => e.DefinitionId).HasDatabaseName("IX_UserDefinitionValues_DefinitionId");
+                
+                // Unique constraint for regular definitions (not custom)
+                entity.HasIndex(e => new { e.UserId, e.DefinitionId })
+                      .IsUnique()
+                      .HasFilter("\"DefinitionId\" != 11")
+                      .HasDatabaseName("IX_UserDefinitionValues_UserId_DefinitionId_Unique");
+            });
 
-            // Foreign key to Definitions table
-            modelBuilder.Entity<UserDefinitionValue>()
-                .HasOne(udv => udv.Definition)
-                .WithMany()
-                .HasForeignKey(udv => udv.DefinitionId)
-                .OnDelete(DeleteBehavior.Cascade);
+            // ProfileVisit yapılandırması
+            modelBuilder.Entity<ProfileVisit>(entity =>
+            {
+                entity.HasIndex(e => new { e.ProfileUserId, e.VisitedAtUtc })
+                      .HasDatabaseName("IX_ProfileVisits_ProfileUserId_VisitedAt");
+                entity.HasIndex(e => e.VisitorUserId)
+                      .HasDatabaseName("IX_ProfileVisits_VisitorUserId");
+            });
 
-            // Regular definitions için unique constraint (DefinitionId != 11)
-            // Bir kullanıcı aynı regular definition'dan sadece 1 tane ekleyebilir
-            // Custom definitions (DefinitionId = 11) için serbest - birden fazla eklenebilir
-            modelBuilder.Entity<UserDefinitionValue>()
-                .HasIndex(udv => new { udv.UserId, udv.DefinitionId })
-                .IsUnique()
-                .HasFilter("\"DefinitionId\" != 11");
-
-            // ProfileVisit indexleri - en sık sorgular: belirli profilin ziyaretleri (zaman sıralı)
-            modelBuilder.Entity<ProfileVisit>()
-                .HasIndex(pv => new { pv.ProfileUserId, pv.VisitedAtUtc });
-
-            modelBuilder.Entity<ProfileVisit>()
-                .HasIndex(pv => pv.VisitorUserId);
+            // UserPreferences yapılandırması
+            modelBuilder.Entity<UserPreferences>(entity =>
+            {
+                entity.HasKey(e => e.UserId);
+                entity.Property(e => e.UserId).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.IsPublic).HasDefaultValue(true);
+                entity.Property(e => e.GridColumns).HasDefaultValue(3);
+                entity.Property(e => e.ViewMode).HasMaxLength(10).HasDefaultValue("list");
+                entity.Property(e => e.ThemeColor).HasMaxLength(20).HasDefaultValue("orange");
+                entity.Property(e => e.FontFamily).HasMaxLength(30).HasDefaultValue("Inter");
+            });
         }
 
         public DbSet<User> Users { get; set; }
@@ -54,6 +68,7 @@ namespace diji_card_alt.Data
 
             public DbSet<UserDefinitionValue> UserDefinitionValues { get; set; }
             public DbSet<ProfileVisit> ProfileVisits { get; set; }
+            public DbSet<UserPreferences> UserPreferences { get; set; }
 
         // UserDefinitionValue kayıtları için veri bütünlüğü koruması:
         //  - DefinitionId != 11 ise CustomDefinitionName daima NULL olmalı

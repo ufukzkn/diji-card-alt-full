@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using DigitalBusinessCard.Models;
 
 namespace diji_card_alt.Models
 {
@@ -18,8 +19,5 @@ namespace diji_card_alt.Models
 
         // Profile photo properties
         public string? ProfilePhotoUrl { get; set; }
-
-    // Profil herkese açık mı? (Arama / görüntüleme izni)
-    public bool IsPublic { get; set; } = true;
     }
 }

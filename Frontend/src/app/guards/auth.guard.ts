@@ -12,11 +12,23 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   canActivate(): boolean {
-    if (this.authService.isLoggedIn()) {
-      return true;
-    } else {
+    const token = this.authService.getToken();
+    
+    if (!token) {
       this.router.navigate(['/login']);
       return false;
     }
+
+    // Token varsa ama süresi dolmuşsa profile'de popup gösterilsin
+    if (this.authService.isTokenExpired()) {
+      // Profile sayfasındaysa popup gösterilsin, değilse login'e yönlendir
+      const currentUrl = this.router.url;
+      if (!currentUrl.includes('/profile')) {
+        this.router.navigate(['/login']);
+        return false;
+      }
+    }
+
+    return true;
   }
 }
