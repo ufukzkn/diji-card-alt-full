@@ -10,7 +10,29 @@
 - **Mobil Uyumluluk:** Tamamen responsive tasarımıyla hem masaüstü hem de mobil cihazlarda sorunsuz görüntülenir.  
 - **Gizlilik ve Güvenlik:** Kullanıcı verileri güvenli bir şekilde saklanır; istenirse kartvizit yalnızca davet yoluyla veya parola korumalı olarak paylaşılabilir.  
 
-Bu özellikler sayesinde, fiziksel kartvizitlere gerek kalmadan, profesyonel ve modern bir ortamda kendinizi ve iletişim bilgilerinizi etkili biçimde tanıtabilirsiniz.  
+Bu özellikler sayesinde, fiziksel kartvizitlere gerek kalmadan, profesyonel ve modern bir ortamda kendinizi ve iletişim bilgilerinizi etkili biçimde tanıtabilirsiniz.
+
+## Screenshots
+
+### Login Ekranı
+
+![Login Screen](docs/screenshots/login.png)
+*Login ekranı*  
+
+### Profil Kartı Grid
+
+![Profile Card](docs/screenshots/profile-card-grid.png)
+*Kullanıcının dijital kartvizit grid layout görünümü*
+
+### Profil Kartı List
+
+![Profile Card](docs/screenshots/profile-card-list.png)
+*Kullanıcının dijital kartvizit list layout görünümü*
+
+### Ayarlar Menüsü
+
+![Settings Menu](docs/screenshots/settings-menu.png)
+*Kullanıcının kendi profilinde yapacağı örnek bağlantı ve profil düzenlemeleri*
 
 ## Özellikler
 
