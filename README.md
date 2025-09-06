@@ -34,52 +34,58 @@ Bu özellikler sayesinde, fiziksel kartvizitlere gerek kalmadan, profesyonel ve 
 ![Settings Menu](docs/screenshots/settings-menu.png)
 *Kullanıcının kendi profilinde yapacağı örnek bağlantı ve profil düzenlemeleri*
 
-## Özellikler
+## 📋 Özellik Durumu
 
-- [x] QR Link
-- [x] Özelleştirilebilir uniq link
-- [x] Sonsuz link vb. ekleme imkanı
-- [ ] Profil ziyaretçi loglaması
+- [x] **QR Kod Entegrasyonu** - Dinamik QR kod oluşturma ve paylaşım
+- [x] **Özelleştirilebilir Unique Link** - Kişisel URL'ler
+- [x] **Sınırsız Link Ekleme** - Sosyal medya ve iletişim linkleri
+- [x] **Private Profil Sistemi** - Şifre korumalı erişim
+- [x] **Özel Erişim Linkleri** - Zaman sınırlı paylaşım
+- [x] **Responsive Tasarım** - Tüm cihazlarda uyumlu
+- [ ] **Multi-language Support** - Çoklu dil desteği
+- [x] **Grid/List Layout** - Esnek görünüm seçenekleri
+- [ ] **Profil Ziyaretçi Loglaması** - Analytics ve istatistikler
 
-## Gereksinimler
+## 🔧 Gereksinimler
 
-- .NET 8 SDK
-- Node.js (v18+ önerilir)
-- npm
-- Angular CLI (v20+)
-- PostgreSQL (veritabanı)
-- Flutter (mobil uygulama için)
+**Development Environment:**
+- **.NET 8 SDK** - Backend API için
+- **Node.js (v18+)** - Frontend geliştirme için
+- **npm** - Paket yöneticisi
+- **Angular CLI (v18+)** - Angular uygulaması için
+- **PostgreSQL** - Veritabanı
 
-## Kurulum
+**Production Environment:**
+- **Web Server** - IIS, Nginx veya Apache
+- **PostgreSQL Server** - Production veritabanı
+- **SSL Certificate** - HTTPS için (önerilen)
 
-1. **Backend (API) Kurulumu**
-   - `dotnet restore` ile bağımlılıkları yükleyin.
-   - PostgreSQL veritabanı oluşturun ve bağlantı ayarlarını `appsettings.json` dosyasında düzenleyin.
-   - Gerekirse migration işlemlerini çalıştırın: `dotnet ef database update`
+## 🚀 Kurulum
 
-2. **Frontend (Angular) Kurulumu**
-   - `cd Frontend`
-   - `npm install` ile bağımlılıkları yükleyin.
-   - `ng serve` ile Angular uygulamasını başlatın.
+### 1. Backend (API) Kurulumu
+```bash
+# Bağımlılıkları yükle
+dotnet restore
 
-3. **Mobil (Flutter) Kurulumu**
-   - Mobil kurulum ilgili klasörün Readme dosyasında mevcuttur.
+# Veritabanı connection string'ini appsettings.json'da ayarla
+# Migration'ları çalıştır
+dotnet ef database update
 
-## Kullanım
+# Backend'i başlat
+dotnet run
+```
 
-1. **Backend'i Başlatmak için:**
-   - Ana dizinde: `dotnet run`
+### 2. Frontend (Angular) Kurulumu
+```bash
+# Frontend klasörüne geç
+cd Frontend
 
-2. **Frontend'i Başlatmak için:**
-   - `cd Frontend`
-   - `ng serve`
+# Bağımlılıkları yükle
+npm install
 
-3. **Mobil Uygulama:**
-   - `cd src/mobile`
-   - `flutter run`
-
-Uygulama varsayılan olarak `http://localhost:5078` (backend) ve `http://localhost:4200` (frontend) adreslerinde çalışır.
-
+# Development server'ı başlat
+ng serve
+```
 ## Proje Hiyerarşisi
 
 ```text
