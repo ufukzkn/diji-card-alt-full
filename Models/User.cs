@@ -17,6 +17,10 @@ namespace diji_card_alt.Models
         // Authentication
         public string Password { get; set; } = string.Empty;
 
+        // Privacy settings
+        public bool IsPublic { get; set; } = true;
+        public string? PrivateAccessPassword { get; set; }
+
         // Profile photo properties
         public string? ProfilePhotoUrl { get; set; }
     }

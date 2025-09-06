@@ -55,8 +55,7 @@ namespace diji_card_alt.Controllers
             {
                 // Sadece public profilleri göster
                 var publicUsers = from u in _context.Users
-                                 join p in _context.UserPreferences on u.UserId equals p.UserId
-                                 where p.IsPublic
+                                 where u.IsPublic
                                  select u;
                 return Ok(publicUsers.ToList());
             }
@@ -64,9 +63,7 @@ namespace diji_card_alt.Controllers
             {
                 // Public profiller + kendi profili
                 var visibleUsers = from u in _context.Users
-                                  join p in _context.UserPreferences on u.UserId equals p.UserId into prefs
-                                  from pref in prefs.DefaultIfEmpty()
-                                  where (pref != null && pref.IsPublic) || u.UserId == caller
+                                  where u.IsPublic || u.UserId == caller
                                   select u;
                 return Ok(visibleUsers.ToList());
             }
@@ -129,8 +126,7 @@ namespace diji_card_alt.Controllers
             {
                 // Sadece public profilleri ara
                 var publicUsers = from u in _context.Users
-                                 join p in _context.UserPreferences on u.UserId equals p.UserId
-                                 where p.IsPublic && u.FullName.Contains(name)
+                                 where u.IsPublic && u.FullName.Contains(name)
                                  select u;
                 return Ok(publicUsers.ToList());
             }
@@ -138,9 +134,7 @@ namespace diji_card_alt.Controllers
             {
                 // Public profiller + kendi profili
                 var visibleUsers = from u in _context.Users
-                                  join p in _context.UserPreferences on u.UserId equals p.UserId into prefs
-                                  from pref in prefs.DefaultIfEmpty()
-                                  where ((pref != null && pref.IsPublic) || u.UserId == caller) && u.FullName.Contains(name)
+                                  where (u.IsPublic || u.UserId == caller) && u.FullName.Contains(name)
                                   select u;
                 return Ok(visibleUsers.ToList());
             }
@@ -214,7 +208,6 @@ namespace diji_card_alt.Controllers
                 userPreferences = new DigitalBusinessCard.Models.UserPreferences
                 {
                     UserId = userId,
-                    IsPublic = true,
                     ViewMode = "list",
                     GridColumns = 3,
                     ThemeColor = "orange",
@@ -223,9 +216,13 @@ namespace diji_card_alt.Controllers
                 _context.UserPreferences.Add(userPreferences);
             }
 
+            // User'ı bul ve IsPublic'i orada güncelle
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
             // Güncelle
             if (preferences.IsPublic.HasValue)
-                userPreferences.IsPublic = preferences.IsPublic.Value;
+                user.IsPublic = preferences.IsPublic.Value;
             if (!string.IsNullOrEmpty(preferences.ViewMode))
                 userPreferences.ViewMode = preferences.ViewMode;
             if (preferences.GridColumns.HasValue && preferences.GridColumns >= 3 && preferences.GridColumns <= 5)
@@ -247,13 +244,16 @@ namespace diji_card_alt.Controllers
             {
                 var preferences = await _context.UserPreferences
                     .FirstOrDefaultAsync(p => p.UserId == userId);
+                    
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null) return NotFound();
 
                 if (preferences == null)
                 {
                     // Default preferences döndür
                     return Ok(new PreferencesUpdateModel
                     {
-                        IsPublic = true,
+                        IsPublic = user.IsPublic,
                         ViewMode = "list",
                         GridColumns = 3,
                         ThemeColor = "#007bff",
@@ -263,7 +263,7 @@ namespace diji_card_alt.Controllers
 
                 return Ok(new PreferencesUpdateModel
                 {
-                    IsPublic = preferences.IsPublic,
+                    IsPublic = user.IsPublic,
                     ViewMode = preferences.ViewMode,
                     GridColumns = preferences.GridColumns,
                     ThemeColor = preferences.ThemeColor,

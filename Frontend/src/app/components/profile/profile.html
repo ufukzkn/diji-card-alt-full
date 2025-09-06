@@ -10,18 +10,21 @@
   </div>
 
   <!-- QR Code Button (Top Left) -->
-  <div class="qr-fab">
-    <div class="qr-icon" (click)="showQr = !showQr">
-      <img src="https://cdn-icons-png.flaticon.com/512/2313/2313147.png" alt="QR Kod"  width="24" height="24" />
+  <div class="qr-fab" [class.active]="showQr" (click)="showQr = !showQr">
+    <div class="qr-icon">
+      <img src="https://cdn-icons-png.flaticon.com/512/2313/2313147.png" alt="QR Kod" width="24" height="24" />
     </div>
-    
-    <!-- QR Code Display (Top Left) -->
-    @if (showQr) {
-      <div class="qr-display">
+  </div>
+  
+  <!-- QR Code Display (Top Left) -->
+  @if (showQr) {
+    <div class="qr-display" [class.show]="showQr">
+      <div class="qr-title">Profil QR Kodu</div>
+      <div class="qr-code">
         <qrcode [qrdata]="profileUrl" [width]="150" [errorCorrectionLevel]="'M'"></qrcode>
       </div>
-    }
-  </div>
+    </div>
+  }
 
   <!-- Settings Button (Top Right) -->
   <div class="settings-fab" [class.active]="showSettings" (click)="toggleSettings()">
@@ -35,6 +38,11 @@
       
       <!-- Navigation & Logout Actions -->
       <div class="settings-actions">
+        @if (canEdit) {
+          <button class="nav-btn" (click)="openPrivacySettings()">
+            <i class="fas fa-shield-alt"></i> Gizlilik Ayarları
+          </button>
+        }
         @if (!canEdit) {
           <button class="nav-btn" (click)="goToMyProfile()">
             <i class="fas fa-user"></i> Profilime Dön
@@ -65,6 +73,161 @@
     </div>
   }
 
+  <!-- Private Profile Password Modal -->
+  @if (showPasswordModal) {
+    <div class="password-modal-overlay">
+      <div class="password-modal">
+        <div class="modal-header">
+          <h3>Özel Profil</h3>
+          <button class="close-btn" (click)="closePasswordModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-message">{{ privateAccessMessage }}</p>
+          <div class="password-input-group">
+            <input 
+              type="password" 
+              [(ngModel)]="passwordInput" 
+              placeholder="Profil şifresini girin..."
+              class="password-input"
+              (keyup.enter)="submitPassword()" />
+            <button class="submit-btn" (click)="submitPassword()" [disabled]="!passwordInput.trim()">
+              <i class="fas fa-unlock"></i> Erişim
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Privacy Settings Modal -->
+  @if (showPrivacySettings) {
+    <div class="password-modal-overlay">
+      <div class="privacy-modal">
+        <div class="modal-header">
+          <h3>Gizlilik Ayarları</h3>
+          <button class="close-btn" (click)="closePrivacySettings()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          
+          <!-- Public/Private Toggle -->
+          <div class="setting-group">
+            <label class="setting-label">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="privacyIsPublic" 
+                class="setting-checkbox" />
+              <span class="setting-text">
+                <i class="fas" [ngClass]="privacyIsPublic ? 'fa-globe text-green' : 'fa-lock text-orange'"></i>
+                {{ privacyIsPublic ? 'Profilim herkese açık' : 'Profilim özel (şifre gerekli)' }}
+              </span>
+            </label>
+          </div>
+
+          <!-- Password Setting (only if private) -->
+          @if (!privacyIsPublic) {
+            <div class="setting-group">
+              <label for="privacyPassword">Profil Şifresi:</label>
+              <input 
+                id="privacyPassword"
+                type="password" 
+                [(ngModel)]="privacyPassword" 
+                placeholder="Profil erişim şifresi..."
+                class="setting-input" />
+              <small class="setting-help">Bu şifre ile başkaları profilinizi görüntüleyebilir</small>
+            </div>
+
+            <!-- Special Links Section -->
+            <div class="setting-group">
+              <div class="section-header">
+                <h4>Özel Erişim Linkleri</h4>
+                <button class="create-link-btn" (click)="openCreateLinkModal()">
+                  <i class="fas fa-plus"></i> Yeni Link
+                </button>
+              </div>
+              
+              @if (specialLinks.length > 0) {
+                <div class="special-links-list">
+                  @for (link of specialLinks; track link.id) {
+                    <div class="special-link-item">
+                      <div class="link-info">
+                        <strong>{{ link.description }}</strong>
+                        <small>{{ link.expiryDate | date:'short' }} tarihine kadar geçerli</small>
+                      </div>
+                      <div class="link-actions">
+                        <button class="copy-link-btn" (click)="copySpecialLink(link.specialUrl)">
+                          <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="delete-link-btn" (click)="deleteSpecialLink(link.id)">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="no-links">Henüz özel link oluşturulmamış</p>
+              }
+            </div>
+          }
+
+          <!-- Save Button -->
+          <div class="modal-actions">
+            <button class="save-btn" (click)="savePrivacySettings()">
+              <i class="fas fa-save"></i> Kaydet
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Create Special Link Modal -->
+  @if (showCreateLinkModal) {
+    <div class="password-modal-overlay">
+      <div class="password-modal">
+        <div class="modal-header">
+          <h3>Özel Link Oluştur</h3>
+          <button class="close-btn" (click)="closeCreateLinkModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="setting-group">
+            <label for="linkDescription">Link Açıklaması:</label>
+            <input 
+              id="linkDescription"
+              type="text" 
+              [(ngModel)]="newLinkDescription" 
+              placeholder="Ör: Etkinlik için özel link"
+              class="setting-input" />
+          </div>
+          
+          <div class="setting-group">
+            <label for="linkExpiry">Geçerlilik Süresi:</label>
+            <select id="linkExpiry" [(ngModel)]="newLinkExpiryDays" class="setting-select">
+              <option value="1">1 gün</option>
+              <option value="3">3 gün</option>
+              <option value="7">1 hafta</option>
+              <option value="30">1 ay</option>
+              <option value="90">3 ay</option>
+            </select>
+          </div>
+          
+          <div class="modal-actions">
+            <button class="save-btn" (click)="createSpecialLink()" [disabled]="!newLinkDescription.trim()">
+              <i class="fas fa-link"></i> Link Oluştur
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
   <!-- Profile Card -->
   @if (accessDenied) {
     <div class="access-denied">
@@ -77,14 +240,29 @@
   }
 
   @if (!accessDenied) {
+    <!-- Private profil kontrolü -->
+    @if (isPrivateProfile && !accessGranted) {
+      <div class="private-profile-notice">
+        <div class="private-icon">
+          <i class="fas fa-lock"></i>
+        </div>
+        <h3>Özel Profil</h3>
+        <p>Bu profil gizli olarak ayarlanmıştır. İçeriği görüntülemek için şifre gereklidir.</p>
+        <button class="unlock-btn" (click)="showPasswordModal = true">
+          <i class="fas fa-unlock"></i> Şifre Gir
+        </button>
+      </div>
+    }
+
+    @if (!isPrivateProfile || accessGranted) {
   <div class="profile-card">
     <!-- Profile Avatar & Basic Info -->
     <div class="profile-header">
       @if (profileSectionReady) {
         <div class="avatar-section">
-          @if (profile?.profilePhotoUrl || avatarFallbackReady) {
+          @if (basicInfo?.profilePhotoUrl || avatarFallbackReady) {
             <img 
-              [src]="profile?.profilePhotoUrl ? (imageBaseUrl + profile?.profilePhotoUrl + '?v=' + photoCacheBuster) : (imageBaseUrl + '/profile-photos/default.png')"
+              [src]="basicInfo?.profilePhotoUrl ? (imageBaseUrl + basicInfo?.profilePhotoUrl + '?v=' + photoCacheBuster) : (imageBaseUrl + '/profile-photos/default.png')"
               alt="Profil Fotoğrafı"
               class="profile-avatar" 
               (load)="onAvatarLoad()" 
@@ -102,34 +280,34 @@
           @if (canEdit && showPhotoActions) {
             <div class="photo-actions">
               <button class="photo-btn" (click)="fileInput.click()"><i class="fas fa-camera"></i> Ekle</button>
-              <button class="photo-btn delete" (click)="onDeletePhoto()" [disabled]="!profile?.profilePhotoUrl"><i class="fas fa-trash"></i> Sil</button>
+              <button class="photo-btn delete" (click)="onDeletePhoto()" [disabled]="!basicInfo?.profilePhotoUrl"><i class="fas fa-trash"></i> Sil</button>
               <input #fileInput type="file" (change)="onPhotoSelected($event)" accept="image/*" style="display:none" />
             </div>
           }
         </div>
       }
 
-      @if (user) {
+      @if (basicInfo) {
         <div class="profile-info">
-          <h1 class="profile-name">{{ user.fullName }}</h1>
-          <p class="profile-title">{{ user.jobTitle }}</p>
-          <p class="profile-company">{{ user.company }}</p>
+          <h1 class="profile-name">{{ basicInfo.fullName }}</h1>
+          <p class="profile-title">{{ basicInfo.jobTitle }}</p>
+          <p class="profile-company">{{ basicInfo.company }}</p>
         </div>
       }
     </div>
 
     <!-- Contact Info -->
     <div class="contact-section">
-      @if (user?.email) {
+      @if (basicInfo?.email) {
         <div class="contact-item">
           <span class="contact-icon"><i class="fas fa-envelope"></i></span>
-          <a [href]="'mailto:' + user?.email" class="contact-link">{{ user?.email }}</a>
+          <a [href]="'mailto:' + basicInfo?.email" class="contact-link">{{ basicInfo?.email }}</a>
         </div>
       }
-      @if (user?.phoneNumber) {
+      @if (basicInfo?.phoneNumber) {
         <div class="contact-item">
           <span class="contact-icon"><i class="fas fa-phone"></i></span>
-          <a [href]="'tel:' + user?.phoneNumber" class="contact-link">{{ user?.phoneNumber }}</a>
+          <a [href]="'tel:' + basicInfo?.phoneNumber" class="contact-link">{{ basicInfo?.phoneNumber }}</a>
         </div>
       }
     </div>
@@ -271,7 +449,8 @@
       </div>
     </div>
   }
-  }
+  } <!-- !isPrivateProfile || accessGranted -->
+  } <!-- !accessDenied -->
 
   <!-- Arama sayfasına git butonu (her zaman sağ alt) -->
   <div class="search-fab" (click)="navigateToSearch()" title="Ara" aria-label="Arama sayfasına git">

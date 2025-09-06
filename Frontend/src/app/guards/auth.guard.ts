@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Injectable({
@@ -11,7 +11,13 @@ export class AuthGuard implements CanActivate {
     private router: Router
   ) {}
 
-  canActivate(): boolean {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+    // Access token parametresi varsa, AuthGuard'ı atla (özel link erişimi)
+    const accessToken = route.queryParams['access'];
+    if (accessToken) {
+      return true;
+    }
+
     const token = this.authService.getToken();
     
     if (!token) {

@@ -9,9 +9,7 @@ namespace DigitalBusinessCard.Models
         [Key]
         public string UserId { get; set; } = string.Empty;
 
-        // Display preferences
-        public bool IsPublic { get; set; } = true;
-        
+        // Display preferences        
         [Range(3, 5)]
         public int GridColumns { get; set; } = 3;
         

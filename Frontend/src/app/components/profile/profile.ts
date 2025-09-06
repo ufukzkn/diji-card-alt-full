@@ -15,7 +15,7 @@ import { NotificationService } from '../../services/notification.service';
 import { LinkEditor } from '../link-editor/link-editor';
 import { CropperDialogComponent, CropperDialogData, CropperDialogResult } from './cropper-dialog/cropper-dialog.component';
 
-import { UserProfile } from '../../models/user-profile.model';
+import { UserProfile, PrivateProfileResponse, PrivateProfileAccessRequest, BasicUserInfo, FullProfileData } from '../../models/user-profile.model';
 import { User } from '../../models/user.models';
 
 @Component({
@@ -36,6 +36,7 @@ export class Profile implements OnInit {
   userId!: string;
   user?: User;
   profile?: UserProfile;
+  basicInfo?: BasicUserInfo;
   showQr = false;
   showCropper = false;
   showSettings = false;
@@ -65,6 +66,23 @@ export class Profile implements OnInit {
   showContentModal = false;
   selectedContent = { title: '', value: '', type: 'text' };
 
+  // Private profile system
+  isPrivateProfile = false;
+  accessGranted = false;
+  privateAccessMessage = '';
+  showPasswordModal = false;
+  passwordInput = '';
+  passwordError = '';
+
+  // Privacy settings modal
+  showPrivacySettings = false;
+  privacyIsPublic = true;
+  privacyPassword = '';
+  specialLinks: any[] = [];
+  showCreateLinkModal = false;
+  newLinkDescription = '';
+  newLinkExpiryDays = 7;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -80,13 +98,23 @@ export class Profile implements OnInit {
       if (!id) return;
       this.userId = id;
       
-      this.validateAccess();
-      // Token kontrolü auth service constructor ve auth interceptor'da yapılıyor
+      // Query parametrelerini kontrol et
+      this.route.queryParams.subscribe(queryParams => {
+        const accessToken = queryParams['access'];
+        if (accessToken) {
+          // Access token ile erişim
+          this.validateSpecialAccess(accessToken);
+        } else {
+          // Normal JWT token ile erişim
+          this.validateAccess();
+        }
+      });
     });
   }
 
   get profileUrl(): string {
-    return `${window.location.origin}/profil/${this.userId}`;
+    // Şu anki URL'i döndür (access token dahil olabilir)
+    return window.location.href;
   }
 
   private validateAccess(): void {
@@ -105,49 +133,151 @@ export class Profile implements OnInit {
     });
   }
 
+  private validateSpecialAccess(accessToken: string): void {
+    // Access token ile direkt verify endpoint'ini çağır
+    const request: PrivateProfileAccessRequest = {
+      accessToken: accessToken
+    };
+
+    this.profSvc.verifyPrivateAccess(this.userId, request).subscribe({
+      next: (response: PrivateProfileResponse) => {
+        if (response.accessGranted && response.profileData) {
+          // Access token ile erişim başarılı
+          this.isPrivateProfile = !response.isPublic;
+          this.accessGranted = true;
+          this.profileSectionReady = true;
+          this.canEdit = false; // Access token ile erişimde edit izni yok
+          
+          // Tam profil data'sı geldi mi kontrol et
+          const profileData = response.profileData as any;
+          if (profileData.links) {
+            // Tam profil data'sı - hem basic info hem links
+            this.profile = {
+              userId: profileData.userId,
+              fullName: profileData.fullName,
+              company: profileData.company,
+              email: profileData.email,
+              phoneNumber: profileData.phoneNumber,
+              profilePhotoUrl: profileData.profilePhotoUrl,
+              links: profileData.links || []
+            };
+            this.basicInfo = {
+              userId: profileData.userId,
+              fullName: profileData.fullName,
+              company: profileData.company,
+              jobTitle: profileData.jobTitle,
+              email: profileData.email,
+              phoneNumber: profileData.phoneNumber,
+              profilePhotoUrl: profileData.profilePhotoUrl
+            };
+          } else {
+            // Sadece basic info
+            this.basicInfo = response.profileData as BasicUserInfo;
+          }
+          
+          // If no custom photo, allow default after a tiny delay to avoid layout shift
+          if (!this.basicInfo?.profilePhotoUrl) {
+            setTimeout(() => { this.avatarFallbackReady = true; }, 30);
+          }
+
+          // User preferences'ları da yükle (view mode için)
+          this.loadUserPreferences();
+        } else {
+          // Erişim reddedildi
+          this.accessDenied = true;
+          this.privateAccessMessage = response.message || 'Bu profil özeldir.';
+          this.isPrivateProfile = true;
+          this.profileSectionReady = true;
+        }
+      },
+      error: (err) => {
+        console.error('Access token ile erişim hatası:', err);
+        this.accessDenied = true;
+        this.privateAccessMessage = 'Erişim linki geçersiz veya süresi dolmuş.';
+        this.isPrivateProfile = true;
+        this.profileSectionReady = true;
+      }
+    });
+  }
+
   onLangChange(event: any) {
     this.selectedLang = event.target.value;
     // Burada ileride i18n desteği eklenebilir
   }
 
   private loadDataWithPrivacy(): void {
-    this.userSvc.getById(this.userId).subscribe({
-      next: u => {
-        this.user = u;
-        // Backend'den preferences'ları da çek
-        this.userSvc.getPreferences(this.userId).subscribe({
-          next: (prefs: UserPreferences) => {
-            // Preferences'ları uygula
-            this.linkViewMode = prefs.viewMode === 'grid' ? 'grid' : 'list';
-            this.gridColumns = prefs.gridColumns || 3;
-          },
-          error: () => {
-            // Default values kalır
-            console.log('Preferences yüklenemedi, default değerler kullanılıyor');
+    // Önce basic info'yu güvenli endpoint ile çek
+    this.profSvc.getBasicInfo(this.userId).subscribe({
+      next: (response: PrivateProfileResponse) => {
+        if (response.accessGranted && response.profileData) {
+          // Erişim var, basic bilgileri göster
+          this.basicInfo = response.profileData as BasicUserInfo;
+          this.isPrivateProfile = !response.isPublic;
+          this.accessGranted = true;
+          this.profileSectionReady = true;
+          
+          // If no custom photo, allow default after a tiny delay to avoid layout shift
+          if (!this.basicInfo?.profilePhotoUrl) {
+            setTimeout(() => { this.avatarFallbackReady = true; }, 30);
           }
-        });
-        
-        // IsPublic artık UserPreferences tablosunda - backend'de kontrol ediliyor
-        // Frontend'te sadece canEdit kontrolü yeterli
-        this.profSvc.get(this.userId).subscribe({
-          next: p => {
-            this.profile = p;
-            this.profileSectionReady = true;
-            // If no custom photo, allow default after a tiny delay to avoid layout shift
-            if (!p?.profilePhotoUrl) {
-              setTimeout(() => { this.avatarFallbackReady = true; }, 30);
-            }
-          },
-          error: _ => {
-            // Profile erişimi reddedildi - muhtemelen private profil
-            this.accessDenied = true;
-            this.profileSectionReady = true;
+
+          // Eğer erişim varsa, links bilgilerini de çek
+          if (response.accessGranted) {
+            this.loadLinksData();
           }
-        });
+        } else {
+          // Erişim yok, private profil modal'ı göster
+          this.isPrivateProfile = true;
+          this.accessGranted = false;
+          this.privateAccessMessage = response.message;
+          this.showPasswordModal = true;
+          this.profileSectionReady = true;
+        }
       },
       error: _ => {
+        // Profile erişimi reddedildi
         this.accessDenied = true;
         this.profileSectionReady = true;
+      }
+    });
+
+    // Preferences'ları yükle
+    this.loadUserPreferences();
+  }
+
+  private loadUserPreferences(): void {
+    // Preferences'ları da çek (edit mode için gerekli)
+    this.userSvc.getPreferences(this.userId).subscribe({
+      next: (prefs: UserPreferences) => {
+        // Preferences'ları uygula
+        this.linkViewMode = prefs.viewMode === 'grid' ? 'grid' : 'list';
+        this.gridColumns = prefs.gridColumns || 3;
+      },
+      error: () => {
+        // Default values kalır
+        console.log('Preferences yüklenemedi, default değerler kullanılıyor');
+      }
+    });
+  }
+
+  private loadLinksData(): void {
+    // Links verilerini güvenli endpoint ile çek
+    this.profSvc.getWithPrivacyCheck(this.userId).subscribe({
+      next: (response: PrivateProfileResponse) => {
+        if (response.accessGranted && response.profileData) {
+          // Type check: eğer links property'si varsa UserProfile, yoksa BasicUserInfo
+          if ('links' in response.profileData) {
+            this.profile = response.profileData as UserProfile;
+            console.log('Links yüklendi:', this.profile.links?.length || 0, 'adet');
+          } else {
+            console.log('Response UserProfile değil, BasicUserInfo:', response.profileData);
+          }
+        } else {
+          console.log('Links erişimi reddedildi:', response.message);
+        }
+      },
+      error: (err) => {
+        console.error('Links yükleme hatası:', err);
       }
     });
   }
@@ -211,21 +341,24 @@ export class Profile implements OnInit {
       this.profSvc.uploadPhoto(this.userId, formData).subscribe({
       next: () => {
         // Refresh only photo info; avoid full reload
-        this.profSvc.get(this.userId).subscribe(p => {
-          if (this.profile) {
-            this.profile.profilePhotoUrl = p.profilePhotoUrl;
-          } else {
-            this.profile = p;
-          }
-          this.avatarLoaded = false;
-          this.photoCacheBuster = Date.now();
-          // allow image element to re-bind
-          setTimeout(() => {
-            // If no photo returned, enable fallback
-            if (!this.profile?.profilePhotoUrl) {
-              this.avatarFallbackReady = true;
+        this.profSvc.getBasicInfo(this.userId).subscribe(response => {
+          if (response.accessGranted && response.profileData) {
+            const basicInfo = response.profileData as BasicUserInfo;
+            if (this.basicInfo) {
+              this.basicInfo.profilePhotoUrl = basicInfo.profilePhotoUrl;
+            } else {
+              this.basicInfo = basicInfo;
             }
-          });
+            this.avatarLoaded = false;
+            this.photoCacheBuster = Date.now();
+            // allow image element to re-bind
+            setTimeout(() => {
+              // If no photo returned, enable fallback
+              if (!this.basicInfo?.profilePhotoUrl) {
+                this.avatarFallbackReady = true;
+              }
+            });
+          }
         });
       },
       error: err => alert('Fotoğraf yüklenemedi: ' + (err?.error?.message || err.message))
@@ -233,7 +366,7 @@ export class Profile implements OnInit {
   }
 
   onDeletePhoto() {
-    if (!this.profile?.profilePhotoUrl) return;
+    if (!this.basicInfo?.profilePhotoUrl) return;
     
     if (!confirm('Profil fotoğrafını silmek istediğinizden emin misiniz?')) {
       return;
@@ -242,8 +375,8 @@ export class Profile implements OnInit {
     this.profSvc.deletePhoto(this.userId).subscribe({
       next: () => {
         // Just clear local state & show fallback without full reload
-        if (this.profile) {
-          this.profile.profilePhotoUrl = '';
+        if (this.basicInfo) {
+          this.basicInfo.profilePhotoUrl = '';
         }
         this.avatarLoaded = false;
         this.avatarFallbackReady = true;
@@ -256,29 +389,50 @@ export class Profile implements OnInit {
   }
 
   shareProfile() {
-    const profileUrl = `${window.location.origin}/profil/${this.userId}`;
+    console.log('Share button clicked!'); // Debug
+    const profileUrl = window.location.href; // Şu anki URL (access token dahil olabilir)
     
-    if (navigator.share) {
+    // Local development'ta navigator.share çalışmayabilir, direkt clipboard'a kopyala
+    if (navigator.share && window.location.protocol === 'https:') {
+      console.log('Using navigator.share'); // Debug
       navigator.share({
-        title: `${this.user?.fullName} - Diji-Card Profili`,
-        text: `${this.user?.fullName} adlı kullanıcının dijital kartvizitini görüntüleyin`,
+        title: `${this.basicInfo?.fullName} - Diji-Card Profili`,
+        text: `${this.basicInfo?.fullName} adlı kullanıcının dijital kartvizitini görüntüleyin`,
         url: profileUrl
+      }).catch(err => {
+        console.log('Share failed:', err);
+        this.copyToClipboardFallback(profileUrl);
       });
     } else {
-      // Fallback: Clipboard'a kopyala
-      navigator.clipboard.writeText(profileUrl).then(() => {
-        alert('Profil bağlantısı panoya kopyalandı!');
-      }).catch(() => {
-        // Fallback for older browsers
-        const textArea = document.createElement('textarea');
-        textArea.value = profileUrl;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        alert('Profil bağlantısı panoya kopyalandı!');
-      });
+      console.log('Using clipboard fallback'); // Debug
+      this.copyToClipboardFallback(profileUrl);
     }
+  }
+
+  private copyToClipboardFallback(url: string) {
+    // Clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(url).then(() => {
+        this.notificationService.showToast('Profil bağlantısı panoya kopyalandı!', 'success');
+      }).catch(() => {
+        this.oldSchoolCopy(url);
+      });
+    } else {
+      this.oldSchoolCopy(url);
+    }
+  }
+
+  private oldSchoolCopy(url: string) {
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = url;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    this.notificationService.showToast('Profil bağlantısı panoya kopyalandı!', 'success');
   }
 
   logout() {
@@ -499,6 +653,187 @@ export class Profile implements OnInit {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('tokenExpiry');
     this.router.navigate(['/login']);
+  }
+
+  // Private profile methods
+  submitPassword(): void {
+    if (!this.passwordInput.trim()) {
+      this.notificationService.showToast('Lütfen şifre girin', 'error');
+      return;
+    }
+
+    const request: PrivateProfileAccessRequest = {
+      authCode: '', // Token'dan gelecek
+      password: this.passwordInput
+    };
+
+    // Yeni endpoint kullan - hem basic info hem links birlikte gelsin
+    this.profSvc.verifyPrivateAccessFull(this.userId, request).subscribe({
+      next: (response: PrivateProfileResponse) => {
+        if (response.accessGranted && response.profileData) {
+          // Şifre doğru, tam profil geldi (FullProfileData)
+          const fullData = response.profileData as FullProfileData;
+          
+          // Basic bilgileri ayır
+          this.basicInfo = {
+            userId: fullData.userId,
+            fullName: fullData.fullName,
+            company: fullData.company,
+            jobTitle: fullData.jobTitle,
+            email: fullData.email,
+            phoneNumber: fullData.phoneNumber,
+            profilePhotoUrl: fullData.profilePhotoUrl
+          };
+
+          // Profile bilgilerini ayır
+          this.profile = {
+            userId: fullData.userId,
+            links: fullData.links || [],
+            profilePhotoUrl: fullData.profilePhotoUrl
+          };
+          
+          this.accessGranted = true;
+          this.showPasswordModal = false;
+          this.passwordInput = '';
+          this.notificationService.showToast('Erişim başarılı!', 'success');
+          
+          // If no custom photo, allow default after a tiny delay to avoid layout shift
+          if (!this.basicInfo?.profilePhotoUrl) {
+            setTimeout(() => { this.avatarFallbackReady = true; }, 30);
+          }
+
+          console.log('Şifre ile tam profil yüklendi - Links:', this.profile?.links?.length || 0, 'adet');
+        } else {
+          // Şifre yanlış
+          this.notificationService.showToast(response.message, 'error');
+          this.passwordInput = '';
+        }
+      },
+      error: (err) => {
+        this.notificationService.showToast('Bir hata oluştu: ' + (err?.error?.message || err.message), 'error');
+        this.passwordInput = '';
+      }
+    });
+  }
+
+  closePasswordModal(): void {
+    this.showPasswordModal = false;
+    this.passwordInput = '';
+    // Private profil ise ve erişim yoksa search'e yönlendir
+    if (this.isPrivateProfile && !this.accessGranted) {
+      this.router.navigate(['/search']);
+    }
+  }
+
+  // Privacy Settings Methods
+  openPrivacySettings(): void {
+    this.showPrivacySettings = true;
+    // Mevcut ayarları yükle
+    this.privacyIsPublic = !this.isPrivateProfile;
+    this.loadSpecialLinks();
+  }
+
+  closePrivacySettings(): void {
+    this.showPrivacySettings = false;
+    this.privacyPassword = '';
+    this.specialLinks = [];
+  }
+
+  savePrivacySettings(): void {
+    const settings: any = {
+      isPublic: this.privacyIsPublic
+    };
+
+    // Sadece private profile ise password gönder
+    if (!this.privacyIsPublic && this.privacyPassword) {
+      settings.privateAccessPassword = this.privacyPassword;
+    }
+    // Public'e çekerken password'u hiç gönderme (mevcut değeri korunsun)
+
+    this.profSvc.updatePrivacySettings(this.userId, settings).subscribe({
+      next: () => {
+        this.notificationService.showToast('Gizlilik ayarları kaydedildi!', 'success');
+        this.isPrivateProfile = !this.privacyIsPublic;
+        this.closePrivacySettings();
+      },
+      error: (err) => {
+        this.notificationService.showToast('Hata: ' + (err?.error?.message || err.message), 'error');
+      }
+    });
+  }
+
+  loadSpecialLinks(): void {
+    this.profSvc.getSpecialLinks(this.userId).subscribe({
+      next: (links) => {
+        this.specialLinks = links;
+      },
+      error: (err) => {
+        console.error('Özel linkler yüklenemedi:', err);
+      }
+    });
+  }
+
+  openCreateLinkModal(): void {
+    this.showCreateLinkModal = true;
+    this.newLinkDescription = '';
+    this.newLinkExpiryDays = 7;
+  }
+
+  closeCreateLinkModal(): void {
+    this.showCreateLinkModal = false;
+  }
+
+  createSpecialLink(): void {
+    if (!this.newLinkDescription.trim()) {
+      this.notificationService.showToast('Lütfen link açıklaması girin', 'error');
+      return;
+    }
+
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + this.newLinkExpiryDays);
+
+    const request = {
+      description: this.newLinkDescription,
+      expiryDate: expiryDate.toISOString()
+    };
+
+    this.profSvc.createSpecialLink(this.userId, request).subscribe({
+      next: (response) => {
+        this.notificationService.showToast('Özel link oluşturuldu!', 'success');
+        this.loadSpecialLinks();
+        this.closeCreateLinkModal();
+        
+        // Linki panoya kopyala
+        navigator.clipboard.writeText(response.specialUrl).then(() => {
+          this.notificationService.showToast('Link panoya kopyalandı!', 'success');
+        });
+      },
+      error: (err) => {
+        this.notificationService.showToast('Hata: ' + (err?.error?.message || err.message), 'error');
+      }
+    });
+  }
+
+  copySpecialLink(url: string): void {
+    navigator.clipboard.writeText(url).then(() => {
+      this.notificationService.showToast('Link panoya kopyalandı!', 'success');
+    });
+  }
+
+  deleteSpecialLink(linkId: number): void {
+    if (!confirm('Bu özel linki silmek istediğinizden emin misiniz?')) {
+      return;
+    }
+
+    this.profSvc.deleteSpecialLink(this.userId, linkId).subscribe({
+      next: () => {
+        this.notificationService.showToast('Özel link silindi!', 'success');
+        this.loadSpecialLinks();
+      },
+      error: (err) => {
+        this.notificationService.showToast('Hata: ' + (err?.error?.message || err.message), 'error');
+      }
+    });
   }
 
 }

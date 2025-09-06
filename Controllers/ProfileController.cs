@@ -1,9 +1,12 @@
 ﻿using diji_card_alt.Data;
 using diji_card_alt.Models;
 using diji_card_alt_full.Dtos;
+using DigitalBusinessCard.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace diji_card_alt_full.Controllers;
 
@@ -18,42 +21,60 @@ public class ProfileController : ControllerBase
     {
         var authHeader = Request.Headers["Authorization"].FirstOrDefault();
         if (authHeader == null || !authHeader.StartsWith("Bearer "))
+        {
+            Console.WriteLine("[DEBUG] Auth header yok veya Bearer ile başlamıyor");
             return null;
+        }
 
         var token = authHeader.Substring("Bearer ".Length).Trim();
         try
         {
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadJwtToken(token);
-            return jsonToken.Claims.FirstOrDefault(x => x.Type == "userId")?.Value;
+            
+            // Farklı claim isimlerini dene
+            var userId = jsonToken.Claims.FirstOrDefault(x => x.Type == "userId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                userId = jsonToken.Claims.FirstOrDefault(x => x.Type == "uid")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                userId = jsonToken.Claims.FirstOrDefault(x => x.Type == "sub")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                userId = jsonToken.Claims.FirstOrDefault(x => x.Type == "nameid")?.Value;
+            
+            Console.WriteLine($"[DEBUG] Token'dan çıkarılan userId: {userId}");
+            Console.WriteLine($"[DEBUG] Token claims: {string.Join(", ", jsonToken.Claims.Select(c => $"{c.Type}={c.Value}"))}");
+            
+            return userId;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"[DEBUG] Token parse hatası: {ex.Message}");
             return null;
         }
     }
 
     [HttpGet("{userId}")]
-    public async Task<ActionResult<UserProfileDto>> GetProfile(string userId)
+    public async Task<ActionResult<PrivateProfileResponse>> GetProfile(string userId)
     {
         // 1) Kullanıcının sabit alanları (Users tablosu)
         var user = await _ctx.Users.FindAsync(userId);
         if (user is null) return NotFound();
 
-        // 2) Privacy kontrolü - UserPreferences'tan IsPublic kontrol et
+        // 2) Privacy kontrolü - User'dan IsPublic kontrol et  
         var caller = GetTokenUserId(); // Token'dan gelen kullanıcı ID'si
-        var preferences = await _ctx.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId);
         
-        // Eğer profil private ise ve caller kendisi değilse erişimi engelle
-        if (preferences != null && !preferences.IsPublic && caller != userId)
-        {
-            return Forbid("Bu profile erişim izniniz bulunmamaktadır.");
-        }
+        Console.WriteLine($"[DEBUG GetProfile] userId: {userId}, caller: {caller}, IsPublic: {user.IsPublic}");
         
-        // Eğer preferences yoksa ve caller kendisi değilse erişimi engelle (default private)
-        if (preferences == null && caller != userId)
+        // Eğer profil private ise ve caller kendisi değilse private response döndür
+        if (!user.IsPublic && (string.IsNullOrEmpty(caller) || caller != userId))
         {
-            return Forbid("Bu profile erişim izniniz bulunmamaktadır.");
+            return Ok(new PrivateProfileResponse
+            {
+                IsPublic = false,
+                AccessGranted = false,
+                Message = "Bu profil özeldir. Erişim için şifre gereklidir.",
+                ProfileData = null
+            });
         }
 
         // 2) Dinamik linkler (UserDefinitionValues) + DefinitionName
@@ -79,7 +100,14 @@ public class ProfileController : ControllerBase
         // 4) Hepsini birleştir
         var allLinks = defaultLinks.Concat(linksFromUdvs).ToList();
 
-        return new UserProfileDto(userId, allLinks, user.ProfilePhotoUrl);
+        var profileDto = new UserProfileDto(userId, allLinks, user.ProfilePhotoUrl);
+        return Ok(new PrivateProfileResponse
+        {
+            IsPublic = user.IsPublic,
+            AccessGranted = true,
+            Message = "Erişim başarılı.",
+            ProfileData = profileDto
+        });
     }
 
     [HttpPost("{userId}/photo")]
@@ -177,5 +205,345 @@ public class ProfileController : ControllerBase
             .ToListAsync();
 
         return Ok(customDefinitionNames);
+    }
+
+    [HttpPost("{userId}/verify-access")]
+    public async Task<ActionResult<PrivateProfileResponse>> VerifyPrivateAccess(string userId, [FromBody] PrivateProfileAccessRequest request)
+    {
+        var user = await _ctx.Users.FindAsync(userId);
+        if (user is null) return NotFound();
+
+        // Eğer profil zaten public ise direkt erişim ver
+        if (user.IsPublic)
+        {
+            return await GetBasicInfoData(userId, user, user.IsPublic);
+        }
+
+        // Özel access token kontrolü (URL'den gelen)
+        if (!string.IsNullOrEmpty(request.AccessToken))
+        {
+            var accessRecord = await _ctx.PrivateProfileAccesses
+                .FirstOrDefaultAsync(p => p.UserId == userId && 
+                                         p.AccessToken == request.AccessToken && 
+                                         p.IsActive &&
+                                         (p.ExpiryDate == null || p.ExpiryDate > DateTime.UtcNow));
+
+            if (accessRecord != null)
+            {
+                return await GetFullProfileData(userId, user, false); // Private profil ama erişim var - TAM PROFİL
+            }
+        }
+
+        // Şifre kontrolü
+        if (!string.IsNullOrEmpty(request.Password))
+        {
+            if (user.PrivateAccessPassword == request.Password)
+            {
+                return await GetBasicInfoData(userId, user, false); // Private profil ama erişim var
+            }
+            else
+            {
+                return Ok(new PrivateProfileResponse
+                {
+                    IsPublic = false,
+                    AccessGranted = false,
+                    Message = "Yanlış şifre girdiniz.",
+                    ProfileData = null
+                });
+            }
+        }
+
+        return Ok(new PrivateProfileResponse
+        {
+            IsPublic = false,
+            AccessGranted = false,
+            Message = "Bu profil özeldir. Şifre veya özel link gereklidir.",
+            ProfileData = null
+        });
+    }
+
+    private Task<PrivateProfileResponse> GetBasicInfoData(string userId, User user, bool isPublic)
+    {
+        // Basic info döndür (links değil)
+        var basicInfo = new
+        {
+            userId = userId,
+            fullName = user.FullName,
+            company = user.Company,
+            jobTitle = user.JobTitle,
+            email = user.Email,
+            phoneNumber = user.PhoneNumber,
+            profilePhotoUrl = user.ProfilePhotoUrl
+        };
+
+        return Task.FromResult(new PrivateProfileResponse
+        {
+            IsPublic = isPublic,
+            AccessGranted = true,
+            Message = "Erişim başarılı.",
+            ProfileData = basicInfo
+        });
+    }
+
+    // Şifre doğrulandıktan sonra tam profil data (basic + links) döndür
+    [HttpPost("{userId}/verify-access-full")]
+    public async Task<ActionResult<PrivateProfileResponse>> VerifyPrivateAccessFull(string userId, [FromBody] PrivateProfileAccessRequest request)
+    {
+        var user = await _ctx.Users.FindAsync(userId);
+        if (user is null) return NotFound();
+
+        // Eğer profil zaten public ise direkt erişim ver
+        if (user.IsPublic)
+        {
+            return await GetFullProfileData(userId, user, user.IsPublic);
+        }
+
+        // Şifre kontrolü
+        if (!string.IsNullOrEmpty(request.Password))
+        {
+            if (user.PrivateAccessPassword == request.Password)
+            {
+                return await GetFullProfileData(userId, user, false); // Private profil ama erişim var - TAM PROFİL
+            }
+            else
+            {
+                return Ok(new PrivateProfileResponse
+                {
+                    IsPublic = false,
+                    AccessGranted = false,
+                    Message = "Yanlış şifre girdiniz.",
+                    ProfileData = null
+                });
+            }
+        }
+
+        return Ok(new PrivateProfileResponse
+        {
+            IsPublic = false,
+            AccessGranted = false,
+            Message = "Bu profil özeldir. Şifre gereklidir.",
+            ProfileData = null
+        });
+    }
+
+    private async Task<PrivateProfileResponse> GetFullProfileData(string userId, User user, bool isPublic)
+    {
+        // Dinamik linkler
+        var linksFromUdvs = await (from udv in _ctx.UserDefinitionValues
+                                  join d in _ctx.Definitions on udv.DefinitionId equals d.DefinitionId
+                                  where udv.UserId == userId
+                                  select new LinkDto(
+                                      udv.DefinitionId == 11 ? udv.CustomDefinitionName ?? "Custom" : d.DefinitionName, 
+                                      udv.Value, 
+                                      udv.SortId))
+                                  .ToListAsync();
+
+        // Sabit alanları DefinitionName'leriyle birlikte DTO'ya ekle
+        var defaultLinks = new List<LinkDto>
+        {
+            new("Full Name", user.FullName  ?? string.Empty, 0),
+            new("Company"  , user.Company   ?? string.Empty, 1),
+            new("E-mail"   , user.Email     ?? string.Empty, 2),
+            new("Phone"    , user.PhoneNumber ?? string.Empty, 3)
+        };
+
+        // Hepsini birleştir
+        var allLinks = defaultLinks.Concat(linksFromUdvs).ToList();
+
+        // Hem basic info hem links içeren combined response
+        var fullProfileData = new
+        {
+            userId = userId,
+            fullName = user.FullName,
+            company = user.Company,
+            jobTitle = user.JobTitle,
+            email = user.Email,
+            phoneNumber = user.PhoneNumber,
+            profilePhotoUrl = user.ProfilePhotoUrl,
+            links = allLinks // Links'i de ekle
+        };
+
+        return new PrivateProfileResponse
+        {
+            IsPublic = isPublic,
+            AccessGranted = true,
+            Message = "Erişim başarılı.",
+            ProfileData = fullProfileData
+        };
+    }
+
+    private async Task<PrivateProfileResponse> GetProfileData(string userId, User user, bool isPublic)
+    {
+        // Dinamik linkler
+        var linksFromUdvs = await (from udv in _ctx.UserDefinitionValues
+                                  join d in _ctx.Definitions on udv.DefinitionId equals d.DefinitionId
+                                  where udv.UserId == userId
+                                  select new LinkDto(
+                                      udv.DefinitionId == 11 ? udv.CustomDefinitionName ?? "Custom" : d.DefinitionName, 
+                                      udv.Value, 
+                                      udv.SortId))
+                                  .ToListAsync();
+
+        // Sabit alanlar
+        var defaultLinks = new List<LinkDto>
+        {
+            new("Full Name", user.FullName  ?? string.Empty, 0),
+            new("Company"  , user.Company   ?? string.Empty, 1),
+            new("E-mail"   , user.Email     ?? string.Empty, 2),
+            new("Phone"    , user.PhoneNumber ?? string.Empty, 3)
+        };
+
+        var allLinks = defaultLinks.Concat(linksFromUdvs).ToList();
+        var profileDto = new UserProfileDto(userId, allLinks, user.ProfilePhotoUrl);
+
+        return new PrivateProfileResponse
+        {
+            IsPublic = isPublic,
+            AccessGranted = true,
+            Message = "Erişim başarılı.",
+            ProfileData = profileDto
+        };
+    }
+
+    [HttpPut("{userId}/privacy-settings")]
+    public async Task<ActionResult> UpdatePrivacySettings(string userId, [FromBody] UpdatePrivacySettingsRequest request)
+    {
+        var caller = GetTokenUserId();
+        if (caller != userId) return Forbid("Sadece kendi profil ayarlarınızı değiştirebilirsiniz.");
+
+        var user = await _ctx.Users.FindAsync(userId);
+        if (user is null) return NotFound();
+
+        // User'da IsPublic'i güncelle
+        user.IsPublic = request.IsPublic;
+        
+        // Password sadece gönderildiğinde güncelle (null/empty değilse)
+        if (!string.IsNullOrEmpty(request.PrivateAccessPassword))
+        {
+            user.PrivateAccessPassword = request.PrivateAccessPassword;
+        }
+
+        await _ctx.SaveChangesAsync();
+
+        return Ok(new { Message = "Gizlilik ayarları güncellendi." });
+    }
+
+    [HttpPost("{userId}/create-special-link")]
+    public async Task<ActionResult> CreateSpecialLink(string userId, [FromBody] CreateSpecialLinkRequest request)
+    {
+        var caller = GetTokenUserId();
+        if (caller != userId) return Forbid("Sadece kendi profiliniz için özel link oluşturabilirsiniz.");
+
+        var user = await _ctx.Users.FindAsync(userId);
+        if (user is null) return NotFound();
+
+        // Random access token oluştur
+        var accessToken = Guid.NewGuid().ToString("N");
+
+        var specialAccess = new PrivateProfileAccess
+        {
+            UserId = userId,
+            AccessToken = accessToken,
+            CreatedDate = DateTime.UtcNow,
+            ExpiryDate = request.ExpiryDate,
+            IsActive = true,
+            Description = request.Description ?? "Özel erişim linki"
+        };
+
+        _ctx.PrivateProfileAccesses.Add(specialAccess);
+        await _ctx.SaveChangesAsync();
+
+        var specialUrl = $"http://localhost:4200/profil/{userId}?access={accessToken}";
+
+        return Ok(new 
+        { 
+            AccessToken = accessToken,
+            SpecialUrl = specialUrl,
+            ExpiryDate = request.ExpiryDate,
+            Description = specialAccess.Description
+        });
+    }
+
+    [HttpGet("{userId}/special-links")]
+    public async Task<ActionResult> GetSpecialLinks(string userId)
+    {
+        var caller = GetTokenUserId();
+        if (caller != userId) return Forbid("Sadece kendi özel linklerinizi görebilirsiniz.");
+
+        var links = await _ctx.PrivateProfileAccesses
+            .Where(p => p.UserId == userId && p.IsActive)
+            .Select(p => new 
+            {
+                Id = p.Id,
+                AccessToken = p.AccessToken,
+                CreatedDate = p.CreatedDate,
+                ExpiryDate = p.ExpiryDate,
+                Description = p.Description,
+                SpecialUrl = $"http://localhost:4200/profil/{userId}?access={p.AccessToken}"
+            })
+            .ToListAsync();
+
+        return Ok(links);
+    }
+
+    [HttpDelete("{userId}/special-links/{linkId}")]
+    public async Task<ActionResult> DeleteSpecialLink(string userId, int linkId)
+    {
+        var caller = GetTokenUserId();
+        if (caller != userId) return Forbid("Sadece kendi özel linklerinizi silebilirsiniz.");
+
+        var link = await _ctx.PrivateProfileAccesses.FindAsync(linkId);
+        if (link is null || link.UserId != userId) return NotFound();
+
+        link.IsActive = false; // Soft delete
+        await _ctx.SaveChangesAsync();
+
+        return Ok(new { Message = "Özel link silindi." });
+    }
+
+    [HttpGet("{userId}/basic-info")]
+    public async Task<ActionResult<PrivateProfileResponse>> GetBasicInfo(string userId)
+    {
+        // 1) Kullanıcının sabit alanları (Users tablosu)
+        var user = await _ctx.Users.FindAsync(userId);
+        if (user is null) return NotFound();
+
+        // 2) Privacy kontrolü - User'dan IsPublic kontrol et  
+        var caller = GetTokenUserId(); // Token'dan gelen kullanıcı ID'si
+        
+        Console.WriteLine($"[DEBUG] userId: {userId}, caller: {caller}, IsPublic: {user.IsPublic}");
+        
+        // Eğer profil private ise ve caller kendisi değilse private response döndür
+        // DÜZELTME: caller null ise veya caller kendisi değilse erişim reddet
+        if (!user.IsPublic && (string.IsNullOrEmpty(caller) || caller != userId))
+        {
+            return Ok(new PrivateProfileResponse
+            {
+                IsPublic = false,
+                AccessGranted = false,
+                Message = "Bu profil özeldir. Erişim için şifre gereklidir.",
+                ProfileData = null
+            });
+        }
+
+        // 3) Erişim var ise basic info'yu döndür (sadece temel bilgiler)
+        var basicInfo = new
+        {
+            userId = userId,
+            fullName = user.FullName,
+            company = user.Company,
+            jobTitle = user.JobTitle,
+            email = user.Email,
+            phoneNumber = user.PhoneNumber,
+            profilePhotoUrl = user.ProfilePhotoUrl
+        };
+
+        return Ok(new PrivateProfileResponse
+        {
+            IsPublic = user.IsPublic,
+            AccessGranted = true,
+            Message = "Erişim başarılı.",
+            ProfileData = basicInfo
+        });
     }
 }

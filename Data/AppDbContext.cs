@@ -54,11 +54,25 @@ namespace diji_card_alt.Data
             {
                 entity.HasKey(e => e.UserId);
                 entity.Property(e => e.UserId).IsRequired().HasMaxLength(50);
-                entity.Property(e => e.IsPublic).HasDefaultValue(true);
                 entity.Property(e => e.GridColumns).HasDefaultValue(3);
                 entity.Property(e => e.ViewMode).HasMaxLength(10).HasDefaultValue("list");
                 entity.Property(e => e.ThemeColor).HasMaxLength(20).HasDefaultValue("orange");
                 entity.Property(e => e.FontFamily).HasMaxLength(30).HasDefaultValue("Inter");
+            });
+
+            // PrivateProfileAccess yapılandırması
+            modelBuilder.Entity<PrivateProfileAccess>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.UserId).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.AccessToken).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.IsActive).HasDefaultValue(true);
+                entity.Property(e => e.Description).HasMaxLength(200);
+                
+                entity.HasIndex(e => e.AccessToken).IsUnique().HasDatabaseName("IX_PrivateProfileAccess_AccessToken");
+                entity.HasIndex(e => e.UserId).HasDatabaseName("IX_PrivateProfileAccess_UserId");
             });
         }
 
@@ -69,6 +83,7 @@ namespace diji_card_alt.Data
             public DbSet<UserDefinitionValue> UserDefinitionValues { get; set; }
             public DbSet<ProfileVisit> ProfileVisits { get; set; }
             public DbSet<UserPreferences> UserPreferences { get; set; }
+            public DbSet<PrivateProfileAccess> PrivateProfileAccesses { get; set; }
 
         // UserDefinitionValue kayıtları için veri bütünlüğü koruması:
         //  - DefinitionId != 11 ise CustomDefinitionName daima NULL olmalı
