@@ -1,9 +1,13 @@
 import { Injectable } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
+
+  constructor(private transloco: TranslocoService) {}
 
   // Toast notification
   showToast(message: string, type: 'success' | 'error' | 'info' = 'success'): void {
@@ -63,23 +67,35 @@ export class NotificationService {
   }
 
   // Confirmation modal
-  showConfirmation(title: string, message: string): Promise<boolean> {
+  async showConfirmation(
+    title: string,
+    message: string,
+    confirmLabel?: string,
+    cancelLabel?: string
+  ): Promise<boolean> {
+    // Ensure translations are loaded; using observable guarantees we don't inject raw keys.
+  // Always try to translate incoming title/message in case caller passed translation keys.
+  const resolvedTitle = this.transloco.translate(title);
+  const resolvedMessage = this.transloco.translate(message);
+  const yesText = confirmLabel ? this.transloco.translate(confirmLabel) : this.transloco.translate('common.buttons.yes');
+  const cancelText = cancelLabel ? this.transloco.translate(cancelLabel) : this.transloco.translate('common.buttons.cancel');
+
     return new Promise((resolve) => {
       // Create modal and append to body for proper positioning
       const overlay = document.createElement('div');
       overlay.className = 'confirm-modal-overlay';
       
-      overlay.innerHTML = `
+  overlay.innerHTML = `
         <div class="confirm-modal">
           <div class="confirm-header">
-            <h3>${title}</h3>
+    <h3>${resolvedTitle}</h3>
           </div>
           <div class="confirm-body">
-            <p>${message}</p>
+    <p>${resolvedMessage}</p>
           </div>
           <div class="confirm-actions">
-            <button class="confirm-btn confirm">Evet</button>
-            <button class="confirm-btn cancel">İptal</button>
+            <button class="confirm-btn confirm">${yesText}</button>
+            <button class="confirm-btn cancel">${cancelText}</button>
           </div>
         </div>
       `;

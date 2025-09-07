@@ -1,6 +1,7 @@
 import { Component, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
+import { TranslocoModule } from '@jsverse/transloco';
 
 export type CropperDialogData = {
   image: File;
@@ -16,11 +17,11 @@ export type CropperDialogResult = {
 @Component({
   selector: 'app-cropper-dialog',
   standalone: true,
-  imports: [CommonModule, ImageCropperComponent],
+  imports: [CommonModule, ImageCropperComponent, TranslocoModule],
   template: `
     <div class="cropper-modal">
       <div class="cropper-content">
-        <h2>Profil Fotoğrafını Kırp</h2>
+        <h2>{{ 'profile.photo.cropTitle' | transloco }}</h2>
         <div class="cropper-container">
           <image-cropper
             [maintainAspectRatio]="true"
@@ -33,8 +34,10 @@ export type CropperDialogResult = {
           ></image-cropper>
         </div>
         <div class="cropper-actions">
-          <button class="photo-btn delete" (click)="cancel()">İptal</button>
-          <button class="photo-btn" (click)="done()" [disabled]="!result()">Kaydet</button>
+        <button class="photo-btn" (click)="done()" [disabled]="!result()">{{ 'common.buttons.save' | transloco }}</button>  
+        <button class="photo-btn delete" (click)="cancel()">{{ 'common.buttons.cancel' | transloco }}</button>
+          
+
         </div>
       </div>
     </div>

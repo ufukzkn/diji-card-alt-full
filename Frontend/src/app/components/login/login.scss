@@ -7,6 +7,17 @@
   padding: 20px;
 }
 
+/* Centered language switcher inside card */
+.card-lang-switcher {
+  position: absolute;
+  top: .75rem;
+  right: .75rem;
+  margin: 0;
+  display: flex;
+  justify-content: flex-end;
+  z-index: 2;
+}
+
 .login-card {
   background: white;
   padding: 2rem;
@@ -14,6 +25,7 @@
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   width: 100%;
   max-width: 400px;
+  position: relative;
 }
 
 .brand-header {

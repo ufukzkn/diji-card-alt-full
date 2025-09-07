@@ -71,8 +71,10 @@ export class AuthService {
   // Global logout method with confirmation
   async logout(): Promise<void> {
     const confirmed = await this.notificationService.showConfirmation(
-      this.t.translate('common.confirm.logout.title'),
-      this.t.translate('common.confirm.logout.message')
+      'common.dialogs.logout.title',
+      'common.dialogs.logout.message',
+      'common.buttons.logout',
+      'common.buttons.cancel'
     );
     
     if (confirmed) {

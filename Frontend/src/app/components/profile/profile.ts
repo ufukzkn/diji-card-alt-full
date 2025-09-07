@@ -79,7 +79,7 @@ export class Profile implements OnInit {
   isPrivateProfile = false;
   accessGranted = false;
   privateAccessMessage = '';
-  showPasswordModal = false;
+  showInlinePassword = false; // replaces removed modal
   passwordInput = '';
   passwordError = '';
 
@@ -254,7 +254,7 @@ export class Profile implements OnInit {
           this.accessGranted = false;
           // Use backend message if localized; otherwise fallback to default i18n key
           this.privateAccessMessage = response.message || this.t.translate('profile.private.needPassword');
-          this.showPasswordModal = true;
+            this.showInlinePassword = false; // replaces removed modal
           this.profileSectionReady = true;
         }
       },
@@ -717,7 +717,7 @@ export class Profile implements OnInit {
           };
           
           this.accessGranted = true;
-          this.showPasswordModal = false;
+                this.showInlinePassword = false; // replaces removed modal
           this.passwordInput = '';
           this.notificationService.showToast(this.t.translate('profile.msg.access.granted'), 'success');
           
@@ -740,14 +740,7 @@ export class Profile implements OnInit {
     });
   }
 
-  closePasswordModal(): void {
-    this.showPasswordModal = false;
-    this.passwordInput = '';
-    // Private profil ise ve erişim yoksa search'e yönlendir
-    if (this.isPrivateProfile && !this.accessGranted) {
-      this.router.navigate(['/search']);
-    }
-  }
+  // Modal kapatma fonksiyonu kaldırıldı (artık inline giriş var)
 
   // Privacy Settings Methods
   openPrivacySettings(): void {

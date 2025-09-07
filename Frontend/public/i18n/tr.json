@@ -1,6 +1,24 @@
 {
   "app": { "brand": { "title": "Digital Business Card", "subtitle": "Dijital kartvizit platformu" } },
-  "common": { "errors": { "userNotFound": "Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.", "tokenParse": "Token hatası. Lütfen tekrar giriş yapın.", "sessionMissing": "Oturum bulunamadı. Lütfen giriş yapın.", "generic": "Bir hata oluştu:", "prefix": "Hata:", "tokenFetch": "Token alırken hata oluştu." }, "copied": "Panoya kopyalandı!", "confirm": { "logout": { "title": "Çıkış Yap", "message": "Çıkış yapmak istediğinizden emin misiniz?" } } },
+  "common": {
+    "errors": { "userNotFound": "Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.", "tokenParse": "Token hatası. Lütfen tekrar giriş yapın.", "sessionMissing": "Oturum bulunamadı. Lütfen giriş yapın.", "generic": "Bir hata oluştu:", "prefix": "Hata:", "tokenFetch": "Token alırken hata oluştu." },
+    "copied": "Panoya kopyalandı!",
+    "buttons": {
+      "yes": "Evet",
+      "no": "Hayır",
+      "ok": "Tamam",
+      "cancel": "İptal",
+      "save": "Kaydet",
+      "delete": "Sil",
+      "close": "Kapat",
+      "logout": "Çıkış Yap"
+    },
+    "dialogs": {
+      "logout": { "title": "Çıkış Yap", "message": "Çıkış yapmak istediğinize emin misiniz?" },
+      "delete": { "title": "Öğeyi Sil", "message": "Bu işlem geri alınamaz. Devam edilsin mi?" },
+      "generic": { "title": "Emin misiniz?", "message": "Lütfen işlemi onaylayın." }
+    }
+  },
   "session": { "timeout": "Oturumunuz zaman aşımına uğradı. Lütfen tekrar giriş yapın." },
   "profile": {
     "qr": { "title": "Profil QR Kodu" },

@@ -42,7 +42,7 @@ Bu özellikler sayesinde, fiziksel kartvizitlere gerek kalmadan, profesyonel ve 
 - [x] **Private Profil Sistemi** - Şifre korumalı erişim
 - [x] **Özel Erişim Linkleri** - Zaman sınırlı paylaşım
 - [x] **Responsive Tasarım** - Tüm cihazlarda uyumlu
-- [ ] **Multi-language Support** - Çoklu dil desteği
+- [x] **Multi-language Support** - Çoklu dil desteği
 - [x] **Grid/List Layout** - Esnek görünüm seçenekleri
 - [ ] **Profil Ziyaretçi Loglaması** - Analytics ve istatistikler
 

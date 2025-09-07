@@ -1,9 +1,6 @@
 <!-- src/app/components/profile/profile.html -->
 <div class="profile-page">
-  <!-- Language Switcher centered at top -->
-  <div class="profile-lang-wrapper">
-    <app-language-switcher></app-language-switcher>
-  </div>
+  <!-- (Language switcher moved inside profile card) -->
 
   <!-- QR Code Button (Top Left) -->
   <div class="qr-fab" [class.active]="showQr" (click)="showQr = !showQr">
@@ -69,37 +66,11 @@
     </div>
   }
 
-  <!-- Private Profile Password Modal (removed automatic duplicate rendering: only opened by button) -->
-  @if (showPasswordModal) {
-    <div class="password-modal-overlay">
-      <div class="password-modal">
-        <div class="modal-header">
-          <h3>{{ 'profile.private.title' | transloco }}</h3>
-          <button class="close-btn" (click)="closePasswordModal()">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p class="modal-message">{{ privateAccessMessage }}</p>
-          <div class="password-input-group">
-            <input 
-              type="password" 
-              [(ngModel)]="passwordInput" 
-              [placeholder]="'profile.private.enterPassword' | transloco"
-              class="password-input"
-              (keyup.enter)="submitPassword()" />
-            <button class="submit-btn" (click)="submitPassword()" [disabled]="!passwordInput.trim()">
-              <i class="fas fa-unlock"></i> {{ 'profile.private.access' | transloco }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  }
+  <!-- Password modal removed -->
 
   <!-- Privacy Settings Modal -->
   @if (showPrivacySettings) {
-    <div class="password-modal-overlay">
+    <div class="privacy-settings-modal-overlay">
       <div class="privacy-modal">
         <div class="modal-header">
           <h3>{{ 'profile.privacyModal.title' | transloco }}</h3>
@@ -184,8 +155,8 @@
 
   <!-- Create Special Link Modal (enhanced styling + manual expiry) -->
   @if (showCreateLinkModal) {
-    <div class="password-modal-overlay">
-      <div class="password-modal create-link-modal">
+    <div class="privacy-settings-modal-overlay">
+      <div class="privacy-modal create-link-modal">
         <div class="modal-header gradient-green">
           <h3><i class="fas fa-magic"></i> {{ 'profile.privacyModal.createLinkTitle' | transloco }}</h3>
           <button class="close-btn" (click)="closeCreateLinkModal()">
@@ -261,14 +232,24 @@
         </div>
         <h3>{{ 'profile.private.title' | transloco }}</h3>
         <p>{{ 'profile.private.needPassword' | transloco }}</p>
-        <button class="unlock-btn" (click)="showPasswordModal = true">
-          <i class="fas fa-unlock"></i> {{ 'profile.private.unlock' | transloco }}
-        </button>
+        <div class="unlock-area" *ngIf="!showInlinePassword">
+          <button class="unlock-btn" (click)="showInlinePassword = true">
+            <i class="fas fa-unlock"></i> {{ 'profile.private.unlock' | transloco }}
+          </button>
+        </div>
+        <div class="inline-password-wrapper" *ngIf="showInlinePassword">
+          <input type="password" class="inline-pass-input" [(ngModel)]="passwordInput" (keyup.enter)="submitPassword()" [placeholder]="'profile.private.enterPassword' | transloco" />
+          <button class="inline-pass-submit" (click)="submitPassword()" [disabled]="!passwordInput.trim()"><i class="fas fa-arrow-right"></i></button>
+          <button class="inline-pass-cancel" (click)="showInlinePassword=false; passwordInput=''"><i class="fas fa-times"></i></button>
+        </div>
       </div>
     }
 
     @if (!isPrivateProfile || accessGranted) {
   <div class="profile-card">
+    <div class="card-lang-center">
+      <app-language-switcher></app-language-switcher>
+    </div>
     <!-- Profile Avatar & Basic Info -->
     <div class="profile-header">
       @if (profileSectionReady) {
