@@ -2108,7 +2108,7 @@
   box-shadow: var(--shadow-elevate);
   transition: all .35s cubic-bezier(.4,0,.2,1);
   z-index: 1000;
-  animation: qrFloat 4s ease-in-out infinite;
+  /* removed continuous float animation for calmer UI */
   backdrop-filter: blur(6px);
 
   &:active {
@@ -2134,13 +2134,24 @@
     transform: translateY(-3px) scale(1.05);
     box-shadow: 0 8px 24px rgba(0,0,0,.25), 0 0 0 4px rgba(59,130,246,.15);
     .qr-icon img { opacity: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,.25)); }
+    /* Icon pop animation */
+    .qr-icon { animation: qrIconTwist .55s cubic-bezier(.4,0,.2,1); }
   }
+
+  /* Ripple pulse */
+  &.active::after, &.active::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(59,130,246,.35), rgba(59,130,246,0) 70%);
+    animation: qrPulse 1.15s ease-out forwards;
+    pointer-events: none;
+  }
+  &.active::before { animation-delay: .15s; filter: blur(2px); }
 }
 
-@keyframes qrFloat {
-  0%,100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
+/* qrFloat keyframes removed */
 
 .qr-display {
   position: fixed;
@@ -2157,11 +2168,13 @@
   transition: all 0.3s ease;
   z-index: 999;
   max-width: 200px;
+  will-change: transform, opacity;
 
   &.show {
     opacity: 1;
     visibility: visible;
     transform: translateY(0) scale(1);
+    animation: qrPopIn .5s cubic-bezier(.22,1.12,.42,1) both;
   }
 
   .qr-title {
@@ -2182,6 +2195,9 @@
       border-radius: 8px;
       width: 150px !important;
       height: 150px !important;
+  opacity: 0;
+  transform: scale(.9);
+  animation: qrMatrixFade .6s .1s ease forwards;
     }
   }
 }
@@ -2210,6 +2226,7 @@
 
     &.show {
       transform: translate(-50%, -50%) translateY(0) scale(1);
+  animation: qrPopIn .55s cubic-bezier(.22,1.12,.42,1) both;
     }
 
     .qr-code canvas {
@@ -2217,4 +2234,34 @@
       height: 180px !important;
     }
   }
+}
+
+/* QR Animations */
+@keyframes qrPopIn {
+  0% { opacity:0; transform: translateY(12px) scale(.85) rotate(-2deg); filter:blur(6px); }
+  55% { opacity:1; transform: translateY(-4px) scale(1.03) rotate(1deg); filter:blur(0); }
+  100% { opacity:1; transform: translateY(0) scale(1) rotate(0); }
+}
+@keyframes qrPulse {
+  0% { transform: scale(.6); opacity:.55; }
+  60% { opacity:.18; }
+  100% { transform: scale(1.9); opacity:0; }
+}
+@keyframes qrIconTwist {
+  0% { transform: scale(.6) rotate(-14deg); opacity:.4; }
+  60% { transform: scale(1.18) rotate(6deg); opacity:1; }
+  100% { transform: scale(1) rotate(0); opacity:1; }
+}
+@keyframes qrMatrixFade {
+  0% { opacity:0; transform:scale(.85); filter:blur(10px) brightness(1.6); }
+  70% { opacity:1; filter:blur(1px) brightness(1.05); }
+  100% { opacity:1; transform:scale(1); filter:blur(0) brightness(1); }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .qr-fab, .qr-display, .qr-display.show, .qr-fab.active .qr-icon, .qr-fab.active::after, .qr-fab.active::before, .qr-display .qr-code canvas { animation: none !important; transition: none !important; }
+  .qr-display { opacity:1; visibility:visible; transform:none; }
+  .qr-fab.active { transform:none; }
+  .qr-display .qr-code canvas { opacity:1; transform:none; }
 }
