@@ -4,13 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { LanguageSwitcherComponent } from '../shared/language-switcher/language-switcher.component';
 
 @Component({
   selector: 'app-search',
   standalone: true,
   templateUrl: './search.html',
   styleUrls: ['./search.scss'],
-  imports: [CommonModule, FormsModule, RouterModule, HttpClientModule]
+  imports: [CommonModule, FormsModule, RouterModule, HttpClientModule, TranslocoModule, LanguageSwitcherComponent]
 })
 export class Search implements OnInit {
   searchQuery = '';
@@ -22,7 +24,8 @@ export class Search implements OnInit {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private auth: AuthService
+  private auth: AuthService,
+  private t: TranslocoService
   ) { }
 
   ngOnInit(): void {
@@ -38,7 +41,7 @@ export class Search implements OnInit {
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Kullanıcılar yüklenirken hata:', error);
+          console.error(this.t.translate('search.errors.loadUsers'), error);
           this.isLoading = false;
         }
       });
@@ -90,17 +93,17 @@ export class Search implements OnInit {
           this.router.navigate(['/profil', myUserId]);
         } else {
           console.error('Token\'da userId bulunamadı:', payload);
-          alert('Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+          alert(this.t.translate('common.errors.userNotFound'));
           this.router.navigate(['/login']);
         }
       } catch (error) {
         console.error('Token parse hatası:', error);
-        alert('Token hatası. Lütfen tekrar giriş yapın.');
+  alert(this.t.translate('common.errors.tokenParse'));
         this.router.navigate(['/login']);
       }
     } else {
       console.error('Token bulunamadı');
-      alert('Oturum bulunamadı. Lütfen giriş yapın.');
+  alert(this.t.translate('common.errors.sessionMissing'));
       this.router.navigate(['/login']);
     }
   }

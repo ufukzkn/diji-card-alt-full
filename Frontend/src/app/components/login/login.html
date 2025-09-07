@@ -1,15 +1,18 @@
 <div class="login-container">
+  <div class="lang-floating">
+    <app-language-switcher></app-language-switcher>
+  </div>
   <div class="login-card">
     <div class="brand-header">
   <img src="/logo.png" alt="Logo" class="brand-logo" loading="lazy" />
-      <h1 class="brand-title">Digital Business Card</h1>
-      <p class="brand-subtitle">Dijital kartvizit platformu</p>
+  <h1 class="brand-title">{{ 'app.brand.title' | transloco }}</h1>
+  <p class="brand-subtitle">{{ 'app.brand.subtitle' | transloco }}</p>
     </div>
-    <h2>Giriş Yap</h2>
+  <h2>{{ 'login.title' | transloco }}</h2>
     
     <form (ngSubmit)="onLogin()" #loginForm="ngForm">
       <div class="form-group">
-        <label for="kullaniciAdi">Kullanıcı Adı / E-posta:</label>
+  <label for="kullaniciAdi">{{ 'login.form.username' | transloco }}</label>
         <input 
           type="email" 
           id="kullaniciAdi" 
@@ -17,11 +20,11 @@
           [(ngModel)]="loginData.kullaniciAdi" 
           required 
           class="form-control"
-          placeholder="ornek@email.com">
+          [placeholder]="'login.form.usernamePh' | transloco">
       </div>
 
       <div class="form-group">
-        <label for="sifre">Şifre:</label>
+  <label for="sifre">{{ 'login.form.password' | transloco }}</label>
         <input 
           type="password" 
           id="sifre" 
@@ -29,14 +32,14 @@
           [(ngModel)]="loginData.sifre" 
           required 
           class="form-control"
-          placeholder="Şifrenizi girin">
+          [placeholder]="'login.form.passwordPh' | transloco">
       </div>
 
       <button 
         type="submit" 
         [disabled]="!loginForm.form.valid || isLoading"
         class="btn btn-primary btn-block">
-        {{ isLoading ? 'Giriş yapılıyor...' : 'Giriş Yap' }}
+  {{ isLoading ? ( 'login.form.loading' | transloco ) : ( 'login.form.submit' | transloco ) }}
       </button>
     </form>
 
@@ -55,9 +58,9 @@
     <!-- Test için örnek kullanıcı bilgileri -->
     <div class="test-info">
       <small class="text-muted">
-        <strong>Test için:</strong><br>
-        E-posta: rafasilva&#64;gmail.com<br>
-        Şifre: Deneme123.
+  <strong>{{ 'login.test.title' | transloco }}</strong><br>
+  {{ 'login.test.email' | transloco }}: rafasilva&#64;gmail.com<br>
+  {{ 'login.test.password' | transloco }}: Deneme123.
       </small>
     </div>
   </div>

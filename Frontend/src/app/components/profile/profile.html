@@ -1,25 +1,21 @@
 <!-- src/app/components/profile/profile.html -->
 <div class="profile-page">
-  <!-- Language Selector (Top Center) -->
-  <div class="language-selector">
-    <select [(ngModel)]="selectedLang" (change)="onLangChange($event)" class="lang-select">
-      <option value="tr">🇹🇷 Türkçe</option>
-      <option value="en">🇺🇸 English</option>
-      <option value="de">🇩🇪 Deutsch</option>
-    </select>
+  <!-- Language Switcher centered at top -->
+  <div class="profile-lang-wrapper">
+    <app-language-switcher></app-language-switcher>
   </div>
 
   <!-- QR Code Button (Top Left) -->
   <div class="qr-fab" [class.active]="showQr" (click)="showQr = !showQr">
     <div class="qr-icon">
-      <img src="https://cdn-icons-png.flaticon.com/512/2313/2313147.png" alt="QR Kod" width="24" height="24" />
+  <img src="https://cdn-icons-png.flaticon.com/512/2313/2313147.png" [alt]="'profile.qr.title' | transloco" width="24" height="24" />
     </div>
   </div>
   
   <!-- QR Code Display (Top Left) -->
   @if (showQr) {
     <div class="qr-display" [class.show]="showQr">
-      <div class="qr-title">Profil QR Kodu</div>
+  <div class="qr-title">{{ 'profile.qr.title' | transloco }}</div>
       <div class="qr-code">
         <qrcode [qrdata]="profileUrl" [width]="150" [errorCorrectionLevel]="'M'"></qrcode>
       </div>
@@ -40,16 +36,16 @@
       <div class="settings-actions">
         @if (canEdit) {
           <button class="nav-btn" (click)="openPrivacySettings()">
-            <i class="fas fa-shield-alt"></i> Gizlilik Ayarları
+            <i class="fas fa-shield-alt"></i> {{ 'profile.settings.privacy' | transloco }}
           </button>
         }
         @if (!canEdit) {
           <button class="nav-btn" (click)="goToMyProfile()">
-            <i class="fas fa-user"></i> Profilime Dön
+            <i class="fas fa-user"></i> {{ 'profile.settings.backToMine' | transloco }}
           </button>
         }
         <button class="logout-btn" (click)="logout()">
-          <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+          <i class="fas fa-sign-out-alt"></i> {{ 'profile.settings.logout' | transloco }}
         </button>
       </div>
     </div>
@@ -58,7 +54,7 @@
   <!-- Share Button (Bottom Right) -->
   <div class="share-fab">
     <div class="share-icon" (click)="shareProfile()">
-      <img src="https://cdn-icons-png.flaticon.com/128/4855/4855052.png" alt="Paylaş" width="24" height="24" />
+  <img src="https://cdn-icons-png.flaticon.com/128/4855/4855052.png" [alt]="'profile.share' | transloco" width="24" height="24" />
     </div>
   </div>
 
@@ -66,19 +62,19 @@
   @if (sessionExpired) {
     <div class="session-timeout-popup">
       <div class="popup-content">
-        <h3>Oturum Zaman Aşımı</h3>
-        <p>Oturumunuz zaman aşımına uğradı. Lütfen tekrar giriş yapın.</p>
-        <button (click)="goToLogin()" class="login-btn">Giriş Yap</button>
+        <h3>{{ 'profile.session.timeoutTitle' | transloco }}</h3>
+        <p>{{ 'profile.session.timeoutMsg' | transloco }}</p>
+        <button (click)="goToLogin()" class="login-btn">{{ 'profile.session.login' | transloco }}</button>
       </div>
     </div>
   }
 
-  <!-- Private Profile Password Modal -->
+  <!-- Private Profile Password Modal (removed automatic duplicate rendering: only opened by button) -->
   @if (showPasswordModal) {
     <div class="password-modal-overlay">
       <div class="password-modal">
         <div class="modal-header">
-          <h3>Özel Profil</h3>
+          <h3>{{ 'profile.private.title' | transloco }}</h3>
           <button class="close-btn" (click)="closePasswordModal()">
             <i class="fas fa-times"></i>
           </button>
@@ -89,11 +85,11 @@
             <input 
               type="password" 
               [(ngModel)]="passwordInput" 
-              placeholder="Profil şifresini girin..."
+              [placeholder]="'profile.private.enterPassword' | transloco"
               class="password-input"
               (keyup.enter)="submitPassword()" />
             <button class="submit-btn" (click)="submitPassword()" [disabled]="!passwordInput.trim()">
-              <i class="fas fa-unlock"></i> Erişim
+              <i class="fas fa-unlock"></i> {{ 'profile.private.access' | transloco }}
             </button>
           </div>
         </div>
@@ -106,7 +102,7 @@
     <div class="password-modal-overlay">
       <div class="privacy-modal">
         <div class="modal-header">
-          <h3>Gizlilik Ayarları</h3>
+          <h3>{{ 'profile.privacyModal.title' | transloco }}</h3>
           <button class="close-btn" (click)="closePrivacySettings()">
             <i class="fas fa-times"></i>
           </button>
@@ -122,7 +118,7 @@
                 class="setting-checkbox" />
               <span class="setting-text">
                 <i class="fas" [ngClass]="privacyIsPublic ? 'fa-globe text-green' : 'fa-lock text-orange'"></i>
-                {{ privacyIsPublic ? 'Profilim herkese açık' : 'Profilim özel (şifre gerekli)' }}
+                {{ privacyIsPublic ? ('profile.privacyModal.publicOn' | transloco) : ('profile.privacyModal.publicOff' | transloco) }}
               </span>
             </label>
           </div>
@@ -130,22 +126,22 @@
           <!-- Password Setting (only if private) -->
           @if (!privacyIsPublic) {
             <div class="setting-group">
-              <label for="privacyPassword">Profil Şifresi:</label>
+              <label for="privacyPassword">{{ 'profile.privacyModal.passwordLabel' | transloco }}</label>
               <input 
                 id="privacyPassword"
                 type="password" 
                 [(ngModel)]="privacyPassword" 
-                placeholder="Profil erişim şifresi..."
+                [placeholder]="'profile.private.enterPassword' | transloco"
                 class="setting-input" />
-              <small class="setting-help">Bu şifre ile başkaları profilinizi görüntüleyebilir</small>
+              <small class="setting-help">{{ 'profile.privacyModal.passwordHelp' | transloco }}</small>
             </div>
 
             <!-- Special Links Section -->
             <div class="setting-group">
               <div class="section-header">
-                <h4>Özel Erişim Linkleri</h4>
+                <h4>{{ 'profile.privacyModal.specialLinks' | transloco }}</h4>
                 <button class="create-link-btn" (click)="openCreateLinkModal()">
-                  <i class="fas fa-plus"></i> Yeni Link
+                  <i class="fas fa-plus"></i> {{ 'profile.privacyModal.newLink' | transloco }}
                 </button>
               </div>
               
@@ -155,7 +151,7 @@
                     <div class="special-link-item">
                       <div class="link-info">
                         <strong>{{ link.description }}</strong>
-                        <small>{{ link.expiryDate | date:'short' }} tarihine kadar geçerli</small>
+                        <small>{{ 'profile.privacyModal.validUntil' | transloco:{ date: (link.expiryDate | date:'short') } }}</small>
                       </div>
                       <div class="link-actions">
                         <button class="copy-link-btn" (click)="copySpecialLink(link.specialUrl)">
@@ -169,7 +165,7 @@
                   }
                 </div>
               } @else {
-                <p class="no-links">Henüz özel link oluşturulmamış</p>
+                <p class="no-links">{{ 'profile.privacyModal.noLinks' | transloco }}</p>
               }
             </div>
           }
@@ -177,7 +173,7 @@
           <!-- Save Button -->
           <div class="modal-actions">
             <button class="save-btn" (click)="savePrivacySettings()">
-              <i class="fas fa-save"></i> Kaydet
+              <i class="fas fa-save"></i> {{ 'profile.privacyModal.save' | transloco }}
             </button>
           </div>
 
@@ -186,41 +182,58 @@
     </div>
   }
 
-  <!-- Create Special Link Modal -->
+  <!-- Create Special Link Modal (enhanced styling + manual expiry) -->
   @if (showCreateLinkModal) {
     <div class="password-modal-overlay">
-      <div class="password-modal">
-        <div class="modal-header">
-          <h3>Özel Link Oluştur</h3>
+      <div class="password-modal create-link-modal">
+        <div class="modal-header gradient-green">
+          <h3><i class="fas fa-magic"></i> {{ 'profile.privacyModal.createLinkTitle' | transloco }}</h3>
           <button class="close-btn" (click)="closeCreateLinkModal()">
             <i class="fas fa-times"></i>
           </button>
         </div>
         <div class="modal-body">
-          <div class="setting-group">
-            <label for="linkDescription">Link Açıklaması:</label>
-            <input 
-              id="linkDescription"
-              type="text" 
-              [(ngModel)]="newLinkDescription" 
-              placeholder="Ör: Etkinlik için özel link"
-              class="setting-input" />
+          <div class="fancy-input-group">
+            <label for="linkDescription" class="fancy-label">{{ 'profile.privacyModal.linkDesc' | transloco }}</label>
+            <div class="input-shell">
+              <i class="fas fa-pen-nib"></i>
+              <input 
+                id="linkDescription"
+                type="text" 
+                [(ngModel)]="newLinkDescription" 
+                [placeholder]="'profile.privacyModal.linkDescPlaceholder' | transloco"
+                class="fancy-input" />
+            </div>
           </div>
-          
-          <div class="setting-group">
-            <label for="linkExpiry">Geçerlilik Süresi:</label>
-            <select id="linkExpiry" [(ngModel)]="newLinkExpiryDays" class="setting-select">
-              <option value="1">1 gün</option>
-              <option value="3">3 gün</option>
-              <option value="7">1 hafta</option>
-              <option value="30">1 ay</option>
-              <option value="90">3 ay</option>
-            </select>
+
+          <div class="expiry-section">
+            <label class="fancy-label">{{ 'profile.privacyModal.linkExpiry' | transloco }}</label>
+            <div class="expiry-modes">
+              <div class="preset-mode" *ngIf="!newLinkExpiryDateManual">
+                <div class="preset-options">
+                  <button type="button" class="preset-btn" [class.active]="newLinkExpiryDays===1" (click)="newLinkExpiryDays=1">{{ 'profile.privacyModal.expiry.1day' | transloco }}</button>
+                  <button type="button" class="preset-btn" [class.active]="newLinkExpiryDays===3" (click)="newLinkExpiryDays=3">{{ 'profile.privacyModal.expiry.3days' | transloco }}</button>
+                  <button type="button" class="preset-btn" [class.active]="newLinkExpiryDays===7" (click)="newLinkExpiryDays=7">{{ 'profile.privacyModal.expiry.1week' | transloco }}</button>
+                  <button type="button" class="preset-btn" [class.active]="newLinkExpiryDays===30" (click)="newLinkExpiryDays=30">{{ 'profile.privacyModal.expiry.1month' | transloco }}</button>
+                  <button type="button" class="preset-btn" [class.active]="newLinkExpiryDays===90" (click)="newLinkExpiryDays=90">{{ 'profile.privacyModal.expiry.3months' | transloco }}</button>
+                </div>
+                <button class="switch-manual" type="button" (click)="enableManualExpiryFromPreset()">{{ 'profile.privacyModal.manualExpiry' | transloco }}</button>
+              </div>
+              <div class="manual-mode" *ngIf="newLinkExpiryDateManual">
+                <div class="input-shell">
+                  <i class="fas fa-calendar-alt"></i>
+                  <input type="datetime-local" [(ngModel)]="newLinkExpiryDateManual" class="fancy-input" />
+                </div>
+                <div class="manual-actions">
+                  <button type="button" class="preset-btn outline" (click)="newLinkExpiryDateManual=''">{{ 'profile.privacyModal.backPresets' | transloco }}</button>
+                </div>
+              </div>
+            </div>
           </div>
-          
-          <div class="modal-actions">
-            <button class="save-btn" (click)="createSpecialLink()" [disabled]="!newLinkDescription.trim()">
-              <i class="fas fa-link"></i> Link Oluştur
+
+          <div class="modal-actions spaced">
+            <button class="save-btn large" (click)="createSpecialLink()" [disabled]="!newLinkDescription.trim()">
+              <i class="fas fa-link"></i> {{ 'profile.privacyModal.linkCreate' | transloco }}
             </button>
           </div>
         </div>
@@ -231,10 +244,10 @@
   <!-- Profile Card -->
   @if (accessDenied) {
     <div class="access-denied">
-      <i class="fas fa-eye-slash"></i> Bu profile erişim izniniz yok.
+      <i class="fas fa-eye-slash"></i> {{ 'profile.accessDenied.text' | transloco }}
       <div class="actions">
-        <button (click)="navigateToSearch()"><i class="fas fa-search"></i> Arama Sayfası</button>
-        <button (click)="logout()"><i class="fas fa-sign-out-alt"></i> Çıkış</button>
+        <button (click)="navigateToSearch()"><i class="fas fa-search"></i> {{ 'profile.accessDenied.search' | transloco }}</button>
+        <button (click)="logout()"><i class="fas fa-sign-out-alt"></i> {{ 'profile.accessDenied.logout' | transloco }}</button>
       </div>
     </div>
   }
@@ -246,10 +259,10 @@
         <div class="private-icon">
           <i class="fas fa-lock"></i>
         </div>
-        <h3>Özel Profil</h3>
-        <p>Bu profil gizli olarak ayarlanmıştır. İçeriği görüntülemek için şifre gereklidir.</p>
+        <h3>{{ 'profile.private.title' | transloco }}</h3>
+        <p>{{ 'profile.private.needPassword' | transloco }}</p>
         <button class="unlock-btn" (click)="showPasswordModal = true">
-          <i class="fas fa-unlock"></i> Şifre Gir
+          <i class="fas fa-unlock"></i> {{ 'profile.private.unlock' | transloco }}
         </button>
       </div>
     }
@@ -279,8 +292,8 @@
           <!-- Photo Actions (only if canEdit & active) -->
           @if (canEdit && showPhotoActions) {
             <div class="photo-actions">
-              <button class="photo-btn" (click)="fileInput.click()"><i class="fas fa-camera"></i> Ekle</button>
-              <button class="photo-btn delete" (click)="onDeletePhoto()" [disabled]="!basicInfo?.profilePhotoUrl"><i class="fas fa-trash"></i> Sil</button>
+              <button class="photo-btn" (click)="fileInput.click()"><i class="fas fa-camera"></i> {{ 'profile.photo.add' | transloco }}</button>
+              <button class="photo-btn delete" (click)="onDeletePhoto()" [disabled]="!basicInfo?.profilePhotoUrl"><i class="fas fa-trash"></i> {{ 'profile.photo.delete' | transloco }}</button>
               <input #fileInput type="file" (change)="onPhotoSelected($event)" accept="image/*" style="display:none" />
             </div>
           }
@@ -316,7 +329,7 @@
     @if (profile?.links?.length) {
       <div class="links-section">
         <div class="section-header">
-          <h3 class="section-title">Bağlantılar</h3>
+          <h3 class="section-title">{{ 'profile.links.title' | transloco }}</h3>
           @if (canEdit) {
             <div class="view-controls">
               @if (linkViewMode === 'grid') {
@@ -329,7 +342,7 @@
                   }
                 </div>
               }
-              <button class="view-toggle-btn" (click)="toggleLinkView()" title="Görünüm değiştir">
+              <button class="view-toggle-btn" (click)="toggleLinkView()" [attr.title]="('profile.links.toggleView' | transloco)">
                 <i [class]="linkViewMode === 'list' ? 'fas fa-th' : 'fas fa-list'"></i>
               </button>
             </div>
@@ -412,7 +425,7 @@
                 <div class="iban-display">
                   <div class="iban-content">
                     <div class="iban-text">{{ selectedContent.value }}</div>
-                    <button class="inline-copy-btn" (click)="copyToClipboard(selectedContent.value)" title="Kopyala">
+                    <button class="inline-copy-btn" (click)="copyToClipboard(selectedContent.value)" [title]="'profile.copy' | transloco">
                       <i class="fas fa-copy"></i>
                     </button>
                   </div>
@@ -422,13 +435,13 @@
                 <div class="address-display">
                   <div class="address-content">
                     <div class="address-text">{{ selectedContent.value }}</div>
-                    <button class="inline-copy-btn" (click)="copyToClipboard(selectedContent.value)" title="Kopyala">
+                    <button class="inline-copy-btn" (click)="copyToClipboard(selectedContent.value)" [title]="'profile.copy' | transloco">
                       <i class="fas fa-copy"></i>
                     </button>
                   </div>
                   <div class="address-actions">
                     <button class="map-btn" (click)="openInMaps(selectedContent.value)">
-                      <i class="fas fa-map-marker-alt"></i> Haritada Göster
+                      <i class="fas fa-map-marker-alt"></i> {{ 'profile.map' | transloco }}
                     </button>
                   </div>
                 </div>
@@ -437,7 +450,7 @@
                 <div class="text-display">
                   <div class="text-content-wrapper">
                     <div class="text-content">{{ selectedContent.value }}</div>
-                    <button class="inline-copy-btn" (click)="copyToClipboard(selectedContent.value)" title="Kopyala">
+                    <button class="inline-copy-btn" (click)="copyToClipboard(selectedContent.value)" [title]="'profile.copy' | transloco">
                       <i class="fas fa-copy"></i>
                     </button>
                   </div>
@@ -453,7 +466,7 @@
   } <!-- !accessDenied -->
 
   <!-- Arama sayfasına git butonu (her zaman sağ alt) -->
-  <div class="search-fab" (click)="navigateToSearch()" title="Ara" aria-label="Arama sayfasına git">
+  <div class="search-fab" (click)="navigateToSearch()" [attr.title]="('profile.searchFab.title' | transloco)" [attr.aria-label]="('profile.searchFab.label' | transloco)">
     <i class="fas fa-search"></i>
   </div>
   

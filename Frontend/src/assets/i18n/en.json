@@ -1,0 +1,48 @@
+{
+  "profile": {
+    "qr": { "title": "Profile QR Code" },
+    "settings": {
+      "privacy": "Privacy Settings",
+      "backToMine": "Back to My Profile",
+      "logout": "Logout"
+    },
+    "session": {
+      "timeoutTitle": "Session Timeout",
+      "timeoutMsg": "Your session has expired. Please log in again.",
+      "login": "Login"
+    },
+    "private": {
+      "title": "Private Profile",
+      "needPassword": "This profile is private. A password is required.",
+      "enterPassword": "Enter profile password...",
+      "unlock": "Enter Password",
+      "access": "Access"
+    },
+    "privacyModal": {
+      "title": "Privacy Settings",
+      "publicOn": "My profile is public",
+      "publicOff": "My profile is private (password required)",
+      "passwordLabel": "Profile Password:",
+      "passwordHelp": "Others can view your profile with this password",
+      "specialLinks": "Special Access Links",
+      "newLink": "New Link",
+      "noLinks": "No special links created yet",
+      "save": "Save",
+      "createLinkTitle": "Create Special Link",
+  "linkDesc": "Link Description:",
+  "linkDescPlaceholder": "e.g. Special link for event",
+      "linkExpiry": "Validity Period:",
+      "linkCreate": "Create Link",
+      "validUntil": "Valid until {{date}}"
+    },
+    "share": "Share",
+    "accessDenied": {
+      "text": "You do not have permission to access this profile.",
+      "search": "Search Page",
+      "logout": "Logout"
+    },
+    "links": { "title": "Links" },
+    "copy": "Copy",
+    "map": "Show on Map"
+  }
+}

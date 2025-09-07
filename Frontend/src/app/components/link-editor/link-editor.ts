@@ -7,6 +7,7 @@ import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { firstValueFrom } from 'rxjs';
 
 import { DefinitionsService } from '../../services/definitions';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { UserLinksService, AddUserLinkRequest, UpdateUserLinkRequest } from '../../services/user-links';
 import { Definition } from '../../models/definition.model';
 import { UserDefinitionValue } from '../../models/user-definition-value.model';
@@ -14,7 +15,7 @@ import { UserDefinitionValue } from '../../models/user-definition-value.model';
 @Component({
   selector: 'app-link-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [CommonModule, FormsModule, DragDropModule, TranslocoModule],
   templateUrl: './link-editor.html',
   styleUrls: ['./link-editor.scss']
 })
@@ -48,8 +49,9 @@ export class LinkEditor implements OnInit {
   customDefinitionName = '';
 
   constructor(
-    private defSvc: DefinitionsService,
-    private linkSvc: UserLinksService
+  private defSvc: DefinitionsService,
+  private linkSvc: UserLinksService,
+  private transloco: TranslocoService
   ) {}
 
   ngOnInit(): void {
@@ -153,7 +155,7 @@ export class LinkEditor implements OnInit {
 
     if (this.selectedDefinitionId === '__new') {
       if (!this.newDefinitionName.trim()) {
-        alert('İsim gir');
+        alert(this.transloco.translate('linkEditor.msg.enterName'));
         return;
       }
       const created = await firstValueFrom(
@@ -164,7 +166,7 @@ export class LinkEditor implements OnInit {
     } else if (this.selectedDefinitionId === '__custom') {
       // Kişisel tanım ekleme
       if (!this.customDefinitionName.trim()) {
-        alert('Kişisel tanım adı gir');
+        alert(this.transloco.translate('linkEditor.msg.enterCustomName'));
         return;
       }
       
@@ -183,8 +185,8 @@ export class LinkEditor implements OnInit {
         this.linksChanged.emit();
         return;
       } catch (error) {
-        console.error('Custom definition ekleme hatası:', error);
-        alert('Kişisel tanım eklenirken hata oluştu');
+  console.error('Custom definition ekleme hatası:', error);
+  alert(this.transloco.translate('linkEditor.msg.customAddFail'));
         return;
       }
     } else {
@@ -192,7 +194,7 @@ export class LinkEditor implements OnInit {
     }
 
     if (this.userLinks.some(l => l.definitionId === defId)) {
-      alert('Bu tanım zaten eklenmiş!');
+  alert(this.transloco.translate('linkEditor.msg.alreadyExists'));
       return;
     }
 
@@ -212,7 +214,7 @@ export class LinkEditor implements OnInit {
 
   /** Silme işlemi */
   async delete(id: number): Promise<void> {
-    if (!confirm('Bu bağlantıyı silmek istediğine emin misin?')) return;
+  if (!confirm(this.transloco.translate('linkEditor.msg.confirmDeleteLink'))) return;
     await firstValueFrom(this.linkSvc.deleteById(id));
     this.loadUserLinks();
     this.linksChanged.emit(); // Parent'a değişiklik bildir
@@ -245,7 +247,7 @@ export class LinkEditor implements OnInit {
       this.linksChanged.emit(); // Parent'a değişiklik bildir
     } catch (error) {
       console.error('Edit hatası:', error);
-      alert('Güncelleme sırasında hata oluştu');
+  alert(this.transloco.translate('linkEditor.msg.updateFail'));
     }
   }
 
@@ -259,11 +261,11 @@ export class LinkEditor implements OnInit {
     );
 
     if (!defToDelete) {
-      alert('Böyle bir tanım bulunamadı!');
+      alert(this.transloco.translate('linkEditor.msg.definitionNotFound'));
       return;
     }
 
-    if (!confirm(`"${defToDelete.definitionName}" tanımını silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve bu tanımı kullanan tüm kullanıcıların ilgili bağlantıları da silinecektir.`)) {
+  if (!confirm(this.transloco.translate('linkEditor.msg.confirmDeleteDefinition', { name: defToDelete.definitionName }))) {
       return;
     }
 
@@ -274,9 +276,9 @@ export class LinkEditor implements OnInit {
       this.loadUserLinks();
       this.resetForm();
       this.linksChanged.emit(); // Parent'a değişiklik bildir
-      alert('Tanım başarıyla silindi!');
+  alert(this.transloco.translate('linkEditor.msg.deleteSuccess'));
     } catch (err) {
-      alert('Tanım silinirken bir hata oluştu!');
+  alert(this.transloco.translate('linkEditor.msg.deleteFail'));
       console.error('Tanım silme hatası:', err);
     }
   }

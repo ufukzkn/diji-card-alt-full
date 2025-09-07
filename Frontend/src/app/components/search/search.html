@@ -1,4 +1,7 @@
 <div class="search-page">
+  <div class="lang-bar left-fixed">
+    <app-language-switcher></app-language-switcher>
+  </div>
   <!-- Settings Button (Top Right) -->
   <div class="settings-fab" [class.active]="showSettings" (click)="toggleSettings()">
     <div class="settings-icon"><i class="fas fa-cog"></i></div>
@@ -8,10 +11,10 @@
       <!-- Navigation & Logout Actions -->
       <div class="settings-actions">
         <button class="nav-btn" (click)="goToMyProfile()">
-          <i class="fas fa-user"></i> Profilime Dön
+          <i class="fas fa-user"></i> {{ 'search.actions.backToMine' | transloco }}
         </button>
         <button class="logout-btn" (click)="logout()">
-          <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+          <i class="fas fa-sign-out-alt"></i> {{ 'search.actions.logout' | transloco }}
         </button>
       </div>
     </div>
@@ -23,8 +26,8 @@
       <div class="logo-shell">
         <img src="/logo.jpg" alt="Diji-Card Logo" class="logo-img" loading="lazy" />
       </div>
-      <h1 class="brand-title">Digital Business Card</h1>
-      <p class="brand-subtitle">Dijital kartvizit platformu</p>
+  <h1 class="brand-title">{{ 'app.brand.title' | transloco }}</h1>
+  <p class="brand-subtitle">{{ 'app.brand.subtitle' | transloco }}</p>
     </div>
   </div>
 
@@ -40,14 +43,14 @@
           type="text"
           [(ngModel)]="searchQuery"
           (keydown.enter)="triggerSearch()"
-          placeholder="İsim, meslek veya şirket ara..."
+          [placeholder]="'search.input.placeholder' | transloco"
           class="search-input"
           autocomplete="off" />
         <button 
           (click)="triggerSearch()" 
           class="search-button"
           [disabled]="searchQuery.length < 3">
-          Ara
+          {{ 'search.input.button' | transloco }}
         </button>
       </div>
       
@@ -56,13 +59,13 @@
         @if (searchQuery.length > 0 && searchQuery.length < 3) {
           <p class="info-message warning">
             <span class="icon"><i class="fas fa-info-circle"></i></span>
-            Lütfen en az 3 karakter girin
+            {{ 'search.msg.minChars' | transloco }}
           </p>
         }
         @if (searchQuery.length >= 3 && filteredUsers.length === 0) {
           <p class="info-message empty">
             <span class="icon"><i class="fas fa-search"></i></span>
-            Aradığınız kriterlere uygun kullanıcı bulunamadı
+            {{ 'search.msg.noResults' | transloco }}
           </p>
         }
       </div>
@@ -73,8 +76,8 @@
   @if (filteredUsers.length > 0) {
     <div class="results-section">
       <div class="results-header">
-        <h3>Arama Sonuçları</h3>
-        <span class="results-count">{{ filteredUsers.length }} sonuç bulundu</span>
+  <h3>{{ 'search.results.title' | transloco }}</h3>
+  <span class="results-count">{{ 'search.results.count' | transloco:{ count: filteredUsers.length } }}</span>
       </div>
     
       <div class="user-grid">
@@ -102,7 +105,7 @@
             
             <div class="user-actions">
               <a [routerLink]="['/profil', user.userId]" class="profile-button">
-                <i class="fas fa-user"></i> Profili Görüntüle
+                <i class="fas fa-user"></i> {{ 'search.results.viewProfile' | transloco }}
               </a>
             </div>
           </div>
@@ -113,7 +116,7 @@
       @if (!showAllResults && filteredUsers.length >= 3) {
         <div class="load-more-section">
           <button (click)="showMoreResults()" class="load-more-button">
-            ⬇ Tüm Sonuçları Göster
+            ⬇ {{ 'search.results.showAll' | transloco }}
           </button>
         </div>
       }

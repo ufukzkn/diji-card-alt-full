@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { importProvidersFrom } from '@angular/core';   
 import { BrowserModule } from '@angular/platform-browser';
 import { authInterceptor } from './services/auth.interceptor';
+import { provideAppTransloco } from './i18n/transloco.config';
 
 
 
@@ -18,7 +19,8 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
   provideHttpClient(withInterceptors([authInterceptor])),
     importProvidersFrom(FormsModule),
-    importProvidersFrom(BrowserModule),
+  importProvidersFrom(BrowserModule),
+  provideAppTransloco(),
           
   ]
 };

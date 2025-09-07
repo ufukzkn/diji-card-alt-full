@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { LoginRequest, OAuthTokenRequest, LoginResponse, TokenResponse } from '../models/auth.model';
 import { NotificationService } from './notification.service';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,8 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private notificationService: NotificationService
+  private notificationService: NotificationService,
+  private t: TranslocoService
   ) {
     // Sayfa yüklendiğinde localStorage'dan token'ı kontrol et
     const savedToken = localStorage.getItem('accessToken');
@@ -69,8 +71,8 @@ export class AuthService {
   // Global logout method with confirmation
   async logout(): Promise<void> {
     const confirmed = await this.notificationService.showConfirmation(
-      'Çıkış Yap',
-      'Çıkış yapmak istediğinizden emin misiniz?'
+      this.t.translate('common.confirm.logout.title'),
+      this.t.translate('common.confirm.logout.message')
     );
     
     if (confirmed) {

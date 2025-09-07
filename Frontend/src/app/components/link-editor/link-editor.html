@@ -1,44 +1,44 @@
 <!-- mode butonları -->
 <div class="mode-buttons" *ngIf="canEdit">
   <button class="mode-btn" (click)="toggleMode('add')" [class.active]="mode==='add'">
-    ➕ Link Ekle
+    ➕ {{ 'linkEditor.mode.add' | transloco }}
   </button>
   <button class="mode-btn" (click)="toggleMode('delete')" [class.active]="mode==='delete'">
-    ➖ Link Sil
+    ➖ {{ 'linkEditor.mode.delete' | transloco }}
   </button>
   <button class="mode-btn" (click)="toggleMode('edit')" [class.active]="mode==='edit'">
-    ✏️ Link Düzenle
+    ✏️ {{ 'linkEditor.mode.edit' | transloco }}
   </button>
   <button class="mode-btn" (click)="toggleMode('sort')" [class.active]="mode==='sort'">
-    ⇅ Sırala
+    ⇅ {{ 'linkEditor.mode.sort' | transloco }}
   </button>
 </div>
 
 <!-- + MOD: yeni tanım / link ekle -->
 <div *ngIf="mode==='add' && canEdit" class="mode-panel">
   <select [(ngModel)]="selectedDefinitionId">
-    <option value="" disabled>Tanım seç</option>
+    <option value="" disabled>{{ 'linkEditor.add.selectDefinition' | transloco }}</option>
     <option *ngFor="let d of availableDefinitions()" [value]="d.definitionId">
       {{ d.definitionName }}
     </option>
-    <option value="__new">+ Tabloya Yeni Tanım Ekle…</option>
-    <option value="__custom">+ Kişisel Tanım Ekle</option>
+    <option value="__new">{{ 'linkEditor.add.optionNew' | transloco }}</option>
+    <option value="__custom">{{ 'linkEditor.add.optionCustom' | transloco }}</option>
   </select>
 
   <input *ngIf="selectedDefinitionId==='__new'"
          [(ngModel)]="newDefinitionName"
-         placeholder="Yeni tanım adı" />
+         [placeholder]="'linkEditor.add.placeholder.newDefinitionName' | transloco" />
 
   <!-- Kişisel tanım alanları -->
   <div *ngIf="selectedDefinitionId==='__custom'" class="custom-fields">
-    <input [(ngModel)]="customDefinitionName" placeholder="Kişisel tanım adı (örn: Portfolio)" />
+    <input [(ngModel)]="customDefinitionName" [placeholder]="'linkEditor.add.placeholder.customDefinitionName' | transloco" />
   </div>
 
-  <input [(ngModel)]="value" placeholder="Bağlantı / değer" />
+  <input [(ngModel)]="value" [placeholder]="'linkEditor.add.placeholder.value' | transloco" />
 
   <button class="action-btn" 
           [disabled]="!canAddLink()"
-          (click)="add()">➕ Ekle</button>
+          (click)="add()">➕ {{ 'linkEditor.add.actionAdd' | transloco }}</button>
 </div>
 
 <!-- CUSTOM MOD kaldırıldı çünkü dropdown'a entegre edildi -->
@@ -46,22 +46,22 @@
 <!-- – MOD: var olan linkleri sil -->
 <div *ngIf="mode==='delete' && canEdit" class="mode-panel">
   <select [(ngModel)]="selectedToDelete">
-    <option value="" disabled>Silinecek tanımı seç</option>
+    <option value="" disabled>{{ 'linkEditor.delete.selectDefinition' | transloco }}</option>
     <option *ngFor="let l of userLinks" [ngValue]="l.id">
       {{ l.displayName }}
     </option>
-    <option [ngValue]="'__delete'">- Tanımı Tablodan Sil...</option>
+    <option [ngValue]="'__delete'">{{ 'linkEditor.delete.optionDeleteDefinition' | transloco }}</option>
   </select>
 
   <input *ngIf="selectedToDelete === '__delete'"
          [(ngModel)]="deleteDefinitionName"
-         placeholder="Silmek istediğiniz tanımın adı" />
+         [placeholder]="'linkEditor.delete.placeholder.definitionName' | transloco" />
 
   <ng-container *ngIf="selectedToDelete === '__delete'">
     <button class="action-btn delete-btn" 
             [disabled]="!deleteDefinitionName"
             (click)="deleteDefinition()">
-      ➖ Tanımı Sil
+      ➖ {{ 'linkEditor.delete.actionDeleteDefinition' | transloco }}
     </button>
   </ng-container>
 
@@ -69,7 +69,7 @@
     <button class="action-btn delete-btn" 
             [disabled]="!selectedToDelete && selectedToDelete !== 0"
             (click)="onDeleteClick()">
-      ➖ Sil
+      ➖ {{ 'linkEditor.delete.actionDelete' | transloco }}
     </button>
   </ng-container>
 </div>
@@ -77,13 +77,13 @@
 <!-- EDIT MODE: mevcut tanımı seçip değerini güncelle -->
 <div *ngIf="mode==='edit' && canEdit" class="mode-panel">
   <select [(ngModel)]="selectedToEdit">
-    <option value="" disabled>Düzenlenecek tanımı seç</option>
+    <option value="" disabled>{{ 'linkEditor.edit.selectDefinition' | transloco }}</option>
     <option *ngFor="let l of userLinks" [value]="l.id">
-      {{ l.displayName }} (ID: {{l.id}})      <!-- debug için-->
+      {{ l.displayName }} (ID: {{l.id}})
     </option>
   </select>
-  <input *ngIf="selectedToEdit" [(ngModel)]="editValue" placeholder="Yeni değer" />
-  <button class="action-btn edit-btn" [disabled]="!selectedToEdit || !editValue" (click)="edit()">✏️ Kaydet</button>
+  <input *ngIf="selectedToEdit" [(ngModel)]="editValue" [placeholder]="'linkEditor.edit.placeholder.newValue' | transloco" />
+  <button class="action-btn edit-btn" [disabled]="!selectedToEdit || !editValue" (click)="edit()">✏️ {{ 'linkEditor.edit.actionSave' | transloco }}</button>
 </div>
 
 <!-- Sıralama Modu -->
@@ -93,6 +93,6 @@
       {{ link.displayName }}
     </div>
   </div>
-  <button class="save-sort-btn" (click)="saveSortOrder()">Sıralamayı Kaydet</button>
+  <button class="save-sort-btn" (click)="saveSortOrder()">{{ 'linkEditor.sort.actionSaveOrder' | transloco }}</button>
 </div>
 

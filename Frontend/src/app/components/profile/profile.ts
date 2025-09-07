@@ -17,6 +17,9 @@ import { CropperDialogComponent, CropperDialogData, CropperDialogResult } from '
 
 import { UserProfile, PrivateProfileResponse, PrivateProfileAccessRequest, BasicUserInfo, FullProfileData } from '../../models/user-profile.model';
 import { User } from '../../models/user.models';
+import { LanguageService } from '../../services/language.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { LanguageSwitcherComponent } from '../shared/language-switcher/language-switcher.component';
 
 @Component({
   selector: 'app-profile',
@@ -27,7 +30,9 @@ import { User } from '../../models/user.models';
     LinkEditor,
     QRCodeComponent,
     FormsModule,
-    CropperDialogComponent
+  CropperDialogComponent,
+  TranslocoModule,
+  LanguageSwitcherComponent
   ],
   templateUrl: './profile.html',
   styleUrls: ['./profile.scss']
@@ -45,7 +50,11 @@ export class Profile implements OnInit {
   canEdit = false;
   sessionExpired = false;
   accessDenied = false;
-  selectedLang: 'tr' | 'en' = 'tr';
+  selectedLang: string = 'tr';
+  langs = ['tr','en','de'];
+  flags: Record<string,string> = { tr:'🇹🇷', en:'🇺🇸', de:'🇩🇪' };
+  langLabels: Record<string,string> = { tr:'Türkçe', en:'English', de:'Deutsch' };
+  langOpen = false;
   imageBaseUrl = 'http://localhost:5078';
   cropperData?: CropperDialogData;
   // Avatar rendering control to avoid default flash
@@ -82,6 +91,16 @@ export class Profile implements OnInit {
   showCreateLinkModal = false;
   newLinkDescription = '';
   newLinkExpiryDays = 7;
+  // Manual expiry (datetime-local) optional override
+  newLinkExpiryDateManual: string = '';
+
+  enableManualExpiryFromPreset() {
+    const base = new Date();
+    base.setDate(base.getDate() + this.newLinkExpiryDays);
+    // datetime-local expects yyyy-MM-ddTHH:mm
+    const iso = base.toISOString();
+    this.newLinkExpiryDateManual = iso.slice(0,16);
+  }
 
   constructor(
     private route: ActivatedRoute,
@@ -89,8 +108,13 @@ export class Profile implements OnInit {
   private profSvc: ProfileService,
   private userSvc: UsersService,
   private auth: AuthService,
-  private notificationService: NotificationService
-  ) {}
+  private notificationService: NotificationService,
+  private langService: LanguageService,
+  private t: TranslocoService
+  ) {
+    // initialize selectedLang from service if stored
+    this.selectedLang = this.langService.active || 'tr';
+  }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -185,25 +209,24 @@ export class Profile implements OnInit {
         } else {
           // Erişim reddedildi
           this.accessDenied = true;
-          this.privateAccessMessage = response.message || 'Bu profil özeldir.';
+          // Fallback to i18n key instead of hardcoded Turkish text
+          this.privateAccessMessage = response.message || this.t.translate('profile.private.needPassword');
           this.isPrivateProfile = true;
           this.profileSectionReady = true;
         }
       },
       error: (err) => {
-        console.error('Access token ile erişim hatası:', err);
-        this.accessDenied = true;
-        this.privateAccessMessage = 'Erişim linki geçersiz veya süresi dolmuş.';
+  console.error('Access token ile erişim hatası:', err);
+  this.accessDenied = true;
+  this.privateAccessMessage = this.t.translate('profile.private.invalidLink');
         this.isPrivateProfile = true;
         this.profileSectionReady = true;
       }
     });
   }
 
-  onLangChange(event: any) {
-    this.selectedLang = event.target.value;
-    // Burada ileride i18n desteği eklenebilir
-  }
+  // legacy method kept if template / other code still calls it
+  changeLang(l: string) { /* handled by language switcher component now */ }
 
   private loadDataWithPrivacy(): void {
     // Önce basic info'yu güvenli endpoint ile çek
@@ -229,7 +252,8 @@ export class Profile implements OnInit {
           // Erişim yok, private profil modal'ı göster
           this.isPrivateProfile = true;
           this.accessGranted = false;
-          this.privateAccessMessage = response.message;
+          // Use backend message if localized; otherwise fallback to default i18n key
+          this.privateAccessMessage = response.message || this.t.translate('profile.private.needPassword');
           this.showPasswordModal = true;
           this.profileSectionReady = true;
         }
@@ -306,13 +330,13 @@ export class Profile implements OnInit {
     // Check file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (!allowedTypes.includes(file.type)) {
-      alert('Lütfen sadece JPEG, PNG veya GIF formatında resim yükleyin.');
+  alert(this.t.translate('profile.msg.photo.invalidType'));
       return;
     }
 
     // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('Dosya boyutu 5MB\'dan küçük olmalıdır.');
+  alert(this.t.translate('profile.msg.photo.sizeExceeded'));
       return;
     }
 
@@ -361,14 +385,14 @@ export class Profile implements OnInit {
           }
         });
       },
-      error: err => alert('Fotoğraf yüklenemedi: ' + (err?.error?.message || err.message))
+  error: err => alert(this.t.translate('profile.msg.photo.uploadFail') + ' ' + (err?.error?.message || err.message))
     });
   }
 
   onDeletePhoto() {
     if (!this.basicInfo?.profilePhotoUrl) return;
     
-    if (!confirm('Profil fotoğrafını silmek istediğinizden emin misiniz?')) {
+  if (!confirm(this.t.translate('profile.msg.photo.confirmDelete'))) {
       return;
     }
 
@@ -384,7 +408,7 @@ export class Profile implements OnInit {
         // trigger fade-in of fallback
         setTimeout(() => { this.avatarLoaded = true; }, 30);
       },
-      error: err => alert('Fotoğraf silinemedi: ' + (err?.error?.message || err.message))
+  error: err => alert(this.t.translate('profile.msg.photo.deleteFail') + ' ' + (err?.error?.message || err.message))
     });
   }
 
@@ -396,8 +420,8 @@ export class Profile implements OnInit {
     if (navigator.share && window.location.protocol === 'https:') {
       console.log('Using navigator.share'); // Debug
       navigator.share({
-        title: `${this.basicInfo?.fullName} - Diji-Card Profili`,
-        text: `${this.basicInfo?.fullName} adlı kullanıcının dijital kartvizitini görüntüleyin`,
+  title: this.t.translate('profile.shareMeta.title', { name: this.basicInfo?.fullName }),
+  text: this.t.translate('profile.shareMeta.text', { name: this.basicInfo?.fullName }),
         url: profileUrl
       }).catch(err => {
         console.log('Share failed:', err);
@@ -413,7 +437,7 @@ export class Profile implements OnInit {
     // Clipboard API
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(url).then(() => {
-        this.notificationService.showToast('Profil bağlantısı panoya kopyalandı!', 'success');
+  this.notificationService.showToast(this.t.translate('profile.msg.link.copied'), 'success');
       }).catch(() => {
         this.oldSchoolCopy(url);
       });
@@ -432,7 +456,7 @@ export class Profile implements OnInit {
     textArea.select();
     document.execCommand('copy');
     document.body.removeChild(textArea);
-    this.notificationService.showToast('Profil bağlantısı panoya kopyalandı!', 'success');
+  this.notificationService.showToast(this.t.translate('profile.msg.link.copied'), 'success');
   }
 
   logout() {
@@ -499,17 +523,17 @@ export class Profile implements OnInit {
           console.log('Already on my profile'); // Debug için
         } else {
           console.error('Token\'da userId bulunamadı:', payload);
-          alert('Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+          alert(this.t.translate('common.errors.userNotFound'));
           this.router.navigate(['/login']);
         }
       } catch (error) {
         console.error('Token parse hatası:', error);
-        alert('Token hatası. Lütfen tekrar giriş yapın.');
+  alert(this.t.translate('common.errors.tokenParse'));
         this.router.navigate(['/login']);
       }
     } else {
       console.error('Token bulunamadı');
-      alert('Oturum bulunamadı. Lütfen giriş yapın.');
+  alert(this.t.translate('common.errors.sessionMissing'));
       this.router.navigate(['/login']);
     }
   }
@@ -615,7 +639,7 @@ export class Profile implements OnInit {
 
   copyToClipboard(text: string): void {
     navigator.clipboard.writeText(text).then(() => {
-      this.notificationService.showToast('Panoya kopyalandı!', 'success');
+  this.notificationService.showToast(this.t.translate('common.copied'), 'success');
     }).catch(() => {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
@@ -624,7 +648,7 @@ export class Profile implements OnInit {
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
-      this.notificationService.showToast('Panoya kopyalandı!', 'success');
+  this.notificationService.showToast(this.t.translate('common.copied'), 'success');
     });
   }
 
@@ -658,7 +682,7 @@ export class Profile implements OnInit {
   // Private profile methods
   submitPassword(): void {
     if (!this.passwordInput.trim()) {
-      this.notificationService.showToast('Lütfen şifre girin', 'error');
+  this.notificationService.showToast(this.t.translate('profile.msg.password.enter'), 'error');
       return;
     }
 
@@ -695,7 +719,7 @@ export class Profile implements OnInit {
           this.accessGranted = true;
           this.showPasswordModal = false;
           this.passwordInput = '';
-          this.notificationService.showToast('Erişim başarılı!', 'success');
+          this.notificationService.showToast(this.t.translate('profile.msg.access.granted'), 'success');
           
           // If no custom photo, allow default after a tiny delay to avoid layout shift
           if (!this.basicInfo?.profilePhotoUrl) {
@@ -710,7 +734,7 @@ export class Profile implements OnInit {
         }
       },
       error: (err) => {
-        this.notificationService.showToast('Bir hata oluştu: ' + (err?.error?.message || err.message), 'error');
+  this.notificationService.showToast(this.t.translate('common.errors.generic') + ' ' + (err?.error?.message || err.message), 'error');
         this.passwordInput = '';
       }
     });
@@ -752,12 +776,12 @@ export class Profile implements OnInit {
 
     this.profSvc.updatePrivacySettings(this.userId, settings).subscribe({
       next: () => {
-        this.notificationService.showToast('Gizlilik ayarları kaydedildi!', 'success');
+  this.notificationService.showToast(this.t.translate('profile.msg.privacy.saved'), 'success');
         this.isPrivateProfile = !this.privacyIsPublic;
         this.closePrivacySettings();
       },
       error: (err) => {
-        this.notificationService.showToast('Hata: ' + (err?.error?.message || err.message), 'error');
+  this.notificationService.showToast(this.t.translate('common.errors.prefix') + ' ' + (err?.error?.message || err.message), 'error');
       }
     });
   }
@@ -777,6 +801,7 @@ export class Profile implements OnInit {
     this.showCreateLinkModal = true;
     this.newLinkDescription = '';
     this.newLinkExpiryDays = 7;
+  this.newLinkExpiryDateManual = '';
   }
 
   closeCreateLinkModal(): void {
@@ -785,12 +810,21 @@ export class Profile implements OnInit {
 
   createSpecialLink(): void {
     if (!this.newLinkDescription.trim()) {
-      this.notificationService.showToast('Lütfen link açıklaması girin', 'error');
+  this.notificationService.showToast(this.t.translate('profile.msg.special.enterDesc'), 'error');
       return;
     }
-
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + this.newLinkExpiryDays);
+    let expiryDate: Date;
+    if (this.newLinkExpiryDateManual) {
+      expiryDate = new Date(this.newLinkExpiryDateManual);
+      const now = new Date();
+      if (isNaN(expiryDate.getTime()) || expiryDate <= now) {
+        this.notificationService.showToast(this.t.translate('profile.privacyModal.invalidManualDate') || 'Invalid expiry date', 'error');
+        return;
+      }
+    } else {
+      expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + this.newLinkExpiryDays);
+    }
 
     const request = {
       description: this.newLinkDescription,
@@ -799,39 +833,39 @@ export class Profile implements OnInit {
 
     this.profSvc.createSpecialLink(this.userId, request).subscribe({
       next: (response) => {
-        this.notificationService.showToast('Özel link oluşturuldu!', 'success');
+  this.notificationService.showToast(this.t.translate('profile.msg.special.created'), 'success');
         this.loadSpecialLinks();
         this.closeCreateLinkModal();
         
         // Linki panoya kopyala
         navigator.clipboard.writeText(response.specialUrl).then(() => {
-          this.notificationService.showToast('Link panoya kopyalandı!', 'success');
+          this.notificationService.showToast(this.t.translate('profile.msg.link.copied'), 'success');
         });
       },
       error: (err) => {
-        this.notificationService.showToast('Hata: ' + (err?.error?.message || err.message), 'error');
+  this.notificationService.showToast(this.t.translate('common.errors.prefix') + ' ' + (err?.error?.message || err.message), 'error');
       }
     });
   }
 
   copySpecialLink(url: string): void {
     navigator.clipboard.writeText(url).then(() => {
-      this.notificationService.showToast('Link panoya kopyalandı!', 'success');
+  this.notificationService.showToast(this.t.translate('profile.msg.link.copied'), 'success');
     });
   }
 
   deleteSpecialLink(linkId: number): void {
-    if (!confirm('Bu özel linki silmek istediğinizden emin misiniz?')) {
+  if (!confirm(this.t.translate('profile.msg.special.confirmDelete'))) {
       return;
     }
 
     this.profSvc.deleteSpecialLink(this.userId, linkId).subscribe({
       next: () => {
-        this.notificationService.showToast('Özel link silindi!', 'success');
+  this.notificationService.showToast(this.t.translate('profile.msg.special.deleted'), 'success');
         this.loadSpecialLinks();
       },
       error: (err) => {
-        this.notificationService.showToast('Hata: ' + (err?.error?.message || err.message), 'error');
+  this.notificationService.showToast(this.t.translate('common.errors.prefix') + ' ' + (err?.error?.message || err.message), 'error');
       }
     });
   }

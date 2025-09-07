@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { LanguageSwitcherComponent } from '../shared/language-switcher/language-switcher.component';
 import { LoginRequest, OAuthTokenRequest } from '../../models/auth.model';
 import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslocoModule, LanguageSwitcherComponent],
   templateUrl: './login.html',
   styleUrls: ['./login.scss']
 })
@@ -33,7 +35,8 @@ export class LoginComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
-    private notificationService: NotificationService
+  private notificationService: NotificationService,
+  private t: TranslocoService
   ) {}
 
   ngOnInit(): void {
@@ -41,7 +44,7 @@ export class LoginComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       if (params['timeout'] === '1') {
         console.log('Timeout detected, showing toast...');
-        this.notificationService.showToast('Oturumunuz zaman aşımına uğradı. Lütfen tekrar giriş yapın.', 'error');
+  this.notificationService.showToast(this.t.translate('session.timeout'), 'error');
       }
     });
   }
@@ -58,7 +61,7 @@ export class LoginComponent implements OnInit {
     this.authService.kullaniciGirisYap(this.loginData).subscribe({
       next: (response) => {
         if (response.success) {
-          this.successMessage = 'Giriş başarılı! Token alınıyor...';
+          this.successMessage = this.t.translate('login.msg.authSuccess');
           
           // OAuth token almak için ikinci endpoint'i çağır
           const tokenRequest: OAuthTokenRequest = {
@@ -71,7 +74,7 @@ export class LoginComponent implements OnInit {
             next: (tokenResponse) => {
               if (tokenResponse.success) {
                 this.authService.saveToken(tokenResponse);
-                this.successMessage = 'Giriş başarılı! Profilinize yönlendiriliyorsunuz...';
+                this.successMessage = this.t.translate('login.msg.redirect');
                 
                 // Token'dan userId'yi çıkar
                 const userId = this.getUserIdFromToken(tokenResponse.accessToken);
@@ -83,23 +86,23 @@ export class LoginComponent implements OnInit {
                   this.router.navigate([redirectPath]);
                 }, 1500);
               } else {
-                this.errorMessage = tokenResponse.message || 'Token alırken hata oluştu.';
+                this.errorMessage = tokenResponse.message || this.t.translate('common.errors.tokenFetch');
               }
               this.isLoading = false;
             },
             error: (error) => {
-              this.errorMessage = 'Token alırken hata oluştu.';
+              this.errorMessage = this.t.translate('common.errors.tokenFetch');
               this.isLoading = false;
               console.error('Token error:', error);
             }
           });
         } else {
-          this.errorMessage = response.message || 'Giriş başarısız.';
+          this.errorMessage = response.message || this.t.translate('login.msg.failed');
           this.isLoading = false;
         }
       },
       error: (error) => {
-        this.errorMessage = 'Giriş sırasında hata oluştu.';
+  this.errorMessage = this.t.translate('login.msg.error');
         this.isLoading = false;
         console.error('Login error:', error);
       }
