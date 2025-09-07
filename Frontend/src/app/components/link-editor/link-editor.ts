@@ -10,6 +10,7 @@ import { DefinitionsService } from '../../services/definitions';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { UserLinksService, AddUserLinkRequest, UpdateUserLinkRequest } from '../../services/user-links';
 import { Definition } from '../../models/definition.model';
+import { NotificationService } from '../../services/notification.service';
 import { UserDefinitionValue } from '../../models/user-definition-value.model';
 
 @Component({
@@ -23,6 +24,7 @@ export class LinkEditor implements OnInit {
   @Input() userId!: string;
   @Input() canEdit: boolean = false;
   @Output() linksChanged = new EventEmitter<void>();
+  @Output() modeChanged = new EventEmitter<string>();
 
   definitions: Definition[] = [];
   userLinks: UserDefinitionValue[] = [];
@@ -51,7 +53,8 @@ export class LinkEditor implements OnInit {
   constructor(
   private defSvc: DefinitionsService,
   private linkSvc: UserLinksService,
-  private transloco: TranslocoService
+  private transloco: TranslocoService,
+  private notify: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -68,6 +71,7 @@ export class LinkEditor implements OnInit {
       this.mode = '';
       this.lastOpenedDropdown = '';
       this.resetForm();
+  this.modeChanged.emit(this.mode);
     } else {
       this.mode = m;
       this.lastOpenedDropdown = m;
@@ -78,6 +82,7 @@ export class LinkEditor implements OnInit {
         // Sıralama moduna girerken array'i güncelle
         this.userLinksArray = [...this.userLinks].sort((a, b) => a.sortId - b.sortId);
       }
+  this.modeChanged.emit(this.mode);
     }
     console.log('Yeni mode:', this.mode);
   }
@@ -145,9 +150,14 @@ export class LinkEditor implements OnInit {
   }
 
   async saveSortOrder(): Promise<void> {
-    await firstValueFrom(this.linkSvc.updateSortOrder(this.userLinksArray));
-    this.loadUserLinks();
-    this.linksChanged.emit(); // Parent'a değişiklik bildir
+    try {
+      await firstValueFrom(this.linkSvc.updateSortOrder(this.userLinksArray));
+      this.loadUserLinks();
+      this.linksChanged.emit();
+      this.notify.showToast(this.transloco.translate('profile.links.sortSuccess'), 'success');
+    } catch(e) {
+      this.notify.showToast(this.transloco.translate('common.errors.generic'), 'error');
+    }
   }
 
   async add(): Promise<void> {
@@ -200,26 +210,36 @@ export class LinkEditor implements OnInit {
       return;
     }
 
-    await firstValueFrom(
-      this.linkSvc.add({ 
-        userId: this.userId, 
-        definitionId: defId, 
-        value: this.value, 
-        sortId: this.userLinks.length 
-      } as AddUserLinkRequest)
-    );
-
-    this.loadUserLinks();
-    this.resetForm();
-    this.linksChanged.emit(); // Parent'a değişiklik bildir
+    try {
+      await firstValueFrom(
+        this.linkSvc.add({ 
+          userId: this.userId, 
+          definitionId: defId, 
+          value: this.value, 
+          sortId: this.userLinks.length 
+        } as AddUserLinkRequest)
+      );
+      this.loadUserLinks();
+      this.resetForm();
+      this.linksChanged.emit();
+      this.notify.showToast(this.transloco.translate('profile.links.addSuccess'), 'success');
+    } catch (e) {
+      this.notify.showToast(this.transloco.translate('profile.links.addError'), 'error');
+    }
   }
 
   /** Silme işlemi */
   async delete(id: number): Promise<void> {
-  if (!confirm(this.transloco.translate('linkEditor.msg.confirmDeleteLink'))) return;
-    await firstValueFrom(this.linkSvc.deleteById(id));
-    this.loadUserLinks();
-    this.linksChanged.emit(); // Parent'a değişiklik bildir
+  const confirmed = await this.notify.showConfirmation('common.dialogs.delete.title','linkEditor.msg.confirmDeleteLink');
+  if (!confirmed) return;
+    try {
+      await firstValueFrom(this.linkSvc.deleteById(id));
+      this.loadUserLinks();
+      this.linksChanged.emit();
+      this.notify.showToast(this.transloco.translate('profile.links.deleteSuccess'), 'success');
+    } catch (e) {
+      this.notify.showToast(this.transloco.translate('profile.links.deleteError'), 'error');
+    }
   }
 
   /** Edit işlemi */
@@ -244,12 +264,13 @@ export class LinkEditor implements OnInit {
       );
       
       console.log('API çağrısı başarılı');
-      this.loadUserLinks();
-      this.resetForm();
-      this.linksChanged.emit(); // Parent'a değişiklik bildir
+  this.loadUserLinks();
+  this.resetForm();
+  this.linksChanged.emit();
+  this.notify.showToast(this.transloco.translate('profile.links.updateSuccess'), 'success');
     } catch (error) {
       console.error('Edit hatası:', error);
-  alert(this.transloco.translate('linkEditor.msg.updateFail'));
+  this.notify.showToast(this.transloco.translate('profile.links.updateError'), 'error');
     }
   }
 
@@ -267,9 +288,8 @@ export class LinkEditor implements OnInit {
       return;
     }
 
-  if (!confirm(this.transloco.translate('linkEditor.msg.confirmDeleteDefinition', { name: defToDelete.definitionName }))) {
-      return;
-    }
+  const confirmDef = await this.notify.showConfirmation('common.dialogs.delete.title','linkEditor.msg.confirmDeleteDefinition');
+  if (!confirmDef) return;
 
     try {
       await firstValueFrom(this.defSvc.delete(defToDelete.definitionId));

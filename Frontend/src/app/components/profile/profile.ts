@@ -1,6 +1,6 @@
 // src/app/components/profile/profile.ts
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewChecked, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { QRCodeComponent } from 'angularx-qrcode';
@@ -39,7 +39,8 @@ import { ThemeToggleComponent } from '../shared/theme-toggle/theme-toggle.compon
   templateUrl: './profile.html',
   styleUrls: ['./profile.scss']
 })
-export class Profile implements OnInit {
+export class Profile implements OnInit, AfterViewChecked {
+  @ViewChild(LinkEditor) linkEditorComp?: LinkEditor;
   userId!: string;
   user?: User;
   profile?: UserProfile;
@@ -70,6 +71,7 @@ export class Profile implements OnInit {
   // Link display preference
   linkViewMode: 'list' | 'grid' = 'list';
   gridColumns: number = 3; // Default 3 columns, range 3-5
+  isSortMode = false;
   
   // Mode management - simplified (link-editor handles its own modes)
   showQrCode = false;
@@ -345,6 +347,19 @@ export class Profile implements OnInit {
   this.loadDataWithPrivacy();
   }
 
+  onLinkEditorModeChanged(mode: string) {
+    this.isSortMode = (mode === 'sort');
+  console.log('[Profile] modeChanged event alındı ->', mode, 'isSortMode:', this.isSortMode);
+  }
+
+  ngAfterViewChecked(): void {
+    // Emitted event kaçarsa fallback senkronizasyonu
+    const current = this.linkEditorComp?.mode === 'sort';
+    if (current !== this.isSortMode) {
+      this.isSortMode = current;
+    }
+  }
+
 
   onPhotoSelected(event: any) {
     const file: File = event.target.files[0];
@@ -412,12 +427,12 @@ export class Profile implements OnInit {
     });
   }
 
-  onDeletePhoto() {
+  async onDeletePhoto() {
     if (!this.basicInfo?.profilePhotoUrl) return;
     
-  if (!confirm(this.t.translate('profile.msg.photo.confirmDelete'))) {
-      return;
-    }
+  // Custom confirmation modal
+  const ok = await this.notificationService.showConfirmation('common.dialogs.delete.title','profile.msg.photo.confirmDelete');
+  if (!ok) return;
 
     this.profSvc.deletePhoto(this.userId).subscribe({
       next: () => {
@@ -870,10 +885,9 @@ export class Profile implements OnInit {
     });
   }
 
-  deleteSpecialLink(linkId: number): void {
-  if (!confirm(this.t.translate('profile.msg.special.confirmDelete'))) {
-      return;
-    }
+  async deleteSpecialLink(linkId: number): Promise<void> {
+    const ok = await this.notificationService.showConfirmation('common.dialogs.delete.title','profile.msg.special.confirmDelete');
+    if (!ok) return;
 
     this.profSvc.deleteSpecialLink(this.userId, linkId).subscribe({
       next: () => {

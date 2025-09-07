@@ -110,6 +110,10 @@
   transform-origin: top right;
   padding: 0.5rem;
   min-width: 250px;
+  display:flex;
+  flex-direction:column;
+  max-height:none; /* normal modda kısıtlama yok */
+  
   
   // Settings Actions (Logout button)
   .settings-actions {
@@ -201,7 +205,7 @@
         
         .example-list-vertical {
           width: 100%;
-          max-height: 250px;
+          max-height: 250px; /* eski sınır */
           overflow-y: auto;
           margin-bottom: 1rem;
           
@@ -994,6 +998,7 @@
   max-height: 80vh;
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  color: var(--color-text);
   
   .modal-header {
     display: flex;
@@ -1053,6 +1058,7 @@
           padding: 0;
           margin: 0;
           border: none;
+          color: var(--color-text);
         }
         
         .inline-copy-btn {
@@ -1297,6 +1303,93 @@
     transform: translateY(0) scale(1);
   }
 }
+
+/* Dark theme content modal contrast */
+.dark-theme .content-modal { background: rgba(30,41,59,0.95); border:1px solid rgba(255,255,255,0.08); }
+.dark-theme .content-modal .modal-header { border-bottom:1px solid rgba(255,255,255,0.08); }
+.dark-theme .content-modal .modal-header h3 { color:#f1f5f9; }
+.dark-theme .content-modal .modal-header .close-btn { color:#94a3b8; }
+.dark-theme .content-modal .modal-header .close-btn:hover { background:rgba(255,255,255,0.08); color:#fff; }
+.dark-theme .content-modal .iban-content,
+.dark-theme .content-modal .address-content,
+.dark-theme .content-modal .text-content-wrapper { background:rgba(51,65,85,.55); border:1px solid rgba(148,163,184,.35); }
+.dark-theme .content-modal .iban-text,
+.dark-theme .content-modal .address-text,
+.dark-theme .content-modal .text-content { color:#f8fafc; text-shadow:0 0 1px rgba(0,0,0,.4); }
+.dark-theme .content-modal .inline-copy-btn { background:#3b82f6; }
+.dark-theme .content-modal .inline-copy-btn:hover { background:#2563eb; }
+
+/* Sort mode: internal scroll within settings menu instead of extending page */
+.settings-menu.sort-mode { 
+  max-height: 78vh; 
+  overflow-y: hidden; /* içteki alan scroll edecek */
+  overscroll-behavior: contain; 
+  scrollbar-width: thin; 
+}
+.settings-menu.sort-mode app-link-editor { flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+.settings-menu.sort-mode app-link-editor ::ng-deep .mode-panel { flex:1; display:flex; flex-direction:column; min-height:0; }
+.settings-menu.sort-mode app-link-editor ::ng-deep .mode-panel .example-list-vertical { flex:1; min-height:0; max-height:none; overflow-y:auto; }
+.settings-menu.sort-mode .settings-actions { position:sticky; bottom:0; background:inherit; padding-top:.75rem; }
+.settings-menu.sort-mode::-webkit-scrollbar { width: 8px; }
+.settings-menu.sort-mode::-webkit-scrollbar-track { background: transparent; }
+.settings-menu.sort-mode::-webkit-scrollbar-thumb { background: rgba(100,116,139,.35); border-radius:4px; }
+.settings-menu.sort-mode app-link-editor ::ng-deep .mode-panel { padding-bottom: .5rem; }
+
+/* Dark theme adjustments for settings menu translucency */
+.dark-theme .settings-menu { 
+  background: rgba(30,41,59,0.9); 
+  border:1px solid rgba(255,255,255,0.08); 
+  box-shadow:0 8px 28px -4px rgba(0,0,0,.55);
+}
+.dark-theme .settings-menu .settings-actions { border-top:1px solid rgba(255,255,255,0.08); }
+.dark-theme .settings-menu .settings-actions .nav-btn { box-shadow:none; }
+.dark-theme .settings-menu .settings-actions .nav-btn:hover { box-shadow:0 4px 14px rgba(0,0,0,.4); }
+.dark-theme .settings-menu .settings-actions .logout-btn { background:linear-gradient(135deg,#dc2626,#b91c1c); }
+.dark-theme .settings-menu .settings-actions .logout-btn:hover { background:linear-gradient(135deg,#ef4444,#dc2626); }
+
+/* Dark theme readability for link-editor inputs */
+.dark-theme .settings-menu app-link-editor ::ng-deep select,
+.dark-theme .settings-menu app-link-editor ::ng-deep input { background:rgba(51,65,85,.65); border-color:rgba(148,163,184,.35); color:#f1f5f9; }
+.dark-theme .settings-menu app-link-editor ::ng-deep select:focus,
+.dark-theme .settings-menu app-link-editor ::ng-deep input:focus { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.25); }
+.dark-theme .settings-menu app-link-editor ::ng-deep .mode-buttons .mode-btn { background:rgba(51,65,85,.55); color:#e2e8f0; }
+.dark-theme .settings-menu app-link-editor ::ng-deep .mode-buttons .mode-btn:hover { background:rgba(71,85,105,.6); }
+.dark-theme .settings-menu app-link-editor ::ng-deep .mode-buttons .mode-btn.active { background:#3b82f6; }
+.dark-theme .settings-menu app-link-editor ::ng-deep .example-box-vertical { background:rgba(51,65,85,.55); border-color:rgba(148,163,184,.3); }
+
+/* Content modal readability tweaks (custom def text) */
+.content-modal { backdrop-filter: blur(6px); }
+.dark-theme .content-modal { background:rgba(30,41,59,.92); }
+.dark-theme .profile-page .content-modal { background:linear-gradient(155deg,#1e293b 0%, #0f172a 92%) !important; border:1px solid rgba(148,163,184,.25)!important; box-shadow:0 12px 40px -8px rgba(0,0,0,.65); }
+.dark-theme .profile-page .content-modal .modal-header { border-bottom:1px solid rgba(148,163,184,.18)!important; }
+.dark-theme .profile-page .content-modal .text-content-wrapper,
+.dark-theme .profile-page .content-modal .iban-content,
+.dark-theme .profile-page .content-modal .address-content { background:rgba(51,65,85,.55)!important; border:1px solid rgba(148,163,184,.28)!important; }
+.dark-theme .profile-page .content-modal .text-content,
+.dark-theme .profile-page .content-modal .iban-text,
+.dark-theme .profile-page .content-modal .address-text { color:#f1f5f9!important; text-shadow:0 0 1px rgba(0,0,0,.5); }
+.dark-theme .profile-page .content-modal .inline-copy-btn { background:#3b82f6!important; }
+.dark-theme .profile-page .content-modal .inline-copy-btn:hover { background:#2563eb!important; }
+
+/* Host-context based dark theme overrides (higher reliability) */
+:host-context(.dark-theme) .content-modal { background:linear-gradient(165deg,#1e293b 0%, #0f172a 95%) !important; border:1px solid rgba(148,163,184,.25)!important; }
+:host-context(.dark-theme) .content-modal .modal-header h3 { color:#f1f5f9 !important; }
+:host-context(.dark-theme) .content-modal .modal-header { border-bottom:1px solid rgba(148,163,184,.18)!important; }
+:host-context(.dark-theme) .content-modal .iban-content,
+:host-context(.dark-theme) .content-modal .address-content,
+:host-context(.dark-theme) .content-modal .text-content-wrapper { background:rgba(51,65,85,.55)!important; border:1px solid rgba(148,163,184,.3)!important; }
+:host-context(.dark-theme) .content-modal .iban-text,
+:host-context(.dark-theme) .content-modal .address-text,
+:host-context(.dark-theme) .content-modal .text-content { color:#f1f5f9 !important; font-weight:500; letter-spacing:.25px; }
+:host-context(.dark-theme) .content-modal .inline-copy-btn { background:#3b82f6!important; }
+:host-context(.dark-theme) .content-modal .inline-copy-btn:hover { background:#2563eb!important; }
+.dark-theme .content-modal .modal-body { color:#e2e8f0; }
+.dark-theme .content-modal .text-content-wrapper { background:rgba(51,65,85,.6)!important; }
+.dark-theme .content-modal .text-content-wrapper .text-content { color:#f1f5f9!important; }
+.dark-theme .content-modal .iban-content,
+.dark-theme .content-modal .address-content { background:rgba(51,65,85,.6)!important; }
+.dark-theme .content-modal .inline-copy-btn { background:#2563eb; }
+.dark-theme .content-modal .inline-copy-btn:hover { background:#1d4ed8; }
 
 
   }

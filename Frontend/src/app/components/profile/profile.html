@@ -3,7 +3,7 @@
   <!-- (Language switcher moved inside profile card) -->
 
   <!-- QR Code Button (Top Left) -->
-  <div class="qr-fab" [class.active]="showQr" (click)="showQr = !showQr">
+  <div class="qr-fab" [class.active]="showQr" (click)="showQr = !showQr" [attr.title]="('profile.qrFab.title' | transloco)" [attr.aria-label]="('profile.qrFab.title' | transloco)">
     <div class="qr-icon">
   <img src="https://cdn-icons-png.flaticon.com/512/2313/2313147.png" [alt]="'profile.qr.title' | transloco" width="24" height="24" />
     </div>
@@ -20,13 +20,18 @@
   }
 
   <!-- Settings Button (Top Right) -->
-  <div class="settings-fab" [class.active]="showSettings" (click)="toggleSettings()">
+  <div class="settings-fab" [class.active]="showSettings" (click)="toggleSettings()" [attr.title]="('profile.settingsFab.title' | transloco)" [attr.aria-label]="('profile.settingsFab.title' | transloco)">
     <div class="settings-icon"><i class="fas fa-cog"></i></div>
     
     <!-- Settings Menu - Link Editor Controls (Always exists, but hidden/shown) -->
-    <div class="settings-menu" [style.display]="showSettings ? 'block' : 'none'" (click)="$event.stopPropagation()">
+  <div class="settings-menu" 
+     [class.sort-mode]="isSortMode" 
+     [style.display]="showSettings ? 'block' : 'none'" 
+     [style.maxHeight]="isSortMode ? '78vh' : null"
+     [style.overflowY]="isSortMode ? 'auto' : null"
+     (click)="$event.stopPropagation()">
       @if (canEdit) {
-        <app-link-editor [userId]="userId" [canEdit]="canEdit" (linksChanged)="onLinksChanged()"></app-link-editor>
+  <app-link-editor [userId]="userId" [canEdit]="canEdit" (linksChanged)="onLinksChanged()" (modeChanged)="onLinkEditorModeChanged($event)"></app-link-editor>
       }
       
       <!-- Navigation & Logout Actions -->
@@ -56,8 +61,8 @@
   </div>
 
   <!-- Share Button (Bottom Right) -->
-  <div class="share-fab">
-    <div class="share-icon" (click)="shareProfile()">
+  <div class="share-fab" [attr.title]="('profile.shareFab.title' | transloco)" [attr.aria-label]="('profile.shareFab.title' | transloco)">
+    <div class="share-icon" (click)="shareProfile()" >
   <img src="https://cdn-icons-png.flaticon.com/128/4855/4855052.png" [alt]="'profile.share' | transloco" width="24" height="24" />
     </div>
   </div>
@@ -455,7 +460,7 @@
   } <!-- !accessDenied -->
 
   <!-- Arama sayfasına git butonu (her zaman sağ alt) -->
-  <div class="search-fab" (click)="navigateToSearch()" [attr.title]="('profile.searchFab.title' | transloco)" [attr.aria-label]="('profile.searchFab.label' | transloco)">
+  <div class="search-fab" (click)="navigateToSearch()" [attr.title]="('profile.searchFab.title' | transloco)" [attr.aria-label]="('profile.searchFab.label' | transloco) || ('profile.searchFab.title' | transloco)">
     <i class="fas fa-search"></i>
   </div>
   
