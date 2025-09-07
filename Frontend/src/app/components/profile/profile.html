@@ -247,8 +247,9 @@
 
     @if (!isPrivateProfile || accessGranted) {
   <div class="profile-card">
-    <div class="card-lang-center">
+    <div class="card-lang-center" style="display:flex; gap:.5rem; align-items:center;">
       <app-language-switcher></app-language-switcher>
+      <app-theme-toggle></app-theme-toggle>
     </div>
     <!-- Profile Avatar & Basic Info -->
     <div class="profile-header">

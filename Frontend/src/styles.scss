@@ -5,12 +5,82 @@
   box-sizing: border-box;
 }
 
+/* Theme variables */
+:root {
+  --color-bg: #f2f5f9;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f8fafc;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-primary: #3b82f6;
+  --color-primary-accent: #2563eb;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-success: #10b981;
+  --color-accent-purple: #7c3aed;
+  --color-accent-purple-accent: #5b21b6;
+  --color-elevated-ring: rgba(59,130,246,.15);
+  /* Brand (original orange) */
+  --color-brand: #ff6b35;
+  --color-brand-accent: #f7931e;
+  --color-login-bg: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-accent) 100%);
+  --shadow-elevate: 0 4px 12px rgba(0,0,0,0.08);
+  --transition-base: .25s cubic-bezier(.4,0,.2,1);
+}
+
 body {
   font-family: 'Segoe UI', sans-serif;
-  background-color: #f2f2f2;
-  color: #333;
+  background-color: var(--color-bg);
+  color: var(--color-text);
   padding: 2rem;
+  transition: background-color var(--transition-base), color var(--transition-base);
 }
+
+/* Dark theme */
+.dark-theme {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-alt: #24324a;
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-border: #334155;
+  --color-primary: #60a5fa;
+  --color-primary-accent: #3b82f6;
+  --color-danger: #f87171;
+  --color-warning: #fbbf24;
+  --color-success: #34d399;
+  --color-accent-purple: #8b5cf6;
+  --color-accent-purple-accent: #6d28d9;
+  --color-brand: #ff874f;
+  --color-brand-accent: #ff9f4d;
+  --color-login-bg: linear-gradient(135deg,#0f172a 0%, #1e293b 100%);
+  --shadow-elevate: 0 4px 18px rgba(0,0,0,0.6);
+}
+
+/* Utility surfaces using variables (progressively adopt in components) */
+.surface { background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-elevate); border:1px solid var(--color-border); }
+.text-muted { color: var(--color-text-muted); }
+
+/* Brand utilities */
+.brand-gradient { background: linear-gradient(135deg,var(--color-brand) 0%, var(--color-brand-accent) 100%); }
+.btn-brand { background: linear-gradient(135deg,var(--color-brand) 0%, var(--color-brand-accent) 100%); color:#fff; }
+.btn-brand:hover { filter:brightness(1.05); }
+
+/* Dark theme specific component helpers */
+.dark-theme .modal, .dark-theme .dialog, .dark-theme .toast-notification, .dark-theme .privacy-modal, .dark-theme .privacy-settings-modal {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border-color: var(--color-border) !important;
+}
+
+.dark-theme .gradient-purple, .gradient-purple { background: linear-gradient(135deg,var(--color-accent-purple) 0%, var(--color-accent-purple-accent) 100%); }
+.dark-theme .gradient-green, .gradient-green { background: linear-gradient(135deg,var(--color-success) 0%, #059669 100%); }
+
+.focus-ring-primary { box-shadow: 0 0 0 3px var(--color-elevated-ring); }
+
+/* Smooth theme transition helper */
+body *, body *::before, body *::after { transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base); }
 
 // Toast animations for dynamic toasts
 @keyframes slideDown {

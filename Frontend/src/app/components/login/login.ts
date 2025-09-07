@@ -5,13 +5,14 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { LanguageSwitcherComponent } from '../shared/language-switcher/language-switcher.component';
+import { ThemeToggleComponent } from '../shared/theme-toggle/theme-toggle.component';
 import { LoginRequest, OAuthTokenRequest } from '../../models/auth.model';
 import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslocoModule, LanguageSwitcherComponent],
+  imports: [CommonModule, FormsModule, TranslocoModule, LanguageSwitcherComponent, ThemeToggleComponent],
   templateUrl: './login.html',
   styleUrls: ['./login.scss']
 })

@@ -6,13 +6,14 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { LanguageSwitcherComponent } from '../shared/language-switcher/language-switcher.component';
+import { ThemeToggleComponent } from '../shared/theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-search',
   standalone: true,
   templateUrl: './search.html',
   styleUrls: ['./search.scss'],
-  imports: [CommonModule, FormsModule, RouterModule, HttpClientModule, TranslocoModule, LanguageSwitcherComponent]
+  imports: [CommonModule, FormsModule, RouterModule, HttpClientModule, TranslocoModule, LanguageSwitcherComponent, ThemeToggleComponent]
 })
 export class Search implements OnInit {
   searchQuery = '';

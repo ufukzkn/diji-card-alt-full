@@ -20,6 +20,7 @@ import { User } from '../../models/user.models';
 import { LanguageService } from '../../services/language.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { LanguageSwitcherComponent } from '../shared/language-switcher/language-switcher.component';
+import { ThemeToggleComponent } from '../shared/theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-profile',
@@ -32,7 +33,8 @@ import { LanguageSwitcherComponent } from '../shared/language-switcher/language-
     FormsModule,
   CropperDialogComponent,
   TranslocoModule,
-  LanguageSwitcherComponent
+  LanguageSwitcherComponent,
+  ThemeToggleComponent
   ],
   templateUrl: './profile.html',
   styleUrls: ['./profile.scss']

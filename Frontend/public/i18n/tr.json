@@ -29,7 +29,7 @@
     "share": "Paylaş",
     "accessDenied": { "text": "Bu profile erişim izniniz yok.", "search": "Arama Sayfası", "logout": "Çıkış" },
     "links": { "title": "Bağlantılar", "toggleView": "Görünüm değiştir" },
-    "photo": { "add": "Ekle", "delete": "Sil" },
+  "photo": { "add": "Ekle", "delete": "Sil", "cropTitle": "Resmi Kırp" },
     "copy": "Kopyala",
     "map": "Haritada Göster",
     "msg": { "photo": { "invalidType": "Lütfen sadece JPEG, PNG veya GIF formatında resim yükleyin.", "sizeExceeded": "Dosya boyutu 5MB'dan küçük olmalıdır.", "uploadFail": "Fotoğraf yüklenemedi:", "confirmDelete": "Profil fotoğrafını silmek istediğinizden emin misiniz?", "deleteFail": "Fotoğraf silinemedi:" }, "link": { "copied": "Profil bağlantısı panoya kopyalandı!" }, "password": { "enter": "Lütfen şifre girin" }, "access": { "granted": "Erişim başarılı!" }, "privacy": { "saved": "Gizlilik ayarları kaydedildi!" }, "special": { "enterDesc": "Lütfen link açıklaması girin", "created": "Özel link oluşturuldu!", "confirmDelete": "Bu özel linki silmek istediğinizden emin misiniz?", "deleted": "Özel link silindi!" } },

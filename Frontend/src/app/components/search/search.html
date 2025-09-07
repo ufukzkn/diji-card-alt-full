@@ -1,6 +1,9 @@
 <div class="search-page">
-  <div class="lang-bar left-fixed">
-    <app-language-switcher></app-language-switcher>
+  <div class="top-utils">
+    <div class="utility-group">
+      <app-language-switcher></app-language-switcher>
+      <app-theme-toggle></app-theme-toggle>
+    </div>
   </div>
   <!-- Settings Button (Top Right) -->
   <div class="settings-fab" [class.active]="showSettings" (click)="toggleSettings()">
