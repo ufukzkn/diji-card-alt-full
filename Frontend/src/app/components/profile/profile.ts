@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { ImageCropperComponent, ImageCroppedEvent } from 'ngx-image-cropper';
 
 import { ProfileService } from '../../services/profile';
+import { ProfileVisitService } from '../../services/profile-visit.service';
 import { UsersService, UserPreferences } from '../../services/users';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
@@ -115,7 +116,8 @@ export class Profile implements OnInit, AfterViewChecked {
   private auth: AuthService,
   private notificationService: NotificationService,
   private langService: LanguageService,
-  private t: TranslocoService
+  private t: TranslocoService,
+  private visitSvc: ProfileVisitService
   ) {
     // initialize selectedLang from service if stored
     this.selectedLang = this.langService.active || 'tr';
@@ -126,6 +128,10 @@ export class Profile implements OnInit, AfterViewChecked {
       const id = params.get('userId');
       if (!id) return;
       this.userId = id;
+
+  // Ziyaret kaydı (tek sefer) - özel erişim veya normal erişimden bağımsız
+  const isSpecial = !!this.route.snapshot.queryParamMap.get('access');
+  this.logVisit(isSpecial);
       
       // Query parametrelerini kontrol et
       this.route.queryParams.subscribe(queryParams => {
@@ -138,6 +144,17 @@ export class Profile implements OnInit, AfterViewChecked {
           this.validateAccess();
         }
       });
+    });
+  }
+
+  private visitLogged = false;
+
+  private logVisit(isSpecialAccess: boolean) {
+    if (this.visitLogged || !this.userId) return;
+    this.visitLogged = true;
+    this.visitSvc.logVisit(this.userId, isSpecialAccess).subscribe({
+      next: () => { /* sessiz */ },
+      error: err => console.warn('Visit log failed', err)
     });
   }
 

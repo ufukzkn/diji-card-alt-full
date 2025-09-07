@@ -20,6 +20,9 @@ namespace diji_card_alt.Models
 
         public string? UserAgentHash { get; set; } // UA hash (isteğe bağlı analiz)
 
+    // Özel erişim (special link / access token) ile görüntülendiyse true
+    public bool IsSpecialAccess { get; set; } = false;
+
         [ForeignKey(nameof(ProfileUserId))]
         public User? ProfileUser { get; set; }
 
