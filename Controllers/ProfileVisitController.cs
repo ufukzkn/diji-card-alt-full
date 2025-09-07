@@ -5,6 +5,7 @@ using diji_card_alt.Data;
 using diji_card_alt.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace diji_card_alt_full.Controllers;
 
@@ -23,21 +24,12 @@ public class ProfileVisitController : ControllerBase
 
     private string? GetTokenUserId()
     {
-        var authHeader = Request.Headers["Authorization"].FirstOrDefault();
-        if (authHeader == null || !authHeader.StartsWith("Bearer "))
-            return null;
-        var token = authHeader.Substring("Bearer ".Length).Trim();
-        try
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var jsonToken = handler.ReadJwtToken(token);
-            var userId = jsonToken.Claims.FirstOrDefault(x => x.Type == "userId")?.Value
-                         ?? jsonToken.Claims.FirstOrDefault(x => x.Type == "uid")?.Value
-                         ?? jsonToken.Claims.FirstOrDefault(x => x.Type == "sub")?.Value
-                         ?? jsonToken.Claims.FirstOrDefault(x => x.Type == "nameid")?.Value;
-            return userId;
-        }
-        catch { return null; }
+        // Sadece doğrulanmış ClaimsPrincipal üzerinden al; manuel JWT parse yok
+        if (User?.Identity?.IsAuthenticated != true) return null;
+        return User.FindFirst("userId")?.Value
+            ?? User.FindFirst("uid")?.Value
+            ?? User.FindFirst("sub")?.Value
+            ?? User.FindFirst("nameid")?.Value;
     }
 
     private static string? Hash(string? input)

@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +52,23 @@ builder.Services.AddAuthentication(opt =>
     };
 });
 
+// Authorization services (policy ileride eklenebilir)
+builder.Services.AddAuthorization();
+
+// Basic rate limiting (örnek): Özel link oluşturma endpoint'i için dakikada 5 istek
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("SpecialLinkCreate", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: httpContext.User?.Identity?.Name ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "anon",
+        factory: key => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(1),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 2
+        }));
+});
+
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var app = builder.Build();
@@ -90,6 +109,7 @@ if (!Directory.Exists(profilePhotosDir))
 app.UseCors("AllowAngularApp");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.MapControllers();
 
 app.Run();

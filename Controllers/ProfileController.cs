@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace diji_card_alt_full.Controllers;
 
@@ -111,10 +112,16 @@ public class ProfileController : ControllerBase
     }
 
     [HttpPost("{userId}/photo")]
+    [RequestSizeLimit(5_242_880)] // ~5MB
     public async Task<IActionResult> UploadProfilePhoto(string userId, IFormFile file)
     {
         if (file == null || file.Length == 0)
             return BadRequest("Dosya seçilmedi.");
+
+        // Sunucu tarafı maksimum boyut kontrolü (5MB)
+        const long maxBytes = 5L * 1024 * 1024; // 5MB
+        if (file.Length > maxBytes)
+            return BadRequest("Dosya boyutu 5MB sınırını aşıyor.");
 
         // Sadece resim dosyalarına izin ver
         var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif" };
@@ -429,6 +436,7 @@ public class ProfileController : ControllerBase
     }
 
     [HttpPost("{userId}/create-special-link")]
+    [EnableRateLimiting("SpecialLinkCreate")]
     public async Task<ActionResult> CreateSpecialLink(string userId, [FromBody] CreateSpecialLinkRequest request)
     {
         var caller = GetTokenUserId();
