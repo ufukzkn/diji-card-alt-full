@@ -2219,14 +2219,16 @@
   .qr-display {
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) translateY(-20px) scale(0.9);
+    /* Center perfectly on mobile; removed extra translateY offset that caused drift */
+    transform: translate(-50%, -50%) scale(0.9);
     padding: 24px;
     max-width: 240px;
     border-radius: 20px;
 
     &.show {
-      transform: translate(-50%, -50%) translateY(0) scale(1);
-  animation: qrPopIn .55s cubic-bezier(.22,1.12,.42,1) both;
+      transform: translate(-50%, -50%) scale(1);
+      /* Use centered animation variant so translate(-50%, -50%) persists during keyframes */
+      animation: qrPopInCenter .55s cubic-bezier(.22,1.12,.42,1) both;
     }
 
     .qr-code canvas {
@@ -2241,6 +2243,11 @@
   0% { opacity:0; transform: translateY(12px) scale(.85) rotate(-2deg); filter:blur(6px); }
   55% { opacity:1; transform: translateY(-4px) scale(1.03) rotate(1deg); filter:blur(0); }
   100% { opacity:1; transform: translateY(0) scale(1) rotate(0); }
+}
+@keyframes qrPopInCenter {
+  0% { opacity:0; transform: translate(-50%, -50%) translateY(12px) scale(.85) rotate(-2deg); filter:blur(6px); }
+  55% { opacity:1; transform: translate(-50%, -50%) translateY(-4px) scale(1.03) rotate(1deg); filter:blur(0); }
+  100% { opacity:1; transform: translate(-50%, -50%) translateY(0) scale(1) rotate(0); }
 }
 @keyframes qrPulse {
   0% { transform: scale(.6); opacity:.55; }
@@ -2265,3 +2272,86 @@
   .qr-fab.active { transform:none; }
   .qr-display .qr-code canvas { opacity:1; transform:none; }
 }
+
+/* --- Dark Theme Privacy Modal Contrast Fix (High Specificity & Final Override) --- */
+.dark-theme .privacy-settings-modal-overlay .privacy-modal,
+.dark-theme .privacy-modal { 
+  color: #f1f5f9; 
+}
+.dark-theme .privacy-modal h3,
+.dark-theme .privacy-modal h4,
+.dark-theme .privacy-modal .modal-header h3,
+.dark-theme .privacy-modal .setting-group > label,
+.dark-theme .privacy-modal .setting-group .setting-label .setting-text,
+.dark-theme .privacy-modal .setting-group .setting-text,
+.dark-theme .privacy-modal .section-header h4,
+.dark-theme .privacy-modal .fancy-label { 
+  color: #f8fafc !important; 
+  text-shadow: 0 0 1px rgba(0,0,0,.35);
+}
+.dark-theme .privacy-modal .setting-group .setting-label i { color:#f8fafc !important; }
+.dark-theme .privacy-modal .setting-help { color:#cbd5e1 !important; }
+.dark-theme .privacy-modal input.setting-input::placeholder,
+.dark-theme .privacy-modal input.fancy-input::placeholder { color: rgba(241,245,249,.65); }
+.dark-theme .privacy-modal .special-links-list .special-link-item strong { color:#f8fafc !important; }
+.dark-theme .privacy-modal .special-links-list .special-link-item small { color:#cbd5e1 !important; }
+
+
+/* Dark theme overrides for privacy modal readability */
+.dark-theme .privacy-settings-modal-overlay .privacy-modal,
+.dark-theme .privacy-modal.create-link-modal,
+.dark-theme .privacy-modal { background: rgba(30,41,59,0.94); border:1px solid rgba(255,255,255,0.08); box-shadow:0 18px 48px -12px rgba(0,0,0,.6); }
+.dark-theme .privacy-modal .modal-header { border-bottom:1px solid rgba(255,255,255,0.08); }
+.dark-theme .privacy-modal .modal-header h3 { color:#f8fafc; }
+.dark-theme .privacy-modal .modal-body { color:#e2e8f0; }
+.dark-theme .privacy-modal .modal-body label,
+.dark-theme .privacy-modal .modal-body h4,
+.dark-theme .privacy-modal .modal-body .setting-label .setting-text,
+.dark-theme .privacy-modal .modal-body .section-header h4 { color:#f1f5f9; }
+.dark-theme .privacy-modal .setting-label i { color:#f1f5f9; }
+.dark-theme .privacy-modal .modal-body .setting-group > label { color:#f1f5f9; }
+.dark-theme .privacy-modal .modal-body .setting-group h4 { color:#f1f5f9; }
+.dark-theme .privacy-modal .modal-body .setting-input,
+.dark-theme .privacy-modal .modal-body .setting-select { background:rgba(51,65,85,.55); border:1px solid rgba(148,163,184,.35); color:#f1f5f9; }
+.dark-theme .privacy-modal .modal-body .setting-help { color:#94a3b8; }
+.dark-theme .privacy-modal .modal-actions { border-top:1px solid rgba(255,255,255,0.08); }
+.dark-theme .privacy-modal .modal-actions .save-btn { background:linear-gradient(135deg,#6366f1 0%, #4f46e5 100%); }
+.dark-theme .privacy-modal .modal-actions .save-btn:hover { filter:brightness(1.08); }
+.dark-theme .privacy-modal .create-link-btn { background:linear-gradient(135deg,#10b981 0%, #059669 100%); }
+.dark-theme .privacy-modal .create-link-btn:hover { filter:brightness(1.1); }
+.dark-theme .privacy-modal .special-links-list .special-link-item { background:rgba(51,65,85,.5); border:1px solid rgba(148,163,184,.25); }
+.dark-theme .privacy-modal .special-links-list .special-link-item strong { color:#f1f5f9; }
+.dark-theme .privacy-modal .special-links-list .special-link-item small { color:#94a3b8; }
+.dark-theme .privacy-modal .special-links-list .copy-link-btn { background:#3b82f6; }
+.dark-theme .privacy-modal .special-links-list .delete-link-btn { background:#ef4444; }
+.dark-theme .privacy-modal .special-links-list .copy-link-btn:hover { background:#2563eb; }
+.dark-theme .privacy-modal .special-links-list .delete-link-btn:hover { background:#dc2626; }
+.dark-theme .privacy-modal .preset-btn { background:rgba(51,65,85,.55); border:1px solid rgba(148,163,184,.3); color:#e2e8f0; }
+.dark-theme .privacy-modal .preset-btn.active { background:#6366f1; border-color:#6366f1; color:#fff; }
+.dark-theme .privacy-modal .preset-btn:hover { background:rgba(71,85,105,.65); }
+.dark-theme .privacy-modal .switch-manual { color:#6366f1; }
+.dark-theme .privacy-modal .input-shell { background:rgba(51,65,85,.55); border:1px solid rgba(148,163,184,.35); }
+.dark-theme .privacy-modal .input-shell i { color:#6366f1; }
+.dark-theme .privacy-modal input.fancy-input { color:#f1f5f9; }
+.dark-theme .privacy-modal .expiry-section .fancy-label,
+.dark-theme .privacy-modal .fancy-label { color:#f1f5f9; }
+.dark-theme .privacy-modal .preset-btn.outline { background:transparent; color:#cbd5e1; }
+.dark-theme .privacy-modal .preset-btn.outline:hover { background:rgba(71,85,105,.55); }
+.dark-theme .privacy-modal .save-btn.large { background:linear-gradient(135deg,#6366f1 0%, #4f46e5 100%); }
+.dark-theme .privacy-modal .save-btn.large:hover { box-shadow:0 6px 18px rgba(99,102,241,.35); }
+
+/* --- FINAL ENFORCED CONTRAST (ensure absolutely no grey leftovers) --- */
+/* Placed at end so it wins over any earlier component-level color declarations */
+.dark-theme .privacy-modal .setting-group > label,
+.dark-theme .privacy-modal .setting-group .setting-label .setting-text,
+.dark-theme .privacy-modal .setting-group .setting-text,
+.dark-theme .privacy-modal .section-header h4,
+.dark-theme .privacy-modal .fancy-label,
+.dark-theme .privacy-modal .expiry-section .fancy-label,
+.dark-theme .privacy-modal .special-links-list .special-link-item strong {
+  color:#ffffff !important;
+  text-shadow:0 0 1px rgba(0,0,0,.5);
+}
+
+/* Slightly brighten toggle line specifically if still dim due to nested spans */
+.dark-theme .privacy-modal .setting-group .setting-label .setting-text span { color:#ffffff !important; }

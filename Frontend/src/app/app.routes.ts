@@ -8,6 +8,9 @@ export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'search', component: Search, canActivate: [AuthGuard] },
-  { path: 'profile', component: Profile, canActivate: [AuthGuard] },
-  { path: 'profil/:userId', component: Profile, canActivate: [AuthGuard] }
+  // Public profile viewing (both /profile/:userId and legacy /profil/:userId)
+  { path: 'profile/:userId', component: Profile },
+  { path: 'profil/:userId', component: Profile },
+  // Optional: base /profile without id redirects to search or login
+  { path: 'profile', redirectTo: '/search', pathMatch: 'full' }
 ];

@@ -50,6 +50,7 @@ export class Profile implements OnInit {
   showEditMode = false;
   showPhotoActions = false;
   canEdit = false;
+  isLogged = false; // track logged in state for conditional UI
   sessionExpired = false;
   accessDenied = false;
   selectedLang: string = 'tr';
@@ -145,16 +146,31 @@ export class Profile implements OnInit {
 
   private validateAccess(): void {
     const token = this.auth.getToken();
-    if (!token) { this.router.navigate(['/login']); return; }
+    if (!token) {
+      // Anonymous view: just load privacy-aware data without edit rights
+      this.isLogged = false;
+      this.canEdit = false;
+      this.loadDataWithPrivacy();
+      return;
+    }
+    this.isLogged = true;
     this.auth.validateToken(token, this.userId).subscribe({
       next: res => {
-        if (!res.success) return;
+        if (!res.success) {
+          // Even if token invalid, fallback to anonymous view
+          this.isLogged = false;
+          this.canEdit = false;
+          this.loadDataWithPrivacy();
+          return;
+        }
         this.canEdit = !!res.canEdit;
         this.loadDataWithPrivacy();
       },
-      error: err => {
-        // Auth interceptor timeout'ları halledecek, buradan kaldırıyoruz
-        this.router.navigate(['/login']);
+      error: _err => {
+        // On error treat as anonymous
+        this.isLogged = false;
+        this.canEdit = false;
+        this.loadDataWithPrivacy();
       }
     });
   }
@@ -210,7 +226,7 @@ export class Profile implements OnInit {
           this.loadUserPreferences();
         } else {
           // Erişim reddedildi
-          this.accessDenied = true;
+          // Don't mark accessDenied here; allow anonymous/private flow
           // Fallback to i18n key instead of hardcoded Turkish text
           this.privateAccessMessage = response.message || this.t.translate('profile.private.needPassword');
           this.isPrivateProfile = true;
@@ -219,7 +235,9 @@ export class Profile implements OnInit {
       },
       error: (err) => {
   console.error('Access token ile erişim hatası:', err);
-  this.accessDenied = true;
+  // On special access error treat as private instead of full denial
+  this.isPrivateProfile = true;
+  this.accessGranted = false;
   this.privateAccessMessage = this.t.translate('profile.private.invalidLink');
         this.isPrivateProfile = true;
         this.profileSectionReady = true;
@@ -261,9 +279,11 @@ export class Profile implements OnInit {
         }
       },
       error: _ => {
-        // Profile erişimi reddedildi
-        this.accessDenied = true;
-        this.profileSectionReady = true;
+  // Hata durumunda dahi public gösterim denemesi: accessDenied yerine private kabul edip şifre isteyelim
+  this.isPrivateProfile = true;
+  this.accessGranted = false;
+  this.privateAccessMessage = this.t.translate('profile.private.needPassword');
+  this.profileSectionReady = true;
       }
     });
 
@@ -324,6 +344,7 @@ export class Profile implements OnInit {
   onLinksChanged = () => {
   this.loadDataWithPrivacy();
   }
+
 
   onPhotoSelected(event: any) {
     const file: File = event.target.files[0];
@@ -462,7 +483,7 @@ export class Profile implements OnInit {
   }
 
   logout() {
-    this.auth.logout();
+  this.auth.logout();
   }
 
   getLinkIcon(definitionName: string): string {

@@ -12,29 +12,30 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    // Access token parametresi varsa, AuthGuard'ı atla (özel link erişimi)
     const accessToken = route.queryParams['access'];
-    if (accessToken) {
-      return true;
-    }
+    if (accessToken) return true; // özel link erişimi serbest
 
     const token = this.authService.getToken();
-    
+
+    // Profil rotası ise (örn: /profile/:id) anonim görüntülemeye izin ver
+    const isProfileRoute = /\/profile\//.test(state.url) || route.routeConfig?.path?.includes('profile');
     if (!token) {
+      if (isProfileRoute) {
+        // Anonim kullanıcı profile bakabilir
+        return true;
+      }
+      // Diğer korunan rotalar için login gerekli
       this.router.navigate(['/login']);
       return false;
     }
 
-    // Token varsa ama süresi dolmuşsa profile'de popup gösterilsin
+    // Token var ama expired ise: profile sayfasında popup gösterilmesine izin ver, diğerlerini login'e yönlendir
     if (this.authService.isTokenExpired()) {
-      // Profile sayfasındaysa popup gösterilsin, değilse login'e yönlendir
-      const currentUrl = this.router.url;
-      if (!currentUrl.includes('/profile')) {
+      if (!isProfileRoute) {
         this.router.navigate(['/login']);
         return false;
       }
     }
-
     return true;
   }
 }

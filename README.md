@@ -45,10 +45,12 @@ Bu özellikler sayesinde, fiziksel kartvizitlere gerek kalmadan, profesyonel ve 
 - [x] **Multi-language Support** - Çoklu dil desteği
 - [x] **Grid/List Layout** - Esnek görünüm seçenekleri
 - [ ] **Profil Ziyaretçi Loglaması** - Analytics ve istatistikler
+- [ ] **Profil bazlı tasarım tercihleri** - Arka plan fotoğrafı, renk yazı fontu gibi profile özgü tercihler
 
 ## 🔧 Gereksinimler
 
 **Development Environment:**
+
 - **.NET 8 SDK** - Backend API için
 - **Node.js (v18+)** - Frontend geliştirme için
 - **npm** - Paket yöneticisi
@@ -56,6 +58,7 @@ Bu özellikler sayesinde, fiziksel kartvizitlere gerek kalmadan, profesyonel ve 
 - **PostgreSQL** - Veritabanı
 
 **Production Environment:**
+
 - **Web Server** - IIS, Nginx veya Apache
 - **PostgreSQL Server** - Production veritabanı
 - **SSL Certificate** - HTTPS için (önerilen)
@@ -63,6 +66,7 @@ Bu özellikler sayesinde, fiziksel kartvizitlere gerek kalmadan, profesyonel ve 
 ## 🚀 Kurulum
 
 ### 1. Backend (API) Kurulumu
+
 ```bash
 # Bağımlılıkları yükle
 dotnet restore
@@ -76,6 +80,7 @@ dotnet run
 ```
 
 ### 2. Frontend (Angular) Kurulumu
+
 ```bash
 # Frontend klasörüne geç
 cd Frontend
@@ -86,6 +91,7 @@ npm install
 # Development server'ı başlat
 ng serve
 ```
+
 ## Proje Hiyerarşisi
 
 ```text

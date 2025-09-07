@@ -36,14 +36,21 @@
             <i class="fas fa-shield-alt"></i> {{ 'profile.settings.privacy' | transloco }}
           </button>
         }
-        @if (!canEdit) {
+        @if (!canEdit && isLogged) {
           <button class="nav-btn" (click)="goToMyProfile()">
             <i class="fas fa-user"></i> {{ 'profile.settings.backToMine' | transloco }}
           </button>
         }
-        <button class="logout-btn" (click)="logout()">
-          <i class="fas fa-sign-out-alt"></i> {{ 'profile.settings.logout' | transloco }}
-        </button>
+        @if (!isLogged) {
+          <button class="nav-btn" (click)="goToLogin()">
+            <i class="fas fa-sign-in-alt"></i> {{ 'profile.session.login' | transloco }}
+          </button>
+        }
+        @if (isLogged) {
+          <button class="logout-btn" (click)="logout()">
+            <i class="fas fa-sign-out-alt"></i> {{ 'profile.settings.logout' | transloco }}
+          </button>
+        }
       </div>
     </div>
   </div>

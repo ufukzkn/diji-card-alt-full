@@ -46,7 +46,7 @@
 <!-- – MOD: var olan linkleri sil -->
 <div *ngIf="mode==='delete' && canEdit" class="mode-panel">
   <select [(ngModel)]="selectedToDelete">
-    <option value="" disabled>{{ 'linkEditor.delete.selectDefinition' | transloco }}</option>
+    <option value="" disabled selected>{{ 'linkEditor.delete.selectDefinition' | transloco }}</option>
     <option *ngFor="let l of userLinks" [ngValue]="l.id">
       {{ l.displayName }}
     </option>
@@ -77,7 +77,7 @@
 <!-- EDIT MODE: mevcut tanımı seçip değerini güncelle -->
 <div *ngIf="mode==='edit' && canEdit" class="mode-panel">
   <select [(ngModel)]="selectedToEdit">
-    <option value="" disabled>{{ 'linkEditor.edit.selectDefinition' | transloco }}</option>
+    <option value="" disabled selected>{{ 'linkEditor.edit.selectDefinition' | transloco }}</option>
     <option *ngFor="let l of userLinks" [value]="l.id">
       {{ l.displayName }} (ID: {{l.id}})
     </option>

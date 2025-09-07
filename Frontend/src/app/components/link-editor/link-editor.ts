@@ -37,12 +37,12 @@ export class LinkEditor implements OnInit {
   newDefinitionName = '';
   value = '';
 
-  // delete-mod için
-  selectedToDelete?: number | string;
+  // delete-mod için ('' => placeholder state)
+  selectedToDelete: number | string | '' = '';
   deleteDefinitionName = '';
 
-  // edit-mod için
-  selectedToEdit?: number;
+  // edit-mod için ('' => placeholder state)
+  selectedToEdit: number | string | '' = '';
   editValue = '';
 
   // custom-mod için
@@ -72,6 +72,8 @@ export class LinkEditor implements OnInit {
       this.mode = m;
       this.lastOpenedDropdown = m;
       this.resetForm();
+  if (m === 'delete') { this.selectedToDelete = ''; }
+  if (m === 'edit') { this.selectedToEdit = ''; }
       if (m === 'sort') {
         // Sıralama moduna girerken array'i güncelle
         this.userLinksArray = [...this.userLinks].sort((a, b) => a.sortId - b.sortId);
@@ -225,13 +227,13 @@ export class LinkEditor implements OnInit {
     console.log('Edit fonksiyonu çağrıldı:', this.selectedToEdit, this.editValue);
     console.log('selectedToEdit type:', typeof this.selectedToEdit);
     
-    if (!this.selectedToEdit || !this.editValue) {
+  if (!this.selectedToEdit || this.selectedToEdit === '' || !this.editValue) {
       console.log('Edit validasyon hatası - selectedToEdit veya editValue boş');
       return;
     }
     
     // selectedToEdit'i number'a çevir (select'ten string geliyorsa)
-    const id = typeof this.selectedToEdit === 'string' ? parseInt(this.selectedToEdit) : this.selectedToEdit;
+  const id = typeof this.selectedToEdit === 'string' ? parseInt(this.selectedToEdit) : this.selectedToEdit;
     console.log('Çevrilen ID:', id);
     
     try {
@@ -293,8 +295,8 @@ export class LinkEditor implements OnInit {
     this.selectedDefinitionId = '';
     this.newDefinitionName = '';
     this.value = '';
-    this.selectedToDelete = undefined;
-    this.selectedToEdit = undefined;
+  this.selectedToDelete = '';
+  this.selectedToEdit = '';
     this.editValue = '';
     this.deleteDefinitionName = '';
     this.customDefinitionName = '';
