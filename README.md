@@ -44,7 +44,7 @@ Bu özellikler sayesinde, fiziksel kartvizitlere gerek kalmadan, profesyonel ve 
 - [x] **Responsive Tasarım** - Tüm cihazlarda uyumlu
 - [x] **Multi-language Support** - Çoklu dil desteği
 - [x] **Grid/List Layout** - Esnek görünüm seçenekleri
-- [ ] **Profil Ziyaretçi Loglaması** - Analytics ve istatistikler
+- [x] **Profil Ziyaretçi Loglaması** - Analytics ve istatistikler
 - [ ] **Profil bazlı tasarım tercihleri** - Arka plan fotoğrafı, renk yazı fontu gibi profile özgü tercihler
 
 ## 🔧 Gereksinimler

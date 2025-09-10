@@ -1,0 +1,66 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: diji_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: sifre
+      POSTGRES_DB: dijicarddb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - diji-net
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: diji_backend
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=import_db;Username=postgres;Password=sifre
+      Jwt__Key: dev-secret-key-change-me-32chars-min
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5078:5078"
+    networks:
+      - diji-net
+    volumes:
+      - profile_photos:/app/wwwroot/profile-photos
+      - dataprotection_keys:/root/.aspnet/DataProtection-Keys
+    healthcheck:
+      test: ["CMD-SHELL","curl -fsS http://localhost:5078/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Frontend/Dockerfile
+    container_name: diji_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"
+    networks:
+      - diji-net
+
+networks:
+  diji-net:
+    driver: bridge
+
+volumes:
+  pgdata:
+  profile_photos:
+  dataprotection_keys:

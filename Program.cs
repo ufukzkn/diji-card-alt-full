@@ -1,5 +1,6 @@
 using diji_card_alt.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -7,6 +8,8 @@ using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Connection string override via environment variable already supported by default config layering.
 
 builder.Services.AddCors(options =>
 {
@@ -30,7 +33,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+           .ConfigureWarnings(w => w.Log(RelationalEventId.PendingModelChangesWarning));
+});
 
 // JWT Auth (basic secret for demo)
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "dev-secret-key-change-me-32chars"; // fallback dev key
@@ -111,5 +117,34 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
 app.MapControllers();
+
+// Auto apply EF Core migrations and seed a default test user if not exists
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await db.Database.MigrateAsync();
+
+        if (!await db.Users.AnyAsync())
+        {
+            db.Users.Add(new diji_card_alt.Models.User
+            {
+                UserId = "demo",
+                FullName = "Demo Kullanıcı",
+                Email = "demo@example.com",
+                Password = "1234",
+                JobTitle = "Tester",
+                Company = "DemoCorp",
+                IsPublic = true
+            });
+            await db.SaveChangesAsync();
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Migration/Seeding error: {ex.Message}");
+    }
+}
 
 app.Run();
