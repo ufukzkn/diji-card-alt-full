@@ -73,8 +73,11 @@ public class ProfileVisitController : ControllerBase
 
     // Özet: toplam, son 7 gün, bugün, özel link oranı, unique (IP hash + UA hash kombinasyonu) yaklaşık
     [HttpGet("{userId}/summary")]
+    [Authorize]
     public async Task<IActionResult> GetSummary(string userId)
     {
+        var caller = GetTokenUserId();
+        if (caller != userId) return Forbid();
         var now = DateTime.UtcNow;
         var sevenDays = now.AddDays(-7);
         var todayStart = new DateTime(now.Year, now.Month, now.Day, 0,0,0, DateTimeKind.Utc);
@@ -94,8 +97,11 @@ public class ProfileVisitController : ControllerBase
 
     // Günlük dağılım (varsayılan 7 gün)
     [HttpGet("{userId}/daily")]
+    [Authorize]
     public async Task<IActionResult> GetDaily(string userId, [FromQuery] int days = 7)
     {
+        var caller = GetTokenUserId();
+        if (caller != userId) return Forbid();
         if (days < 1) days = 1; if (days > 60) days = 60;
         var start = DateTime.UtcNow.Date.AddDays(-days + 1);
         var data = await _ctx.ProfileVisits
@@ -118,8 +124,11 @@ public class ProfileVisitController : ControllerBase
 
     // Özel link vs normal (son N gün)
     [HttpGet("{userId}/special-vs-normal")]
+    [Authorize]
     public async Task<IActionResult> GetSpecialVsNormal(string userId, [FromQuery] int days = 7)
     {
+        var caller = GetTokenUserId();
+        if (caller != userId) return Forbid();
         if (days < 1) days = 1; if (days > 60) days = 60;
         var start = DateTime.UtcNow.AddDays(-days);
         var query = _ctx.ProfileVisits.Where(v => v.ProfileUserId == userId && v.VisitedAtUtc >= start);

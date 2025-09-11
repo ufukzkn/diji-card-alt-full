@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text.RegularExpressions;
 
 namespace diji_card_alt_full.Controllers
 {
@@ -13,6 +14,39 @@ namespace diji_card_alt_full.Controllers
     {
         private readonly AppDbContext _context;
         public UserDefinitionValuesController(AppDbContext context) => _context = context;
+
+        // Basic limits / rules (can be moved to config later)
+        private const int MaxValueLength = 512;
+        private const int MaxCustomNameLength = 64;
+        private static readonly Regex AllowedNameRegex = new("^[A-Za-z0-9çğıöşüÇĞİÖŞÜ _.-]{1,64}$", RegexOptions.Compiled);
+        private static readonly Regex ScriptLikeRegex = new("(<script)|(javascript:)|onerror=|onload=", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        private string Sanitize(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+            var trimmed = input.Trim();
+            // Remove control chars
+            trimmed = new string(trimmed.Where(c => c >= 32).ToArray());
+            // Very light neutralization of angle brackets to reduce XSS risk if later rendered unsafely
+            trimmed = trimmed.Replace("<", "").Replace(">", "");
+            return trimmed;
+        }
+
+        private bool IsInvalidValue(string value, out string reason)
+        {
+            if (value.Length == 0) { reason = "Boş değer"; return true; }
+            if (value.Length > MaxValueLength) { reason = "Değer çok uzun"; return true; }
+            if (ScriptLikeRegex.IsMatch(value)) { reason = "Potansiyel script içeriği reddedildi"; return true; }
+            reason = string.Empty; return false;
+        }
+
+        private bool IsInvalidCustomName(string? name, out string reason)
+        {
+            if (string.IsNullOrWhiteSpace(name)) { reason = "İsim gerekli"; return true; }
+            if (name.Length > MaxCustomNameLength) { reason = "İsim çok uzun"; return true; }
+            if (!AllowedNameRegex.IsMatch(name)) { reason = "Geçersiz karakter"; return true; }
+            reason = string.Empty; return false;
+        }
 
         // GET: api/userdefinitionvalues/{userId}
         [HttpGet("{userId}")]
@@ -109,6 +143,12 @@ namespace diji_card_alt_full.Controllers
         public async Task<IActionResult> AddUserLink([FromBody] UserDefinitionValue dto)
         {
             if (!IsOwner(dto.UserId)) return Unauthorized(new { Message = "CanEdit=false" });
+            dto.Value = Sanitize(dto.Value);
+            dto.CustomDefinitionName = Sanitize(dto.CustomDefinitionName);
+
+            if (IsInvalidValue(dto.Value, out var valueReason)) return BadRequest(new { Message = valueReason });
+            if (dto.DefinitionId == 11 && (IsInvalidCustomName(dto.CustomDefinitionName, out var nameReason))) return BadRequest(new { Message = nameReason });
+
             // For regular definitions (non-custom), check if already exists
             if (dto.DefinitionId != 11 && string.IsNullOrEmpty(dto.CustomDefinitionName))
             {
@@ -137,7 +177,7 @@ namespace diji_card_alt_full.Controllers
 
         // POST: api/userdefinitionvalues/custom
         [HttpPost("custom")]
-        public async Task<IActionResult> AddCustomUserLink([FromBody] AddCustomDefinitionRequest request)
+    public async Task<IActionResult> AddCustomUserLink([FromBody] AddCustomDefinitionRequest request)
         {
             try
             {
@@ -151,6 +191,11 @@ namespace diji_card_alt_full.Controllers
                 {
                     return BadRequest(new { Success = false, Message = "Gerekli alanlar boş olamaz" });
                 }
+
+        request.Value = Sanitize(request.Value);
+        request.CustomDefinitionName = Sanitize(request.CustomDefinitionName);
+        if (IsInvalidValue(request.Value, out var valReason)) return BadRequest(new { Success = false, Message = valReason });
+        if (IsInvalidCustomName(request.CustomDefinitionName, out var nReason)) return BadRequest(new { Success = false, Message = nReason });
 
                 // Custom definition entry oluştur (DefinitionId = 11 kullan)
                 var customEntry = new UserDefinitionValue
@@ -235,6 +280,11 @@ namespace diji_card_alt_full.Controllers
 
             if (!IsOwner(entity.UserId)) return Unauthorized(new { Message = "CanEdit=false" });
 
+            dto.Value = Sanitize(dto.Value);
+            dto.CustomDefinitionName = Sanitize(dto.CustomDefinitionName);
+            if (IsInvalidValue(dto.Value, out var reason)) return BadRequest(new { Message = reason });
+            if (entity.DefinitionId == 11 && !string.IsNullOrEmpty(dto.CustomDefinitionName) && IsInvalidCustomName(dto.CustomDefinitionName, out var nameReason)) return BadRequest(new { Message = nameReason });
+
             entity.Value = dto.Value;
             entity.CustomDefinitionName = dto.CustomDefinitionName; // Update custom name if provided
             entity.SortId = dto.SortId;
@@ -260,6 +310,8 @@ namespace diji_card_alt_full.Controllers
 
             if (!IsOwner(entity.UserId)) return Unauthorized(new { Message = "CanEdit=false" });
 
+            dto.Value = Sanitize(dto.Value);
+            if (IsInvalidValue(dto.Value, out var reason)) return BadRequest(new { Message = reason });
             entity.Value = dto.Value;
             await _context.SaveChangesAsync();
 
@@ -284,6 +336,8 @@ namespace diji_card_alt_full.Controllers
 
             if (!IsOwner(entity.UserId)) return Unauthorized(new { Message = "CanEdit=false" });
 
+            dto.Value = Sanitize(dto.Value);
+            if (IsInvalidValue(dto.Value, out var reason)) return BadRequest(new { Message = reason });
             entity.Value = dto.Value;
             await _context.SaveChangesAsync();
 
@@ -292,7 +346,7 @@ namespace diji_card_alt_full.Controllers
 
         // PUT: api/userdefinitionvalues/sort
         [HttpPut("sort")]
-        public async Task<IActionResult> UpdateSortOrder([FromBody] List<UserDefinitionValue> updatedValues)
+    public async Task<IActionResult> UpdateSortOrder([FromBody] List<UserDefinitionValue> updatedValues)
         {
             if (updatedValues.Any() && !IsOwner(updatedValues.First().UserId)) return Unauthorized(new { Message = "CanEdit=false" });
             foreach (var updatedValue in updatedValues)
@@ -302,6 +356,8 @@ namespace diji_card_alt_full.Controllers
                     .FindAsync(updatedValue.Id);
                 if (entity != null)
                 {
+            // Ensure each belongs to same owner (defensive)
+            if (!IsOwner(entity.UserId)) return Unauthorized(new { Message = "CanEdit=false" });
                     entity.SortId = updatedValue.SortId;
                 }
             }

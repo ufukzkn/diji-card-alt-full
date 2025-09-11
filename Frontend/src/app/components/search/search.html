@@ -88,7 +88,7 @@
           <div class="user-card">
             <div class="user-avatar">
               <img 
-                [src]="user.profilePhotoUrl ? 'http://localhost:5078' + user.profilePhotoUrl : '/assets/default-avatar.png'" 
+                [src]="user.profilePhotoUrl ? (environment.imageBase + user.profilePhotoUrl) : '/assets/default-avatar.png'" 
                 [alt]="user.fullName"
                 class="avatar-img" />
               <div class="status-indicator"></div>

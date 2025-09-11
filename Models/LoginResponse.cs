@@ -7,5 +7,7 @@ namespace digital_business_card.Models
         public string RequestId { get; set; } = string.Empty;
         public string AuthToken { get; set; } = string.Empty;
         public string RedirectUrl { get; set; } = string.Empty;
+    // JWT (legacy iki aşamalı auth yerine doğrudan kullanılabilir)
+    public string AccessToken { get; set; } = string.Empty;
     }
 }

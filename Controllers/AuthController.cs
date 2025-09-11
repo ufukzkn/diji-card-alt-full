@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Collections.Concurrent;
 
 namespace digital_business_card.Controllers
 {
@@ -16,9 +18,9 @@ namespace digital_business_card.Controllers
     {
         private readonly ILogger<AuthController> _logger;
         private readonly AppDbContext _context;
-        private static readonly Dictionary<string, string> _activeTokens = new(); // RequestId -> UserId mapping (legacy step1)
-        private static readonly Dictionary<string, DateTime> _tokenExpiryTimes = new(); // AuthToken -> Expiry time mapping (legacy step1)
-        private static readonly Dictionary<string, (string UserId, DateTime ExpiresAt)> _refreshTokens = new(); // refreshToken -> data
+    private static readonly ConcurrentDictionary<string, string> _activeTokens = new(); // RequestId -> UserId
+    private static readonly ConcurrentDictionary<string, DateTime> _tokenExpiryTimes = new(); // AuthToken -> Expiry time
+    private static readonly ConcurrentDictionary<string, (string UserId, DateTime ExpiresAt)> _refreshTokens = new(); // refreshToken -> data
         private readonly IConfiguration _config;
 
         public AuthController(ILogger<AuthController> logger, AppDbContext context, IConfiguration config)
@@ -28,11 +30,16 @@ namespace digital_business_card.Controllers
             _config = config;
         }
 
-        [HttpPost("KullaniciGirisYap")]
+    [HttpPost("KullaniciGirisYap")]
+    [EnableRateLimiting("Login")]
         public async Task<IActionResult> KullaniciGirisYap([FromBody] LoginRequest request)
         {
             try
             {
+                // Normalize incoming credentials (trim whitespace / trailing punctuation accidentally entered)
+                request.KullaniciAdi = (request.KullaniciAdi ?? string.Empty).Trim().TrimEnd(',');
+                request.Sifre = (request.Sifre ?? string.Empty).Trim();
+
                 _logger.LogInformation("Login attempt for user: {KullaniciAdi}", request.KullaniciAdi);
 
                 // Basit doğrulama
@@ -46,22 +53,22 @@ namespace digital_business_card.Controllers
                 }
 
                 // Database'den kullanıcıyı kontrol et (Email veya UserId ile)
+                var userNameOrEmail = request.KullaniciAdi;
                 var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Email == request.KullaniciAdi || u.UserId == request.KullaniciAdi);
+                    .FirstOrDefaultAsync(u => u.Email == userNameOrEmail || u.UserId == userNameOrEmail);
 
                 if (user != null && user.Password == request.Sifre)
                 {
-                    var requestId = !string.IsNullOrEmpty(request.RequestId) 
-                        ? request.RequestId 
+                    var requestId = !string.IsNullOrEmpty(request.RequestId)
+                        ? request.RequestId
                         : Guid.NewGuid().ToString();
 
                     var authToken = Guid.NewGuid().ToString();
-
-                    // RequestId ile UserId'yi eşleştir
                     _activeTokens[requestId] = user.UserId;
-                    
-                    // AuthToken'ın 10 dakikalık timeout süresini ayarla
                     _tokenExpiryTimes[authToken] = DateTime.UtcNow.AddMinutes(10);
+
+                    // DOĞRUDAN JWT üret (frontend artık ikinci adım olmadan kullanabilir)
+                    var accessJwt = await GenerateJwtTokenAsync(user.UserId);
 
                     _logger.LogInformation("Successful login for user: {UserId}", user.UserId);
 
@@ -70,8 +77,9 @@ namespace digital_business_card.Controllers
                         Success = true,
                         Message = "Giriş başarılı",
                         RequestId = requestId,
-                        AuthToken = authToken,
-                        RedirectUrl = $"/profil/{user.UserId}" // Kullanıcının kendi profiline yönlendir
+                        AuthToken = authToken, // legacy flow (OAuthToken endpoint'i isteyenler için)
+                        AccessToken = accessJwt, // yeni direkt JWT
+                        RedirectUrl = $"/profil/{user.UserId}"
                     });
                 }
 
@@ -93,7 +101,8 @@ namespace digital_business_card.Controllers
             }
         }
 
-        [HttpPost("OAuthToken")]
+    [HttpPost("OAuthToken")]
+    [EnableRateLimiting("TokenExchange")]
         public async Task<IActionResult> OAuthToken([FromBody] OAuthTokenRequest request)
         {
             try
@@ -136,8 +145,8 @@ namespace digital_business_card.Controllers
                     else
                     {
                         // Token süresi dolmuş, temizle
-                        _activeTokens.Remove(request.RequestId);
-                        _tokenExpiryTimes.Remove(request.AuthToken);
+                        _activeTokens.TryRemove(request.RequestId, out _);
+                        _tokenExpiryTimes.TryRemove(request.AuthToken, out _);
                         
                         return Unauthorized(new TokenResponse
                         {
@@ -185,6 +194,7 @@ namespace digital_business_card.Controllers
         }
 
         [HttpPost("Refresh")] // body: { refreshToken }
+        [EnableRateLimiting("TokenExchange")]
         public IActionResult Refresh([FromBody] dynamic body)
         {
             string? refreshToken = body?.refreshToken;
@@ -195,7 +205,7 @@ namespace digital_business_card.Controllers
             var (userId, expiresAt) = _refreshTokens[refreshToken];
             if (expiresAt <= DateTime.UtcNow)
             {
-                _refreshTokens.Remove(refreshToken);
+                _refreshTokens.TryRemove(refreshToken, out _);
                 return Unauthorized(new { Success = false, Message = "Refresh token süresi dolmuş" });
             }
             var accessTask = GenerateJwtTokenAsync(userId);
@@ -203,7 +213,7 @@ namespace digital_business_card.Controllers
             var newRefreshExpiry = DateTime.UtcNow.AddDays(_config.GetValue<int>("Jwt:RefreshTokenDays", 7));
             _refreshTokens[newRefreshToken] = (userId, newRefreshExpiry);
             // eski refresh token'ı isteğe bağlı sil
-            _refreshTokens.Remove(refreshToken);
+            _refreshTokens.TryRemove(refreshToken, out _);
             return Ok(new {
                 Success = true,
                 AccessToken = accessTask.Result,

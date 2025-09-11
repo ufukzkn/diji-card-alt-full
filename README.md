@@ -92,6 +92,23 @@ npm install
 ng serve
 ```
 
+### 3. (Opsiyonel) default.png Manuel Kopyalama
+
+Container yeniden oluşturulduğunda `profile_photos` volume boş gelebilir ve `default.png` eksikse 404 alınır.
+Hızlı manuel çözüm (Windows PowerShell):
+
+```powershell
+docker cp .\wwwroot\profile-photos\default.png diji_backend:/app/wwwroot/profile-photos/default.png
+```
+
+Ardından test:
+
+`http://localhost:5078/profile-photos/default.png`
+
+Eğer tarayıcı cache tutarsa gizli pencerede aç veya hard refresh (Ctrl+F5).
+
+Kalıcı otomasyon istersek ileride: build aşamasında image içine seed klasörü eklenip container startında yoksa kopyalanır.
+
 ## Proje Hiyerarşisi
 
 ```text

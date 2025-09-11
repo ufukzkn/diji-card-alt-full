@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Authorization;
 
 namespace diji_card_alt_full.Controllers;
 
@@ -16,42 +17,23 @@ namespace diji_card_alt_full.Controllers;
 public class ProfileController : ControllerBase
 {
     private readonly AppDbContext _ctx;
-    public ProfileController(AppDbContext ctx) => _ctx = ctx;
-
-    private string? GetTokenUserId()
+    private readonly IConfiguration _config;
+    public ProfileController(AppDbContext ctx, IConfiguration config)
     {
-        var authHeader = Request.Headers["Authorization"].FirstOrDefault();
-        if (authHeader == null || !authHeader.StartsWith("Bearer "))
-        {
-            Console.WriteLine("[DEBUG] Auth header yok veya Bearer ile başlamıyor");
-            return null;
-        }
+        _ctx = ctx;
+        _config = config;
+    }
 
-        var token = authHeader.Substring("Bearer ".Length).Trim();
-        try
+    private string? GetCallerUserId()
+    {
+        if (User?.Identity?.IsAuthenticated == true)
         {
-            var handler = new JwtSecurityTokenHandler();
-            var jsonToken = handler.ReadJwtToken(token);
-            
-            // Farklı claim isimlerini dene
-            var userId = jsonToken.Claims.FirstOrDefault(x => x.Type == "userId")?.Value;
-            if (string.IsNullOrEmpty(userId))
-                userId = jsonToken.Claims.FirstOrDefault(x => x.Type == "uid")?.Value;
-            if (string.IsNullOrEmpty(userId))
-                userId = jsonToken.Claims.FirstOrDefault(x => x.Type == "sub")?.Value;
-            if (string.IsNullOrEmpty(userId))
-                userId = jsonToken.Claims.FirstOrDefault(x => x.Type == "nameid")?.Value;
-            
-            Console.WriteLine($"[DEBUG] Token'dan çıkarılan userId: {userId}");
-            Console.WriteLine($"[DEBUG] Token claims: {string.Join(", ", jsonToken.Claims.Select(c => $"{c.Type}={c.Value}"))}");
-            
-            return userId;
+            return User.FindFirst("userId")?.Value
+                ?? User.FindFirst("uid")?.Value
+                ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                ?? User.FindFirst("nameid")?.Value;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[DEBUG] Token parse hatası: {ex.Message}");
-            return null;
-        }
+        return null;
     }
 
     [HttpGet("{userId}")]
@@ -62,7 +44,7 @@ public class ProfileController : ControllerBase
         if (user is null) return NotFound();
 
         // 2) Privacy kontrolü - User'dan IsPublic kontrol et  
-        var caller = GetTokenUserId(); // Token'dan gelen kullanıcı ID'si
+    var caller = GetCallerUserId(); // Doğrulanmış principal
         
         Console.WriteLine($"[DEBUG GetProfile] userId: {userId}, caller: {caller}, IsPublic: {user.IsPublic}");
         
@@ -101,7 +83,9 @@ public class ProfileController : ControllerBase
         // 4) Hepsini birleştir
         var allLinks = defaultLinks.Concat(linksFromUdvs).ToList();
 
-        var profileDto = new UserProfileDto(userId, allLinks, user.ProfilePhotoUrl);
+    // Default profile photo fallback
+    var photoUrl = string.IsNullOrEmpty(user.ProfilePhotoUrl) ? "/profile-photos/default.png" : user.ProfilePhotoUrl;
+    var profileDto = new UserProfileDto(userId, allLinks, photoUrl);
         return Ok(new PrivateProfileResponse
         {
             IsPublic = user.IsPublic,
@@ -113,6 +97,7 @@ public class ProfileController : ControllerBase
 
     [HttpPost("{userId}/photo")]
     [RequestSizeLimit(5_242_880)] // ~5MB
+    [Authorize]
     public async Task<IActionResult> UploadProfilePhoto(string userId, IFormFile file)
     {
         if (file == null || file.Length == 0)
@@ -128,7 +113,9 @@ public class ProfileController : ControllerBase
         if (!allowedTypes.Contains(file.ContentType.ToLower()))
             return BadRequest("Sadece JPEG, PNG ve GIF dosyalarına izin verilir.");
 
-        var user = await _ctx.Users.FindAsync(userId);
+    var caller = GetCallerUserId();
+    if (caller != userId) return Forbid();
+    var user = await _ctx.Users.FindAsync(userId);
         if (user == null)
             return NotFound();
 
@@ -160,8 +147,11 @@ public class ProfileController : ControllerBase
     }
 
     [HttpDelete("{userId}/photo")]
+    [Authorize]
     public async Task<IActionResult> DeleteProfilePhoto(string userId)
     {
+        var caller = GetCallerUserId();
+        if (caller != userId) return Forbid();
         var user = await _ctx.Users.FindAsync(userId);
         if (user == null)
             return NotFound();
@@ -182,6 +172,13 @@ public class ProfileController : ControllerBase
     {
         var user = await _ctx.Users.FindAsync(userId);
         if (user is null) return NotFound();
+
+        // Private profil ise ve caller sahibi değilse boş liste dön
+        var caller = GetCallerUserId();
+        if (!user.IsPublic && caller != userId)
+        {
+            return Ok(Array.Empty<object>());
+        }
 
         var customDefinitions = await _ctx.UserDefinitionValues
             .Where(x => x.UserId == userId && x.DefinitionId == 11)
@@ -204,6 +201,12 @@ public class ProfileController : ControllerBase
     {
         var user = await _ctx.Users.FindAsync(userId);
         if (user is null) return NotFound();
+
+        var caller = GetCallerUserId();
+        if (!user.IsPublic && caller != userId)
+        {
+            return Ok(new List<string>()); // boş
+        }
 
         var customDefinitionNames = await _ctx.UserDefinitionValues
             .Where(x => x.UserId == userId && x.DefinitionId == 11 && !string.IsNullOrEmpty(x.CustomDefinitionName))
@@ -280,7 +283,7 @@ public class ProfileController : ControllerBase
             jobTitle = user.JobTitle,
             email = user.Email,
             phoneNumber = user.PhoneNumber,
-            profilePhotoUrl = user.ProfilePhotoUrl
+            profilePhotoUrl = string.IsNullOrEmpty(user.ProfilePhotoUrl) ? "/profile-photos/default.png" : user.ProfilePhotoUrl
         };
 
         return Task.FromResult(new PrivateProfileResponse
@@ -366,7 +369,7 @@ public class ProfileController : ControllerBase
             jobTitle = user.JobTitle,
             email = user.Email,
             phoneNumber = user.PhoneNumber,
-            profilePhotoUrl = user.ProfilePhotoUrl,
+            profilePhotoUrl = string.IsNullOrEmpty(user.ProfilePhotoUrl) ? "/profile-photos/default.png" : user.ProfilePhotoUrl,
             links = allLinks // Links'i de ekle
         };
 
@@ -413,9 +416,10 @@ public class ProfileController : ControllerBase
     }
 
     [HttpPut("{userId}/privacy-settings")]
+    [Authorize]
     public async Task<ActionResult> UpdatePrivacySettings(string userId, [FromBody] UpdatePrivacySettingsRequest request)
     {
-        var caller = GetTokenUserId();
+        var caller = GetCallerUserId();
         if (caller != userId) return Forbid("Sadece kendi profil ayarlarınızı değiştirebilirsiniz.");
 
         var user = await _ctx.Users.FindAsync(userId);
@@ -437,9 +441,10 @@ public class ProfileController : ControllerBase
 
     [HttpPost("{userId}/create-special-link")]
     [EnableRateLimiting("SpecialLinkCreate")]
+    [Authorize]
     public async Task<ActionResult> CreateSpecialLink(string userId, [FromBody] CreateSpecialLinkRequest request)
     {
-        var caller = GetTokenUserId();
+        var caller = GetCallerUserId();
         if (caller != userId) return Forbid("Sadece kendi profiliniz için özel link oluşturabilirsiniz.");
 
         var user = await _ctx.Users.FindAsync(userId);
@@ -461,7 +466,8 @@ public class ProfileController : ControllerBase
         _ctx.PrivateProfileAccesses.Add(specialAccess);
         await _ctx.SaveChangesAsync();
 
-        var specialUrl = $"http://localhost:4200/profil/{userId}?access={accessToken}";
+    var baseUrl = _config["PublicFrontendBaseUrl"] ?? "http://localhost:4200";
+    var specialUrl = $"{baseUrl.TrimEnd('/')}/profil/{userId}?access={accessToken}";
 
         return Ok(new 
         { 
@@ -473,9 +479,10 @@ public class ProfileController : ControllerBase
     }
 
     [HttpGet("{userId}/special-links")]
+    [Authorize]
     public async Task<ActionResult> GetSpecialLinks(string userId)
     {
-        var caller = GetTokenUserId();
+        var caller = GetCallerUserId();
         if (caller != userId) return Forbid("Sadece kendi özel linklerinizi görebilirsiniz.");
 
         var links = await _ctx.PrivateProfileAccesses
@@ -487,7 +494,7 @@ public class ProfileController : ControllerBase
                 CreatedDate = p.CreatedDate,
                 ExpiryDate = p.ExpiryDate,
                 Description = p.Description,
-                SpecialUrl = $"http://localhost:4200/profil/{userId}?access={p.AccessToken}"
+                SpecialUrl = $"{(_config["PublicFrontendBaseUrl"] ?? "http://localhost:4200").TrimEnd('/')}/profil/{userId}?access={p.AccessToken}"
             })
             .ToListAsync();
 
@@ -495,9 +502,10 @@ public class ProfileController : ControllerBase
     }
 
     [HttpDelete("{userId}/special-links/{linkId}")]
+    [Authorize]
     public async Task<ActionResult> DeleteSpecialLink(string userId, int linkId)
     {
-        var caller = GetTokenUserId();
+        var caller = GetCallerUserId();
         if (caller != userId) return Forbid("Sadece kendi özel linklerinizi silebilirsiniz.");
 
         var link = await _ctx.PrivateProfileAccesses.FindAsync(linkId);
@@ -517,7 +525,7 @@ public class ProfileController : ControllerBase
         if (user is null) return NotFound();
 
         // 2) Privacy kontrolü - User'dan IsPublic kontrol et  
-        var caller = GetTokenUserId(); // Token'dan gelen kullanıcı ID'si
+    var caller = GetCallerUserId(); // Doğrulanmış principal
         
         Console.WriteLine($"[DEBUG] userId: {userId}, caller: {caller}, IsPublic: {user.IsPublic}");
         
@@ -543,7 +551,7 @@ public class ProfileController : ControllerBase
             jobTitle = user.JobTitle,
             email = user.Email,
             phoneNumber = user.PhoneNumber,
-            profilePhotoUrl = user.ProfilePhotoUrl
+            profilePhotoUrl = string.IsNullOrEmpty(user.ProfilePhotoUrl) ? "/profile-photos/default.png" : user.ProfilePhotoUrl
         };
 
         return Ok(new PrivateProfileResponse

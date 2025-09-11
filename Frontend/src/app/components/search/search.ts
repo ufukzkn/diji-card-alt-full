@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { environment } from '../../environments';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -16,6 +17,7 @@ import { ThemeToggleComponent } from '../shared/theme-toggle/theme-toggle.compon
   imports: [CommonModule, FormsModule, RouterModule, HttpClientModule, TranslocoModule, LanguageSwitcherComponent, ThemeToggleComponent]
 })
 export class Search implements OnInit {
+  environment = environment;
   searchQuery = '';
   users: any[] = [];
   showAllResults = false;
@@ -35,7 +37,7 @@ export class Search implements OnInit {
 
   loadUsers(): void {
     this.isLoading = true;
-    this.http.get<any[]>('http://localhost:5078/api/user')
+  this.http.get<any[]>(environment.apiBase + '/api/user')
       .subscribe({
         next: (data) => {
           this.users = data;

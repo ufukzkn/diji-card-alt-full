@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../environments';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UserDefinitionValue } from '../models/user-definition-value.model';
@@ -23,7 +24,7 @@ export interface UpdateUserLinkRequest {
 
 @Injectable({ providedIn: 'root' })
 export class UserLinksService {
-  private api = 'http://localhost:5078/api/userdefinitionvalues';
+  private api = environment.apiBase + '/api/userdefinitionvalues';
 
   constructor(private http: HttpClient) { }
 

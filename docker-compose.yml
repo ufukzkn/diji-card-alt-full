@@ -1,21 +1,25 @@
 services:
   db:
-    image: postgres:17-alpine
+    image: postgres:17-alpine # Rolling tag chosen intentionally (rolling for CVE patches)
     container_name: diji_postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: sifre
-      POSTGRES_DB: dijicarddb
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - diji-net
+      POSTGRES_DB: import_db
     healthcheck:
       test: ["CMD-SHELL","pg_isready -U postgres"]
       interval: 10s
       timeout: 3s
       retries: 5
+    networks:
+      - diji-net
+    volumes:
+      # DB data (persistent). Silip yeniden kurmak için: docker compose down -v
+      - pgdata:/var/lib/postgresql/data
+      # Init script + dump (ilk kez boş data directory oluşurken restore eder)
+      - ./db-init/01-restore.sh:/docker-entrypoint-initdb.d/01-restore.sh:ro
+      - ./backup.dump:/docker-entrypoint-initdb.d/backup.dump:ro
 
   backend:
     build:
@@ -25,7 +29,8 @@ services:
     restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=import_db;Username=postgres;Password=sifre
+      # Reverted to original imported database name 'import_db' so existing data is visible again
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=import_db;Username=postgres;Password=sifre"
       Jwt__Key: dev-secret-key-change-me-32chars-min
     depends_on:
       db:
@@ -56,6 +61,23 @@ services:
     networks:
       - diji-net
 
+  pgadmin:
+    image: dpage/pgadmin4:8.11
+    container_name: diji_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    depends_on:
+      - db
+    ports:
+      - "5050:80" # Access pgAdmin at http://localhost:5050
+    networks:
+      - diji-net
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
 networks:
   diji-net:
     driver: bridge
@@ -64,3 +86,4 @@ volumes:
   pgdata:
   profile_photos:
   dataprotection_keys:
+  pgadmin_data:

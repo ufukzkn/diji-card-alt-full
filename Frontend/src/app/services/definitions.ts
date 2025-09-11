@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../environments';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Definition } from '../models/definition.model';
 
 @Injectable({ providedIn: 'root' })
 export class DefinitionsService {
-  private api = 'http://localhost:5078/api/definitions';
+  private api = environment.apiBase + '/api/definitions';
 
   constructor(private http: HttpClient) { }
 

@@ -1,15 +1,16 @@
-# Frontend build (Angular)
+# Frontend build (Angular) - use official Node for npm availability
 FROM node:20-alpine AS build
-WORKDIR /app
-COPY Frontend/package*.json ./Frontend/
-COPY Frontend/angular.json Frontend/tsconfig*.json Frontend/.editorconfig ./Frontend/
 WORKDIR /app/Frontend
-RUN npm ci
+COPY Frontend/package*.json ./
+COPY Frontend/angular.json Frontend/tsconfig*.json Frontend/.editorconfig ./
+RUN npm ci --legacy-peer-deps
 COPY Frontend/ ./
 RUN npm run build
+# Prepare nginx SPA config (no shell in runtime image, so create here)
+RUN printf 'server {\n  listen 80;\n  server_name _;\n  root /usr/share/nginx/html;\n  index index.html;\n  location / {\n    try_files $uri $uri/ /index.html;\n  }\n  location /assets/ {\n    add_header Cache-Control "public, max-age=31536000, immutable";\n    try_files $uri =404;\n  }\n}\n' > /tmp/default.conf
 
-FROM nginx:1.27-alpine AS runtime
+# Switched to Chainguard's hardened nginx image to address vulnerabilities
+FROM cgr.dev/chainguard/nginx:latest AS runtime
 COPY --from=build /app/Frontend/dist/Frontend/browser /usr/share/nginx/html
-# Basic Angular routing support
-RUN printf 'server {\n  listen 80;\n  root /usr/share/nginx/html;\n  location / { try_files $uri $uri/ /index.html; }\n}\n' > /etc/nginx/conf.d/default.conf
+COPY --from=build /tmp/default.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80

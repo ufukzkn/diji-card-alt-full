@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../environments';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, BehaviorSubject } from 'rxjs';
@@ -10,7 +11,7 @@ import { TranslocoService } from '@jsverse/transloco';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:5078/api/Auth';
+  private apiUrl = environment.apiBase + '/api/Auth';
   private tokenSubject = new BehaviorSubject<string | null>(null);
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
 

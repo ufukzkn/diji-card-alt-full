@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../environments';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileVisitService {
-  private readonly api = 'http://localhost:5078/api/profile-visits';
+  private readonly api = environment.apiBase + '/api/profile-visits';
 
   constructor(private http: HttpClient) {}
 

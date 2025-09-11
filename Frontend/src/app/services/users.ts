@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../environments';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { User } from '../models/user.models';   
@@ -13,7 +14,7 @@ export interface UserPreferences {
 
 @Injectable({ providedIn: 'root' })
 export class UsersService {
-  private api = 'http://localhost:5078/api/user';  
+  private api = environment.apiBase + '/api/user';  
 
   constructor(private http: HttpClient) { }
 

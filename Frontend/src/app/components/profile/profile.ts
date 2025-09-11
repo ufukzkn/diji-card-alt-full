@@ -1,6 +1,7 @@
 // src/app/components/profile/profile.ts
 
 import { Component, OnInit, AfterViewChecked, ViewChild } from '@angular/core';
+import { environment } from '../../environments';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { QRCodeComponent } from 'angularx-qrcode';
@@ -41,6 +42,7 @@ import { ThemeToggleComponent } from '../shared/theme-toggle/theme-toggle.compon
   styleUrls: ['./profile.scss']
 })
 export class Profile implements OnInit, AfterViewChecked {
+  environment = environment;
   @ViewChild(LinkEditor) linkEditorComp?: LinkEditor;
   userId!: string;
   user?: User;
@@ -60,7 +62,7 @@ export class Profile implements OnInit, AfterViewChecked {
   flags: Record<string,string> = { tr:'🇹🇷', en:'🇺🇸', de:'🇩🇪' };
   langLabels: Record<string,string> = { tr:'Türkçe', en:'English', de:'Deutsch' };
   langOpen = false;
-  imageBaseUrl = 'http://localhost:5078';
+  imageBaseUrl = environment.imageBase;
   cropperData?: CropperDialogData;
   // Avatar rendering control to avoid default flash
   profileSectionReady = false; // becomes true after user+profile fetch attempt

@@ -15,11 +15,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .WithExposedHeaders("Content-Disposition") // Needed for file downloads
-              .AllowCredentials();
+      var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new[]{"http://localhost:4200"};
+      policy.WithOrigins(allowedOrigins)
+          .WithMethods("GET","POST","PUT","DELETE","OPTIONS")
+          .AllowAnyHeader()
+          .WithExposedHeaders("Content-Disposition")
+          .AllowCredentials();
     });
 });
 
@@ -73,6 +74,26 @@ builder.Services.AddRateLimiter(options =>
             QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
             QueueLimit = 2
         }));
+    // Login brute force mitigation: 5 attempts / 1 minute per IP
+    options.AddPolicy("Login", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "anon",
+        factory: key => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(1),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 0
+        }));
+    // Token exchange (OAuthToken + Refresh) higher limit
+    options.AddPolicy("TokenExchange", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "anon",
+        factory: key => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 20,
+            Window = TimeSpan.FromMinutes(1),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 2
+        }));
 });
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -104,11 +125,54 @@ app.UseStaticFiles(new StaticFileOptions
     }
 });
 
+// Global security headers
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.TryAdd("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.TryAdd("X-Frame-Options", "DENY");
+    context.Response.Headers.TryAdd("Referrer-Policy", "no-referrer");
+    context.Response.Headers.TryAdd("X-XSS-Protection", "0"); // modern browsers ignore / CSP recommended
+    // Minimal CSP (can be tightened later)
+    context.Response.Headers.TryAdd("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'");
+    await next();
+});
+
 // Ensure profile-photos directory exists
 var profilePhotosDir = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "profile-photos");
 if (!Directory.Exists(profilePhotosDir))
 {
     Directory.CreateDirectory(profilePhotosDir);
+}
+// Ensure a usable default.png exists; if missing OR suspiciously tiny, copy from internal seed if available
+var defaultPngPath = Path.Combine(profilePhotosDir, "default.png");
+var seedDefaultPath = Path.Combine(AppContext.BaseDirectory, "profile-photo-seed", "default.png");
+try
+{
+    if (!File.Exists(defaultPngPath))
+    {
+        if (File.Exists(seedDefaultPath))
+        {
+            File.Copy(seedDefaultPath, defaultPngPath, true);
+            Console.WriteLine("[Info] default.png seeded (was missing).");
+        }
+        else
+        {
+            Console.WriteLine("[Warn] default.png missing and no seed copy found.");
+        }
+    }
+    else
+    {
+        var fi = new FileInfo(defaultPngPath);
+        if (fi.Length < 1024 && File.Exists(seedDefaultPath))
+        {
+            File.Copy(seedDefaultPath, defaultPngPath, true);
+            Console.WriteLine("[Info] default.png reseeded (previous file too small).");
+        }
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[Warn] default.png seed operation failed: {ex.Message}");
 }
 
 // Important: UseCors must come before UseAuthorization and MapControllers
@@ -126,6 +190,7 @@ using (var scope = app.Services.CreateScope())
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await db.Database.MigrateAsync();
 
+        // Eğer veritabanı tamamen boşsa ilk demo kullanıcıyı ekle
         if (!await db.Users.AnyAsync())
         {
             db.Users.Add(new diji_card_alt.Models.User
@@ -139,7 +204,9 @@ using (var scope = app.Services.CreateScope())
                 IsPublic = true
             });
             await db.SaveChangesAsync();
+            Console.WriteLine("[Seed] İlk demo kullanıcı eklendi (tamamen boş DB).");
         }
+        
     }
     catch (Exception ex)
     {
